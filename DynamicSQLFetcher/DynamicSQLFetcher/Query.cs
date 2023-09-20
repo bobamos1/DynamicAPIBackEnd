@@ -17,6 +17,7 @@ namespace DynamicSQLFetcher
         internal Dictionary<string, bool> variablesInQuery { get; set; }
         internal Dictionary<string, string> selectColumns { get; set; }
         internal Dictionary<string, object> paramsUsed { get; set; }
+        internal bool completeCheck { get; set; }
         public Query(QueryType queryType)
         {
             this.queryType = queryType;
@@ -24,13 +25,18 @@ namespace DynamicSQLFetcher
             variablesInQuery = new Dictionary<string, bool>();
             selectColumns = new Dictionary<string, string>();
             paramsUsed = new Dictionary<string, object>();
+            completeCheck = false;
+        }
+        public Query setCompleteCheck(bool completeCheck)
+        {
+            this.completeCheck = completeCheck;
+            return this;
         }
         public Query clearParams()
         {
             paramsUsed.Clear();
             return this;
         }
-
         public DynamicParameters getParameters()
         {
             DynamicParameters dynamicParameters = new DynamicParameters();
@@ -127,13 +133,13 @@ namespace DynamicSQLFetcher
         private static readonly char delimiterStart = '\u2020';
         private static readonly char delimiterEnd = '\u2021';
         private static readonly char splitter = '\u2221';
-        public string Parse(bool completeCheck, int page, int step, params string[] authorizedColumns)
+        public string Parse(int page, int step, params string[] authorizedColumns)
         {
             if (queryType != QueryType.SELECT)
                 throw new Exception("need to be of type select to add pagination");
-            return string.Format("{0} {1}", Parse(completeCheck, authorizedColumns), getPagination(page, step));
+            return string.Format("{0} {1}", Parse(authorizedColumns), getPagination(page, step));
         }
-        public string Parse(bool completeCheck, params string[] authorizedColumns)
+        public string Parse(params string[] authorizedColumns)
         {
             string queryStr;
             if (authorizedColumns is null)
@@ -156,13 +162,13 @@ namespace DynamicSQLFetcher
         {
             lastQueryWithCols = SelectCols(authorizedColumns);
         }
-        public string Parse(int page, int step, bool completeCheck)
+        public string Parse(int page, int step)
         {
             if (queryType != QueryType.SELECT)
                 throw new Exception("need to be of type select to add pagination");
-            return string.Format("{0} {1}", Parse(completeCheck), getPagination(page, step));
+            return string.Format("{0} {1}", Parse(), getPagination(page, step));
         }
-        public string Parse(bool completeCheck)
+        public string Parse()
         {
             string queryStr = lastQueryWithCols;
             queryStr = string.Format(queryStr, varsInfoList.Select(var => var.validateVar(paramsUsed)).ToArray());
@@ -203,7 +209,7 @@ namespace DynamicSQLFetcher
                 return true;
             return paramsUsed.ContainsKey(varsInfoList[index].VarName);
         }
-        public static Query fromQueryString(QueryType queryType, string query, bool removeVarIdentifier = true)
+        public static Query fromQueryString(QueryType queryType, string query, bool completeCheck = true, bool removeVarIdentifier = true)
         {
             char[] tempNoComma = query.ToCharArray();
             handleReplacements('\'', tempNoComma);
@@ -273,6 +279,8 @@ namespace DynamicSQLFetcher
             //newQuery.hasTop1 = conditionalTop(query);
             if ((queryType == QueryType.ROW || queryType == QueryType.VALUE) && !conditionalTop(query))
                 query = query.Replace(hilightStart, string.Format("{0}{1}", " TOP (1)", hilightStart));
+            if (newQuery.varsInfoList.Any() && completeCheck)
+                newQuery.completeCheck = true;
             newQuery.query = query;
             return newQuery;
         }

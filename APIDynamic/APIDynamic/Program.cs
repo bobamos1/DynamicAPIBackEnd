@@ -42,44 +42,48 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
-app.MapGet("newTest", async () =>
+app.MapGet("/newTest", async () =>
 {
     //return Results.Ok("ok");
     Query query = Query.fromQueryString(QueryType.CBO, "SELECT name, id FROM Tables");
-    return Results.Ok(await executor.SelectDictionary(query, false));
+    return Results.Ok(await executor.SelectDictionary(query));
 })
 .WithName("newTest");
-app.MapGet("newTestArray", async () =>
+app.MapGet("/newTestArray", async () =>
 {
     //return Results.Ok("ok");
     Query query = Query.fromQueryString(QueryType.ARRAY, "SELECT name FROM Tables");
-    return Results.Ok(await executor.SelectArray(query, false));
+    return Results.Ok(await executor.SelectArray(query));
 })
 .WithName("newTestArray");
-app.MapGet("newTestValue", async () =>
+app.MapGet("/newTestValue", async () =>
 {
     //return Results.Ok("ok");
     Query query = Query.fromQueryString(QueryType.VALUE, "SELECT name FROM Tables ORDER BY name");
-    return Results.Ok(await executor.SelectValue(query, false));
+    return Results.Ok(await executor.SelectValue(query));
 })
 .WithName("newTestValue");
-app.MapGet("newTestValueSpecific", async () =>
+app.MapGet("/newTestValueSpecific", async () =>
 {
     //return Results.Ok("ok");
     Query query = Query.fromQueryString(QueryType.SELECT, "SELECT name AS [key], id AS [value] FROM Tables ORDER BY name");
-    return Results.Ok(await executor.SelectDictionary(query, false, "key", "value"));
+    return Results.Ok(await executor.SelectDictionary(query, "key", "value"));
 })
 .WithName("newTestValueSpecific");
 app.MapGet("/getTest", async () =>
 {
     Query insideQuery = Query.fromQueryString(QueryType.SELECT, "SELECT name, id FROM Colonnes WHERE id_table = @tableID");
     List<DynamicMapper> mappers = new List<DynamicMapper>();
-    mappers.Add(new DynamicMapper("colonnes", insideQuery, false, "name", "id"));
+    mappers.Add(new DynamicMapper("colonnes", insideQuery, "name", "id"));
     mappers[0].addLinkParams("tableID", "id");
     Query query = Query.fromQueryString(QueryType.SELECT, "SELECT name, id FROM Tables");
-    return Results.Ok(await executor.DetailedSelectQuery(query, mappers, false, "name", "id"));
+    return Results.Ok(await executor.DetailedSelectQuery(query, mappers, "name", "id"));
 })
 .WithName("getTest");
+app.Map("/test", async (HttpContext context, CancellationToken ct)
+    => await Results.Json(new { test = context.Request.Method }).ExecuteAsync(context))
+    .WithName("test");
+
 
 app.Run();
 
