@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <Reference Include="DynamicSQLFetcher">
-      <HintPath>..\..\Debug\net6.0\DynamicSQLFetcher.dll</HintPath>
+      <HintPath>..\..\DynamicSQLFetcher.dll</HintPath>
     </Reference>
   </ItemGroup>
 
