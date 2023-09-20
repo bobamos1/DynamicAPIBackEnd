@@ -7,11 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="Dapper" Version="2.0.151" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\Documents\CSLibraries\DynamicSQLFetcher\DynamicSQLFetcher\DynamicSQLFetcher.csproj" />
+    <Reference Include="DynamicSQLFetcher">
+      <HintPath>..\..\Debug\net6.0\DynamicSQLFetcher.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
