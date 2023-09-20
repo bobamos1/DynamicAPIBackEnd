@@ -15,7 +15,7 @@ namespace DynamicSQLFetcher
         internal IEnumerable<string> authorizedColumns { get; set; }
         internal Dictionary<string, object> baseParameters { get; set; }
         internal Dictionary<string, string> parametersToLink { get; set; }
-        public DynamicMapper(string propetyName, Query queryLinked, IEnumerable<string> authorizedColumns, bool completeCheck, Dictionary<string, string> parametersToLink, Dictionary<string, object> baseParameters) 
+        public DynamicMapper(string propetyName, Query queryLinked, bool completeCheck, Dictionary<string, string> parametersToLink, Dictionary<string, object> baseParameters, params string[] authorizedColumns) 
         {
             this.propetyName = propetyName;
             this.queryLinked = queryLinked;

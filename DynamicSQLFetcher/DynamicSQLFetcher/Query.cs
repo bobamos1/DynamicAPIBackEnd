@@ -127,31 +127,42 @@ namespace DynamicSQLFetcher
         private static readonly char delimiterStart = '\u2020';
         private static readonly char delimiterEnd = '\u2021';
         private static readonly char splitter = '\u2221';
-        public string Parse(IEnumerable<string> selectColonnes, int page, int step, bool completeCheck = false)
+        public string Parse(bool completeCheck, int page, int step, params string[] authorizedColumns)
         {
             if (queryType != QueryType.SELECT)
                 throw new Exception("need to be of type select to add pagination");
-            return string.Format("{0} {1}", Parse(selectColonnes, completeCheck), getPagination(page, step));
+            return string.Format("{0} {1}", Parse(completeCheck, authorizedColumns), getPagination(page, step));
         }
-        public string Parse(IEnumerable<string> selectColonnes, bool completeCheck = false)
+        public string Parse(bool completeCheck, params string[] authorizedColumns)
         {
-            string queryStr = SelectCols(selectColonnes);
+            string queryStr;
+            if (authorizedColumns is null)
+            {
+                if (queryType == QueryType.ARRAY || queryType == QueryType.VALUE)
+                    queryStr = this.query.Replace(hilightStart + hilightEnd, string.Format(" {0} AS [item] ", this.selectColumns.First().Key));
+                else if (queryType == QueryType.CBO)
+                    queryStr = this.query.Replace(hilightStart + hilightEnd, string.Format(" {0} AS [key], {1} AS [value] ", this.selectColumns.First().Key, this.selectColumns.Last().Key));
+                else
+                    throw new Exception("selectColonnes can not be null");
+            }
+            else
+                queryStr = SelectCols(authorizedColumns);
             queryStr = string.Format(queryStr, varsInfoList.Select(var => var.validateVar(paramsUsed)).ToArray());
             if (completeCheck)
                 queryStr = validateAll(queryStr);
             return queryStr;
         }
-        public void setQueryWithCols(IEnumerable<string> selectColonnes)
+        public void setQueryWithCols(params string[] authorizedColumns)
         {
-            lastQueryWithCols = SelectCols(selectColonnes);
+            lastQueryWithCols = SelectCols(authorizedColumns);
         }
-        public string Parse(int page, int step, bool completeCheck = false)
+        public string Parse(int page, int step, bool completeCheck)
         {
             if (queryType != QueryType.SELECT)
                 throw new Exception("need to be of type select to add pagination");
             return string.Format("{0} {1}", Parse(completeCheck), getPagination(page, step));
         }
-        public string Parse(bool completeCheck = false)
+        public string Parse(bool completeCheck)
         {
             string queryStr = lastQueryWithCols;
             queryStr = string.Format(queryStr, varsInfoList.Select(var => var.validateVar(paramsUsed)).ToArray());
@@ -163,15 +174,13 @@ namespace DynamicSQLFetcher
         {
             return string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (page - 1) * step, step);
         }
-        private string SelectCols(IEnumerable<string> selectColonnes)
+        private string SelectCols(params string[] authorizedColumns)
         {
             IEnumerable<string> selectedCols = selectColumns
-                    .Where(item => selectColonnes.Contains(item.Key) && checkIfOkParam(item.Value, paramsUsed))
+                    .Where(item => authorizedColumns.Contains(item.Key) && checkIfOkParam(item.Value, paramsUsed))
                     .Select(item => item.Value);
-            if (queryType == QueryType.ARRAY || queryType == QueryType.VALUE)
-                selectedCols = selectedCols.Take(1);
             if (queryType == QueryType.CBO)
-                selectedCols = selectedCols.Take(2);
+                selectedCols = selectedCols.Take(2).Select((col, index) => $"{col} AS {(index == 0 ? "[key]" : "[value]")}");
             string queryStr = this.query.Replace(hilightStart + hilightEnd, string.Format(" {0} ", string.Join(", ", selectedCols)));
             return queryStr;
         }
@@ -254,7 +263,7 @@ namespace DynamicSQLFetcher
                     if (queryType == QueryType.UPDATE)
                         currentVarName = getColNameUpdate(currentSelectVar, newQuery);
                     else
-                        currentVarName = getAliasOrColName(currentSelectVar);
+                        currentVarName = getAliasOrColName(currentSelectVar, queryType);
                     if (newQuery.selectColumns.ContainsKey(currentVarName))
                         throw new Exception("all selectColumns needs to be unique");
                     newQuery.selectColumns.Add(currentVarName, currentSelectVar);
@@ -271,14 +280,16 @@ namespace DynamicSQLFetcher
         {
             return completeQuery.Contains(string.Format("{0}{1}", "(1)", hilightStart));
         }
-        private static string getAliasOrColName(string selectSection)
+        private static string getAliasOrColName(string selectSection, QueryType queryType)
         {
             int index = selectSection.LastIndexOf(" AS ");
             if (index != -1)
             {
-                string colName = selectSection.Substring(index + 4);
+                if (QueryType.CBO == queryType || QueryType.VALUE == queryType || QueryType.ARRAY == queryType)
+                    return getColName(selectSection.Substring(0, index));
+                string colName = selectSection.Substring(index + 4).Trim();
                 if (colName.Last() == ']')
-                    return colName.Substring(1, colName.Length - 1);
+                    return colName.Substring(1, colName.Length - 2);
                 return colName;
             }
             return getColName(selectSection);

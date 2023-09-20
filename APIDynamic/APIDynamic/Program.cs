@@ -3,6 +3,9 @@ using DynamicSQLFetcher;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 SQLExecutor.Initialize(builder.Configuration);
+string connectionString = SQLExecutor.GetConnectionString("structure");
+Console.WriteLine(connectionString);
+SQLExecutor executor = new SQLExecutor(connectionString);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -39,22 +42,42 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
-app.MapGet("newTest", () =>
+app.MapGet("newTest", async () =>
 {
-    return Results.Ok("newTest");
+    //return Results.Ok("ok");
+    Query query = Query.fromQueryString(QueryType.CBO, "SELECT name, id FROM Tables");
+    return Results.Ok(await executor.SelectDictionary(query, false));
 })
 .WithName("newTest");
+app.MapGet("newTestArray", async () =>
+{
+    //return Results.Ok("ok");
+    Query query = Query.fromQueryString(QueryType.ARRAY, "SELECT name FROM Tables");
+    return Results.Ok(await executor.SelectArray(query, false));
+})
+.WithName("newTestArray");
+app.MapGet("newTestValue", async () =>
+{
+    //return Results.Ok("ok");
+    Query query = Query.fromQueryString(QueryType.VALUE, "SELECT name FROM Tables ORDER BY name");
+    return Results.Ok(await executor.SelectValue(query, false));
+})
+.WithName("newTestValue");
+app.MapGet("newTestValueSpecific", async () =>
+{
+    //return Results.Ok("ok");
+    Query query = Query.fromQueryString(QueryType.SELECT, "SELECT name AS [key], id AS [value] FROM Tables ORDER BY name");
+    return Results.Ok(await executor.SelectDictionary(query, false, "key", "value"));
+})
+.WithName("newTestValueSpecific");
 app.MapGet("/getTest", async () =>
 {
-    string connectionString = builder.Configuration.GetConnectionString("structure");
-    Console.WriteLine(connectionString);
-    SQLExecutor executor = new SQLExecutor(connectionString);
     Query insideQuery = Query.fromQueryString(QueryType.SELECT, "SELECT name, id FROM Colonnes WHERE id_table = @tableID");
     List<DynamicMapper> mappers = new List<DynamicMapper>();
     mappers.Add(new DynamicMapper("colonnes", insideQuery, false, "name", "id"));
     mappers[0].addLinkParams("tableID", "id");
     Query query = Query.fromQueryString(QueryType.SELECT, "SELECT name, id FROM Tables");
-    return Results.Ok(await executor.DetailedSelectQuery(query, mappers, new List<string>() { "name", "id" }, true));
+    return Results.Ok(await executor.DetailedSelectQuery(query, mappers, false, "name", "id"));
 })
 .WithName("getTest");
 

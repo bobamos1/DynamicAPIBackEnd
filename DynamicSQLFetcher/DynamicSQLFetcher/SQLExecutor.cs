@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Dynamic;
 
 namespace DynamicSQLFetcher
 {
@@ -9,7 +10,15 @@ namespace DynamicSQLFetcher
     {
         private static IConfiguration _configuration;
         private string _connectionString;
-
+        internal class SingleValueItem
+        {
+            internal object item;
+        }
+        public class KeyValueItem
+        {
+            internal object key;
+            internal object value;
+        }
         public SQLExecutor(string connectionString)
         {
             _connectionString = connectionString;
@@ -22,70 +31,94 @@ namespace DynamicSQLFetcher
         {
             return _configuration.GetConnectionString(name);
         }
-        public Task<IEnumerable<dynamic>> SelectQuery(Query query, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public Task<IEnumerable<dynamic>> SelectQuery(Query query, bool completeCheck, params string[] authorizedColumns)
         {
-            return SelectQuery(_connectionString, query, authorizedColumns, completeCheck);
+            return SelectQuery(_connectionString, query, completeCheck, authorizedColumns);
         }
-        public Task<IEnumerable<dynamic>> SelectQuery(Query query, int page, int step, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public Task<IEnumerable<dynamic>> SelectQuery(Query query, int page, int step, bool completeCheck, params string[] authorizedColumns)
         {
-            return SelectQuery(_connectionString, query, page, step, authorizedColumns, completeCheck);
+            return SelectQuery(_connectionString, query, page, step, completeCheck, authorizedColumns);
         }
-        public Task<dynamic> DetailedSelectQuerySingle(Query query, List<DynamicMapper> mappers, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public Task<dynamic> DetailedSelectQuerySingle(Query query, List<DynamicMapper> mappers, bool completeCheck, params string[] authorizedColumns)
         {
-            return DetailedSelectQuerySingle(_connectionString, query, mappers, authorizedColumns, completeCheck);
+            return DetailedSelectQuerySingle(_connectionString, query, mappers, completeCheck, authorizedColumns);
         }
-        public Task<IEnumerable<dynamic>> DetailedSelectQuery(Query query, List<DynamicMapper> mappers, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public Task<IEnumerable<dynamic>> DetailedSelectQuery(Query query, List<DynamicMapper> mappers, bool completeCheck, params string[] authorizedColumns)
         {
-            return DetailedSelectQuery(_connectionString, query, mappers, authorizedColumns, completeCheck);
+            return DetailedSelectQuery(_connectionString, query, mappers, completeCheck, authorizedColumns);
         }
-        public Task<IEnumerable<dynamic>> DetailedSelectQuery(Query query, int page, int step, List<DynamicMapper> mappers, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public Task<IEnumerable<dynamic>> DetailedSelectQuery(Query query, int page, int step, List<DynamicMapper> mappers, bool completeCheck, params string[] authorizedColumns)
         {
-            return DetailedSelectQuery(_connectionString, query, page, step, mappers, authorizedColumns, completeCheck);
+            return DetailedSelectQuery(_connectionString, query, page, step, mappers, completeCheck, authorizedColumns);
         }
-        public Task<int> ExecuteQueryWithoutTransaction(Query query, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public Task<int> ExecuteQueryWithoutTransaction(Query query, bool completeCheck, params string[] authorizedColumns)
         {
-            return ExecuteQueryWithoutTransaction(_connectionString, new Dictionary<string, DynamicParameters>() { { query.Parse(authorizedColumns, completeCheck), query.getParameters() } });
+            return ExecuteQueryWithoutTransaction(_connectionString, new Dictionary<string, DynamicParameters>() { { query.Parse(completeCheck, authorizedColumns), query.getParameters() } });
         }
-        public Task<int> ExecuteQueryWithTransaction(Query query, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public Task<int> ExecuteQueryWithTransaction(Query query, bool completeCheck, params string[] authorizedColumns)
         {
-            return ExecuteQueryWithTransaction(_connectionString, new Dictionary<string, DynamicParameters>() { { query.Parse(authorizedColumns, completeCheck), query.getParameters() } });
+            return ExecuteQueryWithTransaction(_connectionString, new Dictionary<string, DynamicParameters>() { { query.Parse(completeCheck, authorizedColumns), query.getParameters() } });
         }
-        public Task<int> ExecuteQueryWithoutTransaction(List<Tuple<Query, IEnumerable<string>, bool>> queries)
+        public Task<int> ExecuteQueryWithoutTransaction(List<Tuple<Query, string[], bool>> queries)
         {
             Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
             foreach (var query in queries)
-                queriesDict.Add(query.Item1.Parse(query.Item2, query.Item3), query.Item1.getParameters());
+                queriesDict.Add(query.Item1.Parse(query.Item3, query.Item2), query.Item1.getParameters());
             return ExecuteQueryWithoutTransaction(_connectionString, queriesDict);
         }
-        public Task<int> ExecuteQueryWithTransaction(List<Tuple<Query, IEnumerable<string>, bool>> queries)
+        public Task<int> ExecuteQueryWithTransaction(List<Tuple<Query, string[], bool>> queries)
         {
             Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
             foreach (var query in queries)
-                queriesDict.Add(query.Item1.Parse(query.Item2, query.Item3), query.Item1.getParameters());
+                queriesDict.Add(query.Item1.Parse(query.Item3, query.Item2), query.Item1.getParameters());
             return ExecuteQueryWithTransaction(_connectionString, queriesDict);
         }
-        public static Task<IEnumerable<dynamic>> SelectQuery(string connectionString, Query query, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public static Task<IEnumerable<dynamic>> SelectQuery(string connectionString, Query query, bool completeCheck, params string[] authorizedColumns)
         {
-            return SelectQuery(connectionString, query.Parse(authorizedColumns, completeCheck), query.getParameters());
+            return SelectQuery(connectionString, query.Parse(completeCheck, authorizedColumns), query.getParameters());
         }
-        public static Task<IEnumerable<dynamic>> SelectQuery(string connectionString, Query query, int page, int step, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public static Task<IEnumerable<dynamic>> SelectQuery(string connectionString, Query query, int page, int step, bool completeCheck, params string[] authorizedColumns)
         {
-            return SelectQuery(connectionString, query.Parse(authorizedColumns, page, step, completeCheck), query.getParameters());
+            return SelectQuery(connectionString, query.Parse(completeCheck, page, step, authorizedColumns), query.getParameters());
         }
-        public Task<object> ValueQuery(Query query, bool completeCheck = false)
+        public Task<object> SelectValue(Query query, bool completeCheck)
         {
-            return ValueQuery<object>(_connectionString, query, completeCheck);
+            return SelectValue<object>(_connectionString, query, completeCheck);
         }
-        public Task<T> ValueQuery<T>(Query query, bool completeCheck = false)
+        public Task<T> SelectValue<T>(Query query, bool completeCheck)
         {
-            return ValueQuery<T>(_connectionString, query, completeCheck);
+            return SelectValue<T>(_connectionString, query, completeCheck);
+        }
+        public Task<object> SelectValue(Query query, bool completeCheck, string valueCol)
+        {
+            return SelectValue<object>(_connectionString, query, completeCheck, valueCol);
+        }
+        public Task<T> SelectValue<T>(Query query, bool completeCheck, string valueCol)
+        {
+            return SelectValue<T>(_connectionString, query, completeCheck, valueCol);
+        }
+        public Task<Dictionary<object, object>> SelectDictionary(Query query, bool completeCheck, string idCol, string valueCol)
+        {
+            return SelectDictionary(_connectionString, query.Parse(completeCheck, idCol, valueCol), query.getParameters());
+        }
+        public Task<Dictionary<object, object>> SelectDictionary(Query query, bool completeCheck)
+        {
+            return SelectDictionary(_connectionString, query.Parse(completeCheck, null), query.getParameters());
+        }
+        public Task<IEnumerable<object>> SelectArray(Query query, bool completeCheck)
+        {
+            return SelectArray(_connectionString, query.Parse(completeCheck, null), query.getParameters());
+        }
+        public Task<IEnumerable<object>> SelectArray(Query query, bool completeCheck, string colAuthorized)
+        {
+            return SelectArray(_connectionString, query.Parse(completeCheck, colAuthorized), query.getParameters());
         }
         public async static Task<IEnumerable<dynamic>> SelectQuery(string connectionString, string query, DynamicParameters parameters)
         {
             using (IDbConnection cnn = new SqlConnection(connectionString))
                 return await cnn.QueryAsync(query, parameters);
         }
-        private async static Task getDetails(IDbConnection connection, string connectionString, dynamic obj, List<DynamicMapper> mappers)
+        private async static Task getDetails(string connectionString, dynamic obj, List<DynamicMapper> mappers)
         {
             using (IDbConnection con = new SqlConnection(connectionString))
             {
@@ -101,23 +134,23 @@ namespace DynamicSQLFetcher
                 }
             }
         }
-        public async static Task<dynamic> DetailedSelectQuerySingle(string connectionString, Query query, List<DynamicMapper> mappers, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public async static Task<dynamic> DetailedSelectQuerySingle(string connectionString, Query query, List<DynamicMapper> mappers, bool completeCheck, params string[] authorizedColumns)
         {
             dynamic result = null;
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
-                result = await connection.QueryFirstOrDefaultAsync(query.Parse(authorizedColumns, completeCheck), query.getParameters());
-                await getDetails(connection, connectionString, result, mappers);
+                result = await connection.QueryFirstOrDefaultAsync(query.Parse(completeCheck, authorizedColumns), query.getParameters());
+                await getDetails(connectionString, result, mappers);
             }
             return result;
         }
-        public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, int page, int step, List<DynamicMapper> mappers, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, int page, int step, List<DynamicMapper> mappers, bool completeCheck, params string[] authorizedColumns)
         {
-            return DetailedSelectQueryString(connectionString, query.Parse(authorizedColumns, page, step, completeCheck), query.getParameters(), mappers);
+            return DetailedSelectQueryString(connectionString, query.Parse(completeCheck, page, step, authorizedColumns), query.getParameters(), mappers);
         }
-        public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, List<DynamicMapper> mappers, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, List<DynamicMapper> mappers, bool completeCheck, params string[] authorizedColumns)
         {
-            return DetailedSelectQueryString(connectionString, query.Parse(authorizedColumns, completeCheck), query.getParameters(), mappers);
+            return DetailedSelectQueryString(connectionString, query.Parse(completeCheck, authorizedColumns), query.getParameters(), mappers);
         }
         private async static Task<IEnumerable<dynamic>> DetailedSelectQueryString(string connectionString, string query, DynamicParameters parameters, List<DynamicMapper> mappers)
         {
@@ -126,19 +159,27 @@ namespace DynamicSQLFetcher
             {
                 results = await connection.QueryAsync(query, parameters);
                 foreach (var result in results)
-                    await getDetails(connection, connectionString, result, mappers);
+                    await getDetails(connectionString, result, mappers);
             }
             return results;
         }
-        public static Task<object> ValueQuery(string connectionString, Query query, bool completeCheck = false)
+        public static Task<object> SelectValue(string connectionString, Query query, bool completeCheck)
         {
-            return ValueQuery<object>(connectionString, query.Parse(completeCheck), query.getParameters());
+            return SelectValue<object>(connectionString, query.Parse(completeCheck, null), query.getParameters());
         }
-        public static Task<T> ValueQuery<T>(string connectionString, Query query, bool completeCheck = false)
+        public static Task<T> SelectValue<T>(string connectionString, Query query, bool completeCheck)
         {
-            return ValueQuery<T>(connectionString, query.Parse(completeCheck), query.getParameters());
+            return SelectValue<T>(connectionString, query.Parse(completeCheck, null), query.getParameters());
         }
-        public async static Task<T> ValueQuery<T>(string connectionString, string query, DynamicParameters parameters)
+        public static Task<object> SelectValue(string connectionString, Query query, bool completeCheck, string valueCol)
+        {
+            return SelectValue<object>(connectionString, query.Parse(completeCheck, valueCol), query.getParameters());
+        }
+        public static Task<T> SelectValue<T>(string connectionString, Query query, bool completeCheck, string valueCol)
+        {
+            return SelectValue<T>(connectionString, query.Parse(completeCheck, valueCol), query.getParameters());
+        }
+        public async static Task<T> SelectValue<T>(string connectionString, string query, DynamicParameters parameters)
         {
             using (IDbConnection connection = new SqlConnection(connectionString))
                 return await connection.ExecuteScalarAsync<T>(query, parameters);
@@ -191,27 +232,61 @@ namespace DynamicSQLFetcher
         {
             return ExecuteQueryWithTransaction(connectionString, new Dictionary<string, DynamicParameters>() { { query, parameter } });
         }
-        public static Task<int> ExecuteQueryWithoutTransaction(string connectionString, Query query, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public static Task<int> ExecuteQueryWithoutTransaction(string connectionString, Query query, bool completeCheck, params string[] authorizedColumns)
         {
-            return ExecuteQueryWithoutTransaction(connectionString, new Dictionary<string, DynamicParameters>() { { query.Parse(authorizedColumns, completeCheck), query.getParameters() } });
+            return ExecuteQueryWithoutTransaction(connectionString, new Dictionary<string, DynamicParameters>() { { query.Parse(completeCheck, authorizedColumns), query.getParameters() } });
         }
-        public static Task<int> ExecuteQueryWithTransaction(string connectionString, Query query, IEnumerable<string> authorizedColumns, bool completeCheck = false)
+        public static Task<int> ExecuteQueryWithTransaction(string connectionString, Query query, bool completeCheck, params string[] authorizedColumns)
         {
-            return ExecuteQueryWithTransaction(connectionString, new Dictionary<string, DynamicParameters>() { { query.Parse(authorizedColumns, completeCheck), query.getParameters() } });
+            return ExecuteQueryWithTransaction(connectionString, new Dictionary<string, DynamicParameters>() { { query.Parse(completeCheck, authorizedColumns), query.getParameters() } });
         }
-        public static Task<int> ExecuteQueryWithoutTransaction(string connectionString, List<Tuple<Query, IEnumerable<string>, bool>> queries)
+        public static Task<int> ExecuteQueryWithoutTransaction(string connectionString, List<Tuple<Query, string[], bool>> queries)
         {
             Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
             foreach (var query in queries)
-                queriesDict.Add(query.Item1.Parse(query.Item2, query.Item3), query.Item1.getParameters());
+                queriesDict.Add(query.Item1.Parse(query.Item3, query.Item2), query.Item1.getParameters());
             return ExecuteQueryWithoutTransaction(connectionString, queriesDict);
         }
-        public static Task<int> ExecuteQueryWithTransaction(string connectionString, List<Tuple<Query, IEnumerable<string>, bool>> queries)
+        public static Task<int> ExecuteQueryWithTransaction(string connectionString, List<Tuple<Query, string[], bool>> queries)
         {
             Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
             foreach (var query in queries)
-                queriesDict.Add(query.Item1.Parse(query.Item2, query.Item3), query.Item1.getParameters());
+                queriesDict.Add(query.Item1.Parse(query.Item3, query.Item2), query.Item1.getParameters());
             return ExecuteQueryWithTransaction(connectionString, queriesDict);
         }
+        public static Task<Dictionary<object, object>> SelectDictionary(string connectionString, Query query, bool completeCheck, string idCol, string valueCol)
+        {
+            return SelectDictionary(connectionString, query.Parse(completeCheck, idCol, valueCol), query.getParameters());
+        }
+        public static Task<Dictionary<object, object>> SelectDictionary(string connectionString, Query query, bool completeCheck)
+        {
+            return SelectDictionary(connectionString, query.Parse(completeCheck, null), query.getParameters());
+        }
+        public async static Task<Dictionary<object, object>> SelectDictionary(string connectionString, string query, DynamicParameters parameters)
+        {
+            using (IDbConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                return (await connection.QueryAsync<KeyValueItem>(query, parameters)).ToDictionary(pair => pair.key, pair => pair.value);
+            }
+        }
+        public static Task<IEnumerable<object>> SelectArray(string connectionString, Query query, bool completeCheck)
+        {
+            return SelectArray(connectionString, query.Parse(completeCheck, null), query.getParameters());
+        }
+        public static Task<IEnumerable<object>> SelectArray(string connectionString, Query query, bool completeCheck, string colAuthorized)
+        {
+            return SelectArray(connectionString, query.Parse(completeCheck, colAuthorized), query.getParameters());
+        }
+        public async static Task<IEnumerable<object>> SelectArray(string connectionString, string query, DynamicParameters parameters)
+        {
+            using (IDbConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var wtf = (await connection.QueryAsync<SingleValueItem>(query, parameters));
+                return wtf.Select(val => val.item);
+            }
+        }
+
     }
 }
