@@ -1,6 +1,7 @@
 ﻿//using System;
 //using System.Collections.Generic;
 using Dapper;
+using System;
 using System.Text.RegularExpressions;
 //using System.Linq;
 //using System.Text;
@@ -145,9 +146,9 @@ namespace DynamicSQLFetcher
             if (authorizedColumns is null)
             {
                 if (queryType == QueryType.ARRAY || queryType == QueryType.VALUE)
-                    queryStr = this.query.Replace(hilightStart + hilightEnd, string.Format(" {0} AS [item] ", this.selectColumns.First().Key));
+                    queryStr = this.query.Replace(hilightStart + hilightEnd, string.Format(" {0} AS [item] ", this.selectColumns.First().Value));
                 else if (queryType == QueryType.CBO)
-                    queryStr = this.query.Replace(hilightStart + hilightEnd, string.Format(" {0} AS [key], {1} AS [value] ", this.selectColumns.First().Key, this.selectColumns.Last().Key));
+                    queryStr = this.query.Replace(hilightStart + hilightEnd, string.Format(" {0} AS [key], {1} AS [value] ", this.selectColumns.First().Value, this.selectColumns.Last().Value));
                 else
                     throw new Exception("selectColonnes can not be null");
             }
@@ -266,12 +267,15 @@ namespace DynamicSQLFetcher
                 foreach (var str in selectSection)
                 {
                     currentSelectVar = cleanString(new string(str.ToArray()).Trim()).Trim();
+                    int index = currentSelectVar.LastIndexOf(" AS ");
                     if (queryType == QueryType.UPDATE)
                         currentVarName = getColNameUpdate(currentSelectVar, newQuery);
                     else
-                        currentVarName = getAliasOrColName(currentSelectVar, queryType);
+                        currentVarName = getAliasOrColName(currentSelectVar, queryType, index);
                     if (newQuery.selectColumns.ContainsKey(currentVarName))
                         throw new Exception("all selectColumns needs to be unique");
+                    if ((QueryType.CBO == queryType || QueryType.VALUE == queryType || QueryType.ARRAY == queryType) && index > -1)
+                        currentSelectVar = currentSelectVar.Substring(0, index);
                     newQuery.selectColumns.Add(currentVarName, currentSelectVar);
                 }
             }
@@ -288,13 +292,12 @@ namespace DynamicSQLFetcher
         {
             return completeQuery.Contains(string.Format("{0}{1}", "(1)", hilightStart));
         }
-        private static string getAliasOrColName(string selectSection, QueryType queryType)
+        private static string getAliasOrColName(string selectSection, QueryType queryType, int index)
         {
-            int index = selectSection.LastIndexOf(" AS ");
             if (index != -1)
             {
-                if (QueryType.CBO == queryType || QueryType.VALUE == queryType || QueryType.ARRAY == queryType)
-                    return getColName(selectSection.Substring(0, index));
+                /*if (QueryType.CBO == queryType || QueryType.VALUE == queryType || QueryType.ARRAY == queryType)
+                    return getColName(selectSection.Substring(0, index));*/
                 string colName = selectSection.Substring(index + 4).Trim();
                 if (colName.Last() == ']')
                     return colName.Substring(1, colName.Length - 2);
