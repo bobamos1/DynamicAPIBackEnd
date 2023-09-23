@@ -12,10 +12,8 @@ SQLExecutor executorStructure = new SQLExecutor(connectionString);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
-Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure, app);
-await DynamicController.addController(controllers, "test", false);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -30,6 +28,7 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
+Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure, app);
 app.MapGet("/weatherforecast", () =>
 {
     var forecast = Enumerable.Range(1, 5).Select(index =>

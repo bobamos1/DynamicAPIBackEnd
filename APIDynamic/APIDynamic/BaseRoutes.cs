@@ -1,7 +1,12 @@
 ﻿namespace APIDynamic
 {
-    public static class BaseRoutes
+    public enum BaseRoutes
     {
-
+        [Value("NULL")]
+        NONE = 1,
+        [Value("GetAll")]
+        GETALL = 2,
+        [Value("Get")]
+        GET = 3,
     }
 }

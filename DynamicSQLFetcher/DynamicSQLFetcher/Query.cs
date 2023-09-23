@@ -14,7 +14,7 @@ namespace DynamicSQLFetcher
         internal QueryTypes queryType { get; set; }
         internal string query { get; set; }
         internal List<SQLVariableInfo> varsInfoList { get; set; }
-        internal Dictionary<string, bool> variablesInQuery { get; set; }
+        public Dictionary<string, bool> variablesInQuery { get; set; }
         internal Dictionary<string, string> selectColumns { get; set; }
         internal Dictionary<string, object> paramsUsed { get; set; }
         internal bool completeCheck { get; set; }

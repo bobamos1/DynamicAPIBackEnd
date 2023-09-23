@@ -1,12 +1,14 @@
 ﻿namespace APIDynamic
 {
-    public enum CSharpTypes
+    public enum ShowTypes : long
     {
         [Value("Reference")]
-        REFERENCE = 1,
+        Ref = 1,
         [Value("String")]
         STRING = 2,
         [Value("Int")]
-        Int = 3,
+        INT = 3,
+        [Value("Float")]
+        FLOAT = 4
     }
 }
