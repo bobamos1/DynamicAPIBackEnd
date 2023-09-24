@@ -5,6 +5,10 @@
         public string AssociatedVarName { get; set; }
         public object Value { get; set; }
         public bool IsStatic { get; set; }
+<<<<<<< Updated upstream
+=======
+        public static readonly Query insertParamInitializer = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ListVars (name, value, id_CSharpType, id_link) VALUES (@Name, @Value, @CSharpTypeID, @LinkID)", true, true);
+>>>>>>> Stashed changes
         public DynamicParamInitializer(string AssociatedVarName, string Value, long CSharpType)
         {
             this.AssociatedVarName = AssociatedVarName;
