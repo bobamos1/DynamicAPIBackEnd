@@ -5,10 +5,7 @@
         public string AssociatedVarName { get; set; }
         public object Value { get; set; }
         public bool IsStatic { get; set; }
-<<<<<<< Updated upstream
-=======
         public static readonly Query insertParamInitializer = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ListVars (name, value, id_CSharpType, id_link) VALUES (@Name, @Value, @CSharpTypeID, @LinkID)", true, true);
->>>>>>> Stashed changes
         public DynamicParamInitializer(string AssociatedVarName, string Value, long CSharpType)
         {
             this.AssociatedVarName = AssociatedVarName;
@@ -23,6 +20,21 @@
             }
             this.IsStatic = true;
             return value;
+        }
+        public async static Task<DynamicParamInitializer> addParamInitializer(string AssociatedVarName, string Value, CSharpTypes CSharpType, long linkID)
+        {
+            await DynamicController.executor.ExecuteInsertWithLastID(
+                insertParamInitializer
+                    .setParam("Name", AssociatedVarName)
+                    .setParam("Value", Value)
+                    .setParam("CSharpTypeID", (long)CSharpType)
+                    .setParam("LinkID", linkID)
+            );
+            return new DynamicParamInitializer(
+                  AssociatedVarName
+                , Value
+                , (long)CSharpType
+            );
         }
     }
 }

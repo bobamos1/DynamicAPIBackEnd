@@ -1,10 +1,7 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Mvc;
-<<<<<<< Updated upstream
-=======
 using System.Collections.Generic;
 using System.Xml.Linq;
->>>>>>> Stashed changes
 
 namespace APIDynamic
 {
@@ -12,62 +9,66 @@ namespace APIDynamic
     {
         public long id { get; set; }
         public string Name { get; set; }
-        public List<DynamicQueryForRoute> queries { get; set; }
-<<<<<<< Updated upstream
-        public static readonly string[] BaseRoutes = new string[] { null, null, "GetAll", "Get" };
-        public static readonly Query getQueries = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, SQLString AS queryString, id_queryType AS IDQueryType, completeCheck AS CompleteCheck FROM RouteQueries WHERE id_route = @routeID ORDER BY ind");
-        public static readonly Query insertRoute = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO URLRoutes (name, id_baseRoute, id_controller) VALUES (@Name, @BaseRouteID, @ControllerID)");
-=======
-        public List<long> roles { get; set; }
+        public List<DynamicQueryForRoute> Queries { get; set; }
+        public List<long> Roles { get; set; }
         public static readonly Query getRoles = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id FROM PermissionRoutes INNER JOIN Roles ON id = id_role WHERE id_route = @RouteID", true, true);
         public static readonly Query getQueries = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, SQLString AS queryString, id_queryType AS IDQueryType, completeCheck AS CompleteCheck, completeAuth AS CompleteAuth FROM RouteQueries WHERE id_route = @RouteID ORDER BY ind", true, true);
         public static readonly Query insertRoute = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO URLRoutes (name, id_baseRoute, id_controller) VALUES (@Name, @BaseRouteID, @ControllerID)", true, true);
         public static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionProprieties(id_propriety, id_role) VALUES(@BaseRouteID, @RoleID)", true, true);
         public static readonly Query getBaseRouteName = Query.fromQueryString(QueryTypes.VALUE, "SELECT Name FROM BaseRoutes WHERE id = @BaseRouteID", true, true);
->>>>>>> Stashed changes
         internal DynamicRoute(long id, string Name)
         {
             this.id = id;
             this.Name = Name;
-            this.queries = new List<DynamicQueryForRoute>();
         }
         internal static async Task<DynamicRoute> init(DynamicRoute route)
         {
-            route.queries = (await DynamicController.executor.SelectQuery<DynamicQueryForRoute>(getQueries.setParam("RouteID", route.id))).ToList(); 
+            route.Queries = new List<DynamicQueryForRoute>();
+            route.Queries = (await DynamicController.executor.SelectQuery<DynamicQueryForRoute>(getQueries.setParam("RouteID", route.id))).ToList(); 
             route.roles = (await DynamicController.executor.SelectArray<long>(getRoles.setParam("RouteID", route.id))).ToList();
             foreach (var query in route.queries)
                 await DynamicQueryForRoute.init(query);
             return route;
         }
-        public static Task addRoute(List<DynamicRoute> routes, long idController, long baseRoute)
+        public static Task<DynamicRoute> addRoute(long idController, BaseRoutes baseRoute)
         {
-            return addRoute(routes, idController, null, baseRoute);
+            return addRoute(idController, null, baseRoute);
         }
-        public static Task addRoute(List<DynamicRoute> routes, long idController, string Name)
+        public static Task<DynamicRoute> addRoute(long idController, string Name)
         {
-            long baseRoute = Array.IndexOf(BaseRoutes, Name);
-            if (baseRoute == -1)
-                return addRoute(routes, idController, Name, 1);
-            return addRoute(routes, idController, null, baseRoute);
+            return addRoute(idController, Name, BaseRoutes.NONE);
         }
-        public async static Task addRoute(List<DynamicRoute> routes, long idController, string Name, long baseRoute)
+        public async static Task<DynamicRoute> addRoute(long idController, string Name, BaseRoutes baseRoute)
         {
-            routes.Add(new DynamicRoute(await DynamicController.executor.ExecuteInsertWithLastID(insertRoute.setParam("Name", Name).setParam("BaseRouteID", baseRoute).setParam("ControllerID", idController)), Name));
+            return new DynamicRoute(
+                await DynamicController.executor.ExecuteInsertWithLastID(
+                    insertRoute
+                        .setParam("Name", Name)
+                        .setParam("BaseRouteID", (long)baseRoute)
+                        .setParam("ControllerID", idController)
+                    )
+                , Name is not null ? Name : baseRoute.Value()
+            );
         }
-<<<<<<< Updated upstream
-        public Task addRouteQuery(string queryString, QueryTypes IDQueryType, bool CompleteCheck)
+        public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
         {
-            return DynamicQueryForRoute.addRouteQuery(queries, queryString, IDQueryType, id, CompleteCheck);
-=======
-        public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes IDQueryType, bool CompleteCheck, bool CompleteAuth)
-        {
-            queries.Add(await DynamicQueryForRoute.addRouteQuery(queries.Count, queryString, IDQueryType, id, CompleteCheck, CompleteAuth));
+            Queries.Add(await DynamicQueryForRoute.addRouteQuery(Queries.Count, queryString, QueryType, id, CompleteCheck, CompleteAuth));
             return this;
->>>>>>> Stashed changes
         }
-        public Task addFilters(int index, string name, long ShowTypeID, string VarAffected)
+        public async Task<DynamicRoute> addSQLParamInfo(int indexQuery, string varAffected, long ProprietyID)
         {
-            return queries[index].addFilters(name, ShowTypeID, VarAffected);
+            await Queries[indexQuery].addSQLParamInfo(varAffected, ProprietyID);
+            return this;
+        }
+        public async Task<DynamicRoute> addValidator(int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
+        {
+            await Queries[indexQuery].addValidator(VarAffected, Value, ValidatorType);
+            return this;
+        }
+        public async Task<DynamicRoute> addFilter(int indexQuery, string name, ShowTypes showType, string VarAffected)
+        {
+            await Queries[indexQuery].addFilter(name, showType, VarAffected);
+            return this;
         }
         public async Task<DynamicRoute> addAuthorizedRole(long RoleID)
         {

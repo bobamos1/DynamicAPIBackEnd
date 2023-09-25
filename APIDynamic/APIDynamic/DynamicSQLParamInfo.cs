@@ -18,7 +18,12 @@ namespace APIDynamic
         }
         internal static async Task<DynamicSQLParamInfo> init(DynamicSQLParamInfo paramInfo)
         {
-            paramInfo.Validators = (await DynamicController.executor.SelectQuery<DynamicValidator>((paramInfo.ProprietyID == 1 ? getValidators : DynamicPropriety.getValidators).setParam("SQLParamInfoID", (paramInfo.ProprietyID == 1 ? paramInfo.id : paramInfo.ProprietyID)))).ToList();
+            paramInfo.Validators = (
+                await DynamicController.executor.SelectQuery<DynamicValidator>(
+                    (paramInfo.ProprietyID == 1 ? getValidators : DynamicPropriety.getValidators)
+                        .setParam("SQLParamInfoID", (paramInfo.ProprietyID == 1 ? paramInfo.id : paramInfo.ProprietyID))
+                    )
+                ).ToList();
             //foreach (var query in paramInfo.dynamicValidators)
             //await DynamicValidator.init(query);
             return paramInfo;
