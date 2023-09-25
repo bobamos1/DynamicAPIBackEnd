@@ -1,10 +1,7 @@
 ﻿using DynamicSQLFetcher;
-<<<<<<< Updated upstream
-=======
 using Microsoft.AspNetCore.Routing;
 using System;
 using System.Runtime.CompilerServices;
->>>>>>> Stashed changes
 
 namespace APIDynamic
 {
@@ -46,8 +43,6 @@ namespace APIDynamic
             propriety.roles = (await DynamicController.executor.SelectDictionary<long, bool>(getRoles.setParam("ProprietyID", propriety.id)));
             return propriety;
         }
-<<<<<<< Updated upstream
-=======
         public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsReadOnly, ShowTypes showType, long ControllerID)
         {
             return new DynamicPropriety(
@@ -96,6 +91,5 @@ namespace APIDynamic
         {
             return rolesUser.Any(role => roles.ContainsKey(role) && roles[role]);
         }
->>>>>>> Stashed changes
     }
 }

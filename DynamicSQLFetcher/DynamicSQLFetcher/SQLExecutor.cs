@@ -290,7 +290,7 @@ namespace DynamicSQLFetcher
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                using (var trans = connection.BeginTransaction())
+                using (var trans = connection.BeginTransaction())   
                 {
                     try
                     {
