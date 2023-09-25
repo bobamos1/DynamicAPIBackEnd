@@ -7,20 +7,9 @@ namespace APIDynamic
         public long id { get; set; }
         public string Name { get; set; }
         public string VarAffected { get; set; }
-<<<<<<< Updated upstream
-        public int index { get; set; }
-        public long IDShowType { get; set; }
-        public string ShowTypeName { get; set; }
-        public List<DynamicValidator> validators { get; set; }
-        public static readonly string[] ShowTypes = new string[] { null, "Reference", "String", "Int", "Float" };
-        public static readonly Query insertFilter = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Filters (ind, name, id_ShowType, id_RouteQuery, varAffected) VALUES (@index, @name, @ShowTypeID, @RouteQueryID, @VarAffected)");
-        public static readonly Query selectLastInd = Query.fromQueryString(QueryTypes.VALUE, "SELECT MAX(ind) + 1 FROM Filters WHERE id_RouteQuery = @RouteQueryID");
-        internal DynamicFilter(long id, string Name, string VarAffected, int index, long IDShowType, string ShowTypeName)
-=======
         public static readonly Query insertFilter = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Filters (ind, name, id_ShowType, id_SQLParamInfo) VALUES (@index, @name, @ShowTypeID, @SQLParamInfoID)", true, true);
         public static readonly Query selectSQLParamName = Query.fromQueryString(QueryTypes.VALUE, "SELECT varAffected FROM SQLParamInfos WHERE id = @SQLParamInfoID", true, true);
         internal DynamicFilter(long id, string Name, string VarAffected)
->>>>>>> Stashed changes
         {
             this.id = id;
             this.Name = Name;

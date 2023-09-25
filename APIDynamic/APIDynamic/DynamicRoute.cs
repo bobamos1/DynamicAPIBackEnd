@@ -1,10 +1,7 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Mvc;
-<<<<<<< Updated upstream
-=======
 using System.Collections.Generic;
 using System.Xml.Linq;
->>>>>>> Stashed changes
 
 namespace APIDynamic
 {
@@ -13,18 +10,12 @@ namespace APIDynamic
         public long id { get; set; }
         public string Name { get; set; }
         public List<DynamicQueryForRoute> queries { get; set; }
-<<<<<<< Updated upstream
-        public static readonly string[] BaseRoutes = new string[] { null, null, "GetAll", "Get" };
-        public static readonly Query getQueries = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, SQLString AS queryString, id_queryType AS IDQueryType, completeCheck AS CompleteCheck FROM RouteQueries WHERE id_route = @routeID ORDER BY ind");
-        public static readonly Query insertRoute = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO URLRoutes (name, id_baseRoute, id_controller) VALUES (@Name, @BaseRouteID, @ControllerID)");
-=======
         public List<long> roles { get; set; }
         public static readonly Query getRoles = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id FROM PermissionRoutes INNER JOIN Roles ON id = id_role WHERE id_route = @RouteID", true, true);
         public static readonly Query getQueries = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, SQLString AS queryString, id_queryType AS IDQueryType, completeCheck AS CompleteCheck, completeAuth AS CompleteAuth FROM RouteQueries WHERE id_route = @RouteID ORDER BY ind", true, true);
         public static readonly Query insertRoute = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO URLRoutes (name, id_baseRoute, id_controller) VALUES (@Name, @BaseRouteID, @ControllerID)", true, true);
         public static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionProprieties(id_propriety, id_role) VALUES(@BaseRouteID, @RoleID)", true, true);
         public static readonly Query getBaseRouteName = Query.fromQueryString(QueryTypes.VALUE, "SELECT Name FROM BaseRoutes WHERE id = @BaseRouteID", true, true);
->>>>>>> Stashed changes
         internal DynamicRoute(long id, string Name)
         {
             this.id = id;
@@ -54,16 +45,10 @@ namespace APIDynamic
         {
             routes.Add(new DynamicRoute(await DynamicController.executor.ExecuteInsertWithLastID(insertRoute.setParam("Name", Name).setParam("BaseRouteID", baseRoute).setParam("ControllerID", idController)), Name));
         }
-<<<<<<< Updated upstream
-        public Task addRouteQuery(string queryString, QueryTypes IDQueryType, bool CompleteCheck)
-        {
-            return DynamicQueryForRoute.addRouteQuery(queries, queryString, IDQueryType, id, CompleteCheck);
-=======
         public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes IDQueryType, bool CompleteCheck, bool CompleteAuth)
         {
             queries.Add(await DynamicQueryForRoute.addRouteQuery(queries.Count, queryString, IDQueryType, id, CompleteCheck, CompleteAuth));
             return this;
->>>>>>> Stashed changes
         }
         public Task addFilters(int index, string name, long ShowTypeID, string VarAffected)
         {
