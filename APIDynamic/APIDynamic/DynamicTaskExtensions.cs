@@ -1,5 +1,6 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Threading.Tasks;
 
@@ -22,9 +23,9 @@ namespace APIDynamic
             await task[controllerName].addRoute(Name);
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Dictionary<string, DynamicController> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck)
+        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Dictionary<string, DynamicController> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
         {
-            await task[controllerName].addRouteQuery(routeName, queryString, QueryType, CompleteCheck);
+            await task[controllerName].addRouteQuery(routeName, queryString, QueryType, CompleteCheck, CompleteAuth);
             return task;
         }
         public async static Task<Dictionary<string, DynamicController>> addFilter(this Dictionary<string, DynamicController> task, string controllerName, string routeName, int index, string name, ShowTypes showType, string VarAffected)
@@ -57,6 +58,16 @@ namespace APIDynamic
             await task[controllerName].addMapperGenerator(ProprietyName, ControllerToLinkName, linkers);
             return task;
         }
+        public async static Task<Dictionary<string, DynamicController>> addAuthorizedRouteRole(this Dictionary<string, DynamicController> task, string controllerName, string routeName, long RoleID)
+        {
+            await task[controllerName].addAuthorizedRouteRole(routeName, RoleID);
+            return task;
+        }
+        public async static Task<Dictionary<string, DynamicController>> addAuthorizedProprietyRole(this Dictionary<string, DynamicController> task, string controllerName, string ProprietyName, long RoleID, bool CanModify)
+        {
+            await task[controllerName].addAuthorizedProprietyRole(ProprietyName, RoleID, CanModify);
+            return task;
+        }
 
 
 
@@ -72,9 +83,9 @@ namespace APIDynamic
         {
             return await (await task).addRoute(controllerName, Name);
         }
-        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck)
+        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
         {
-            return await (await task).addRouteQuery(controllerName, routeName, queryString, QueryType, CompleteCheck);
+            return await (await task).addRouteQuery(controllerName, routeName, queryString, QueryType, CompleteCheck, CompleteAuth);
         }
         public async static Task<Dictionary<string, DynamicController>> addFilter(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, int index, string name, ShowTypes showType, string VarAffected)
         {
@@ -100,6 +111,14 @@ namespace APIDynamic
         {
             return await (await task).addMapperGenerator(controllerName, ProprietyName, ControllerToLinkName, linkers);
         }
+        public async static Task<Dictionary<string, DynamicController>> addAuthorizedRouteRole(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, long RoleID)
+        {
+            return await (await task).addAuthorizedRouteRole(controllerName, routeName, RoleID);
+        }
+        public async static Task<Dictionary<string, DynamicController>> addAuthorizedProprietyRole(this Task<Dictionary<string, DynamicController>> task, string controllerName, string ProprietyName, long RoleID, bool CanModify)
+        {
+            return await (await task).addAuthorizedProprietyRole(controllerName, ProprietyName, RoleID, CanModify);
+        }
 
 
 
@@ -112,9 +131,9 @@ namespace APIDynamic
         {
             return await (await task).addRoute(Name);
         }
-        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck)
+        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
         {
-            return await (await task).addRouteQuery(routeName, queryString, QueryType, CompleteCheck);
+            return await (await task).addRouteQuery(routeName, queryString, QueryType, CompleteCheck, CompleteAuth);
         }
         public async static Task<DynamicController> addSQLParamInfo(this Task<DynamicController> task, string routeName, int index, string varAffected, long ProprietyID)
         {
@@ -140,13 +159,21 @@ namespace APIDynamic
         {
             return await (await task).addMapperGenerator(ProprietyName, ControllerName, linkers);
         }
-
-
-
-
-        public async static Task<DynamicRoute> addRouteQuery(this Task<DynamicRoute> task, string queryString, QueryTypes QueryType, bool CompleteCheck)
+        public async static Task<DynamicController> addAuthorizedRouteRole(this Task<DynamicController> task, string routeName, long RoleID)
         {
-            return await (await task).addRouteQuery(queryString, QueryType, CompleteCheck);
+            return await (await task).addAuthorizedRouteRole(routeName, RoleID);
+        }
+        public async static Task<DynamicController> addAuthorizedProprietyRole(this Task<DynamicController> task, string ProprietyName, long RoleID, bool CanModify)
+        {
+            return await (await task).addAuthorizedProprietyRole(ProprietyName, RoleID, CanModify);
+        }
+
+
+
+
+        public async static Task<DynamicRoute> addRouteQuery(this Task<DynamicRoute> task, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        {
+            return await (await task).addRouteQuery(queryString, QueryType, CompleteCheck, CompleteAuth);
         }
         public async static Task<DynamicRoute> addSQLParamInfo(this Task<DynamicRoute> task, int index, string varAffected, long ProprietyID)
         {
@@ -159,6 +186,10 @@ namespace APIDynamic
         public async static Task<DynamicRoute> addFilter(this Task<DynamicRoute> task, int index, string name, ShowTypes showType, string VarAffected)
         {
             return await (await task).addFilter(index, name, showType, VarAffected);
+        }
+        public async static Task<DynamicRoute> addAuthorizedRole(this Task<DynamicRoute> task, long RoleID)
+        {
+            return await (await task).addAuthorizedRole(RoleID);
         }
 
 
@@ -194,6 +225,10 @@ namespace APIDynamic
         public async static Task<DynamicPropriety> addValidator(this Task<DynamicPropriety> task, string Value, ValidatorTypes ValidatorTypeID)
         {
             return await (await task).addValidator(Value, ValidatorTypeID);
+        }
+        public async static Task<DynamicPropriety> addAuthorizedRole(this Task<DynamicPropriety> task, long RoleID, bool CanModify)
+        {
+            return await (await task).addAuthorizedRole(RoleID, CanModify);
         }
     }
 }

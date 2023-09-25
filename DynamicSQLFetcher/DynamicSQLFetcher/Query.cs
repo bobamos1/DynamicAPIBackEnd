@@ -142,9 +142,11 @@ namespace DynamicSQLFetcher
         public string Parse(params string[] authorizedColumns)
         {
             string queryStr;
-            if (authorizedColumns is null)
+            if (authorizedColumns is null || !authorizedColumns.Any())
             {
-                if (queryType == QueryTypes.ARRAY || queryType == QueryTypes.VALUE)
+                if (!selectColumns.Any())
+                    queryStr = this.query;
+                else if (queryType == QueryTypes.ARRAY || queryType == QueryTypes.VALUE)
                     queryStr = this.query.Replace(hilightStart + hilightEnd, string.Format(" {0} AS [item] ", this.selectColumns.First().Value));
                 else if (queryType == QueryTypes.CBO)
                     queryStr = this.query.Replace(hilightStart + hilightEnd, string.Format(" {0} AS [key], {1} AS [value] ", this.selectColumns.First().Value, this.selectColumns.Last().Value));
@@ -164,10 +166,11 @@ namespace DynamicSQLFetcher
                 throw new Exception("need to be of type select to add pagination");
             return string.Format("{0} {1}", Parse(), getPagination(page, step));
         }
+        /*
         internal string ParseTotalAuth()
         {
             return Parse(this.selectColumns.Select(col => col.Key).ToArray());
-        }
+        }*/
         private static string getPagination(int page, int step)
         {
             return string.Format("OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY", (page - 1) * step, step);
@@ -201,7 +204,7 @@ namespace DynamicSQLFetcher
                 return true;
             return paramsUsed.ContainsKey(varsInfoList[index].VarName);
         }
-        public static Query fromQueryString(QueryTypes queryType, string query, bool completeCheck = true, bool removeVarIdentifier = true)
+        public static Query fromQueryString(QueryTypes queryType, string query, bool completeCheck = true, bool completeAuth = false, bool removeVarIdentifier = true)
         {
             char[] tempNoComma = query.ToCharArray();
             handleReplacements('\'', tempNoComma);
@@ -210,21 +213,22 @@ namespace DynamicSQLFetcher
             query = ReplaceDigitsWithDoubleCurlyBraces(query);
             query = handleDelimiters(query);
             query = handleSeparators(query);
-            switch (queryType)
-            {
-                case QueryTypes.SELECT:
-                case QueryTypes.VALUE:
-                case QueryTypes.ROW:
-                case QueryTypes.CBO:
-                case QueryTypes.ARRAY:
-                    query = highlightSelectPart("SELECT", "FROM", query);
-                    break;
-                case QueryTypes.UPDATE:
-                    query = highlightUpdatePart("SET", query);
-                    break;
-                default:
-                    break;
-            }
+            if (!completeAuth)
+                switch (queryType)
+                {
+                    case QueryTypes.SELECT:
+                    case QueryTypes.VALUE:
+                    case QueryTypes.ROW:
+                    case QueryTypes.CBO:
+                    case QueryTypes.ARRAY:
+                        query = highlightSelectPart("SELECT", "FROM", query);
+                        break;
+                    case QueryTypes.UPDATE:
+                        query = highlightUpdatePart("SET", query);
+                        break;
+                    default:
+                        break;
+                }
             Query newQuery = new Query(queryType);
             query = parseVariables(query, newQuery, removeVarIdentifier);
 

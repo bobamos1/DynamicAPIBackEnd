@@ -1,13 +1,13 @@
-﻿using DynamicSQLFetcher;
-
-namespace APIDynamic
+﻿namespace APIDynamic
 {
     public class DynamicValidator
     {
+<<<<<<< Updated upstream
+=======
         public ValidatorTypes ValidatorType { get; set; }
         public string Value { get; set; }
-        public static readonly Query insertSQLParamInfoValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorSQLParamInfoValues (id_SQLParamInfo, id_ValidatorType, value) VALUES (@ParentID, @ValidatorTypeID, @Value)");
-        public static readonly Query insertProprietyValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorProprietyValues (id_ValidatorType, id_ValidatorType, value) VALUES (@ParentID, @ValidatorTypeID, @Value)");
+        public static readonly Query insertSQLParamInfoValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorSQLParamInfoValues (id_SQLParamInfo, id_ValidatorType, value) VALUES (@ParentID, @ValidatorTypeID, @Value)", true, true);
+        public static readonly Query insertProprietyValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorProprietyValues (id_ValidatorType, id_ValidatorType, value) VALUES (@ParentID, @ValidatorTypeID, @Value)", true, true);
         public DynamicValidator(string Value, long ValidatorTypeID)
         {
             this.ValidatorType = (ValidatorTypes)ValidatorTypeID;
@@ -26,5 +26,6 @@ namespace APIDynamic
                 , (long)ValidatorType
             );
         }
+>>>>>>> Stashed changes
     }
 }

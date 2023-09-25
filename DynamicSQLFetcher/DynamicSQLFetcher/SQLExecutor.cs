@@ -48,11 +48,11 @@ namespace DynamicSQLFetcher
         public Task<IEnumerable<T>> SelectQuery<T>(Query query, params string[] authorizedColumns)
         {
             return SelectQuery<T>(_connectionString, query, authorizedColumns);
-        }
+        }/*
         public Task<IEnumerable<T>> SelectQueryTotal<T>(Query query)
         {
             return SelectQuery<T>(_connectionString, query.ParseTotalAuth(), query.getParameters());
-        }
+        }*/
         public Task<IEnumerable<dynamic>> SelectQuery(Query query, int page, int step, params string[] authorizedColumns)
         {
             return SelectQuery(_connectionString, query, page, step, authorizedColumns);
@@ -158,11 +158,11 @@ namespace DynamicSQLFetcher
         public Task<T> SelectSingle<T>(Query query, params string[] authorizedColumns) where T : class
         {
             return SelectSingle<T>(_connectionString, query, authorizedColumns);
-        }
+        }/*
         public Task<T> SelectSingleTotal<T>(Query query) where T : class
         {
             return SelectSingle<T>(_connectionString, query.ParseTotalAuth(), query.getParameters());
-        }
+        }*/
         public Task<long> ExecuteInsertWithLastID(Query query)
         {
             return ExecuteInsertWithLastID(_connectionString, query.Parse(), query.getParameters());
