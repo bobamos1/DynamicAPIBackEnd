@@ -1,4 +1,6 @@
-﻿namespace APIDynamic
+﻿using DynamicSQLFetcher;
+
+namespace APIDynamic
 {
     public class DynamicParamInitializer
     {
@@ -20,6 +22,21 @@
             }
             this.IsStatic = true;
             return value;
+        }
+        public async static Task<DynamicParamInitializer> addParamInitializer(string AssociatedVarName, string Value, CSharpTypes CSharpType, long linkID)
+        {
+            await DynamicController.executor.ExecuteInsertWithLastID(
+                insertParamInitializer
+                    .setParam("Name", AssociatedVarName)
+                    .setParam("Value", Value)
+                    .setParam("CSharpTypeID", (long)CSharpType)
+                    .setParam("LinkID", linkID)
+            );
+            return new DynamicParamInitializer(
+                  AssociatedVarName
+                , Value
+                , (long)CSharpType
+            );
         }
     }
 }

@@ -10,10 +10,9 @@ namespace APIDynamic
         public long id { get; set; }
         public string Name { get; set; }
         public bool IsMain { get; set; }
-        public bool ReadOnly { get; set; }
-        public IEnumerable<DynamicValidator> validators { get; set; }
-        public long IDShowType { get; set; }
-        public string ShowTypeName { get; set; }
+        public bool ReadOnly { get; set; }        
+        public List<DynamicValidator> Validators { get; set; }
+        public ShowTypes ShowType { get; set; }
         public DynamicMapperGenerator mapperGenerator { get; set; }
         public Dictionary<long, bool> roles { get; set; }
         public static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT id, canModify FROM PermissionProprieties INNER JOIN Roles ON id = id_role WHERE id_propriety = @ProprietyID", true, true);
@@ -27,20 +26,33 @@ namespace APIDynamic
             this.Name = Name;
             this.IsMain = IsMain;
             this.ReadOnly = ReadOnly;
-            this.IDShowType = IDShowType;
-            this.ShowTypeName = ShowTypeName;
-            this.validators = new List<DynamicValidator>();
+            this.ShowType = (ShowTypes)ShowTypeID;
+            this.Validators = new List<DynamicValidator>();
         }
         internal static async Task<DynamicPropriety> init(DynamicPropriety propriety)
         {
-            propriety.Validators = (await DynamicController.executor.SelectQuery<DynamicValidator>(getValidators.setParam("ProprietyID", propriety.id))).ToList();
+            propriety.Validators = (
+                await DynamicController.executor.SelectQuery<DynamicValidator>(
+                    getValidators
+                        .setParam("ProprietyID", propriety.id)
+                    )
+                ).ToList();
             if (propriety.ShowType == ShowTypes.Ref)
             {
-                propriety.mapperGenerator = await DynamicController.executor.SelectSingle<DynamicMapperGenerator>(getMapperGenerator.setParam("ProprietyID", propriety.id));
+                propriety.mapperGenerator = 
+                    await DynamicController.executor.SelectSingle<DynamicMapperGenerator>(
+                        getMapperGenerator
+                            .setParam("ProprietyID", propriety.id)
+                        );
                 if (propriety.mapperGenerator is not null)
-                    await DynamicMapperGenerator.init(propriety.mapperGenerator, propriety.Name);
+                    await DynamicMapperGenerator.init(propriety.mapperGenerator);
             }
-            propriety.roles = (await DynamicController.executor.SelectDictionary<long, bool>(getRoles.setParam("ProprietyID", propriety.id)));
+            propriety.roles = (
+                await DynamicController.executor.SelectDictionary<long, bool>(
+                    getRoles
+                        .setParam("ProprietyID", propriety.id)
+                    )
+                );
             return propriety;
         }
         public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsReadOnly, ShowTypes showType, long ControllerID)

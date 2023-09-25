@@ -14,15 +14,24 @@ namespace APIDynamic
             this.id = id;
             this.Name = Name;
             this.VarAffected = VarAffected;
-            this.index = index;
-            this.IDShowType = IDShowType;
-            this.ShowTypeName = ShowTypeName;
-            this.validators = new List<DynamicValidator>();
         }
-        public async static Task addFilters(List<DynamicFilter> filters, string name, long ShowTypeID, long RouteQueryID, string VarAffected)
+        internal static async Task<DynamicFilter> init(DynamicFilter filter)
         {
-            int index = await DynamicController.executor.SelectValue<int>(selectLastInd);
-            filters.Add(new DynamicFilter(await DynamicController.executor.ExecuteInsertWithLastID(insertFilter.setParam("index", index).setParam("name", name).setParam("ShowTypeID", ShowTypes[ShowTypeID]).setParam("RouteQueryID", RouteQueryID).setParam("VarAffected", VarAffected)), name, VarAffected, index, (int)ShowTypeID, ShowTypes[ShowTypeID]));
+            return filter;
+        }
+        public async static Task<DynamicFilter> addFilter(int index, string name, ShowTypes showType, long SQLParamInfoID)
+        {
+            return new DynamicFilter(
+                await DynamicController.executor.ExecuteInsertWithLastID(
+                    insertFilter
+                        .setParam("index", index)
+                        .setParam("name", name)
+                        .setParam("ShowTypeID", (long)showType)
+                        .setParam("SQLParamInfoID", SQLParamInfoID)
+                    )
+                , name
+                , await DynamicController.executor.SelectValue<string>(selectSQLParamName.setParam("SQLParamInfoID", SQLParamInfoID))
+            );
         }
     }
 }
