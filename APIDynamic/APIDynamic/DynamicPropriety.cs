@@ -1,7 +1,10 @@
 ﻿using DynamicSQLFetcher;
+<<<<<<< Updated upstream
+=======
 using Microsoft.AspNetCore.Routing;
 using System;
 using System.Runtime.CompilerServices;
+>>>>>>> Stashed changes
 
 namespace APIDynamic
 {
@@ -15,6 +18,10 @@ namespace APIDynamic
         public long IDShowType { get; set; }
         public string ShowTypeName { get; set; }
         public DynamicMapperGenerator mapperGenerator { get; set; }
+<<<<<<< Updated upstream
+        public static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT lnk.id AS id, c.id AS controllerID, urlR.id AS RouteID, SQLString AS queryString, id_queryType AS IDQueryType, completeCheck AS CompleteCheck FROM LinkProprietiesControllers lnk INNER JOIN Controllers c ON c.id = lnk.id_controller INNER JOIN URLRoutes urlR ON urlR.id_controller = c.id INNER JOIN RouteQueries rq ON rq.id_route = urlR.id WHERE urlR.id_baseRoute = 1 AND rq.ind = 1 AND lnk.id_propriety = @proprietyID");
+        internal DynamicPropriety(long id, string Name, bool IsMain, long IDShowType, bool ReadOnly, string ShowTypeName)
+=======
         public Dictionary<long, bool> roles { get; set; }
         public static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT id, canModify FROM PermissionProprieties INNER JOIN Roles ON id = id_role WHERE id_propriety = @ProprietyID", true, true);
         public static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true, true);
@@ -22,6 +29,7 @@ namespace APIDynamic
         public static readonly Query insertPropriety = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Proprieties (name, isMain, isReadOnly,id_ShowType, id_controller) VALUES (@Name, @IsMain, @IsReadOnly, @ShowTypeID, @ControllerID)", true, true);
         public static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionProprieties(id_propriety, id_role, canModify) VALUES(@ProprietyID, @RoleID, @CanModify)", true, true);
         internal DynamicPropriety(long id, string Name, bool IsMain, bool ReadOnly, long ShowTypeID)
+>>>>>>> Stashed changes
         {
             this.id = id;
             this.Name = Name;
@@ -33,16 +41,24 @@ namespace APIDynamic
         }
         internal static async Task<DynamicPropriety> init(DynamicPropriety propriety)
         {
+<<<<<<< Updated upstream
+            if (propriety.IDShowType == 1)
+            {
+                propriety.mapperGenerator = await DynamicController.executor.SelectSingleTotal<DynamicMapperGenerator>(getMapperGenerator.setParam("proprietyID", propriety.id));
+=======
             propriety.Validators = (await DynamicController.executor.SelectQuery<DynamicValidator>(getValidators.setParam("ProprietyID", propriety.id))).ToList();
             if (propriety.ShowType == ShowTypes.Ref)
             {
                 propriety.mapperGenerator = await DynamicController.executor.SelectSingle<DynamicMapperGenerator>(getMapperGenerator.setParam("ProprietyID", propriety.id));
+>>>>>>> Stashed changes
                 if (propriety.mapperGenerator is not null)
                     await DynamicMapperGenerator.init(propriety.mapperGenerator, propriety.Name);
             }
             propriety.roles = (await DynamicController.executor.SelectDictionary<long, bool>(getRoles.setParam("ProprietyID", propriety.id)));
             return propriety;
         }
+<<<<<<< Updated upstream
+=======
         public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsReadOnly, ShowTypes showType, long ControllerID)
         {
             return new DynamicPropriety(
@@ -91,5 +107,6 @@ namespace APIDynamic
         {
             return rolesUser.Any(role => roles.ContainsKey(role) && roles[role]);
         }
+>>>>>>> Stashed changes
     }
 }

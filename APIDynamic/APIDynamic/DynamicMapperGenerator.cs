@@ -12,11 +12,16 @@ namespace APIDynamic
         public string PropretyName { get; set; }
         internal Dictionary<string, object> baseParameters { get; set; }
         internal Dictionary<string, string> parametersToLink { get; set; }
+<<<<<<< Updated upstream
+        public static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT name AS AssociatedVarName, value AS Value, id_CSharpType AS CSharpType FROM ListVars WHERE id_link = @link");
+        public DynamicMapperGenerator(long id, long controllerID, long routeID, string queryString, long IDQueryType, bool CompleteCheck)
+=======
         public static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT name AS AssociatedVarName, value AS Value, id_CSharpType AS CSharpType FROM ListVars WHERE id_link = @link", true, true);
         public static readonly Query insertMapperGenerator = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO LinkProprietiesControllers (id_propriety, id_controller) VALUES (@PropretyID, @ControllerID)", true, true);
         public static readonly Query getMapperGeneratorSingleInfo = Query.fromQueryString(QueryTypes.ROW, "SELECT TOP (1) @LinkID AS id, @ControllerID AS controllerID, urlR.id AS RouteID, SQLString AS queryString, id_queryType AS IDQueryType, completeCheck AS CompleteCheck, p.name AS ProprietyName FROM URLRoutes urlR INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = @PropertyID WHERE urlR.id_baseRoute = 1 AND rq.ind = 1 AND urlR.id_controller = @ControllerID", true, true);
         public static readonly Query getControllerID = Query.fromQueryString(QueryTypes.VALUE, "SELECT id FROM Controllers WHERE name = @ControllerName", true, true);
         public DynamicMapperGenerator(long id, long controllerID, long routeID, string queryString, long IDQueryType, bool CompleteCheck, string ProprietyName)
+>>>>>>> Stashed changes
         {
             this.id = id;
             this.controllerID = controllerID;
@@ -35,6 +40,8 @@ namespace APIDynamic
         {
             return this.mapper.updateQuery(query.Parse("id"));//faudra gerer les authorizations
         }
+<<<<<<< Updated upstream
+=======
         public async static Task<DynamicMapperGenerator> addMapperGenerator(string ControllerName, long ProprietyID, params ParamLinker[] linkers)
         {
             long ControllerID = await DynamicController.executor.SelectValue<long>(
@@ -66,5 +73,6 @@ namespace APIDynamic
             return this;
         }
 
+>>>>>>> Stashed changes
     }
 }

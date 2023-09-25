@@ -2,6 +2,8 @@
 {
     public class DynamicValidator
     {
+<<<<<<< Updated upstream
+=======
         public ValidatorTypes ValidatorType { get; set; }
         public string Value { get; set; }
         public static readonly Query insertSQLParamInfoValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorSQLParamInfoValues (id_SQLParamInfo, id_ValidatorType, value) VALUES (@ParentID, @ValidatorTypeID, @Value)", true, true);
@@ -24,5 +26,6 @@
                 , (long)ValidatorType
             );
         }
+>>>>>>> Stashed changes
     }
 }
