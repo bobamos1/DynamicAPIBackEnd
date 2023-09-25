@@ -14,18 +14,11 @@ namespace APIDynamic
         internal static SQLExecutor executor { get; set; }
         public static Dictionary<string, long> rolesAvailable { get; set; }
         internal static WebApplication app { get; set; }
-<<<<<<< Updated upstream
-        public static readonly Query getControllers = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, name AS Name, isMain AS IsMain FROM Controllers");
-        public static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, id_ShowType AS IDShowType, isReadOnly AS ReadOnly, ShowTypes.name AS ShowTypeName FROM Proprieties INNER JOIN ShowTypes ON ShowTypes.id = id_ShowType WHERE id_controller = @controllerID");
-        public static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, COALESCE(BaseRoutes.name, URLRoutes.name) AS Name FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID");
-        public static readonly Query insertController = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Controllers (name, isMain) VALUES (@Name, @IsMain)");
-=======
         public static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name, id FROM Roles", true, true);
         public static readonly Query getControllers = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, name AS Name, isMain AS IsMain FROM Controllers", true, true);
         public static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isReadOnly AS ReadOnly, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true, true);
         public static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, COALESCE(BaseRoutes.name, URLRoutes.name) AS Name FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true, true);
         public static readonly Query insertController = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Controllers (name, isMain) VALUES (@Name, @IsMain)", true, true);
->>>>>>> Stashed changes
         public List<DynamicRoute> routes { get; set; }
         public List<DynamicPropriety> proprieties { get; set; }
         private DynamicController(long id, string Name, bool IsMain)
@@ -67,16 +60,10 @@ namespace APIDynamic
         {
             return DynamicRoute.addRoute(routes, id, Name);
         }
-<<<<<<< Updated upstream
-        public Task addRouteQuery(string routeName, string queryString, QueryTypes IDQueryType, bool CompleteCheck)
-        {
-            return routes.First(route => route.Name == routeName).addRouteQuery(queryString, IDQueryType, CompleteCheck);
-=======
         public async Task<DynamicController> addRouteQuery(string routeName, string queryString, QueryTypes IDQueryType, bool CompleteCheck, bool CompleteAuth)
         {
             await routes.First(route => route.Name == routeName).addRouteQuery(queryString, IDQueryType, CompleteCheck, CompleteAuth);
             return this;
->>>>>>> Stashed changes
         }
         public Task addFilters(string routeName, int index, string name, long ShowTypeID, string VarAffected)
         {
