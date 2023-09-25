@@ -1,4 +1,5 @@
 using APIDynamic;
+using DynamicStructureObjects;
 using DynamicSQLFetcher;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,8 +28,9 @@ var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
-
-Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure, app);
+Query test = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id", true, true);
+Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure);
+//await BDInit.InitDB(controllers);
 app.MapGet("/weatherforecast", () =>
 {
     var forecast = Enumerable.Range(1, 5).Select(index =>
@@ -82,7 +84,8 @@ app.MapGet("/getTest", async () =>
 })
 .WithName("getTest");
 app.MapGet("/test", 
-    async () => Results.Ok(await executorStructure.SelectDictionary(DynamicController.getRoutes.setParam("controllerID", 1))))
+    async () => Results.Ok(controllers.ToDictionary(item => item.Key, item => item.Value.Name))
+)
 .WithName("test");
 
 

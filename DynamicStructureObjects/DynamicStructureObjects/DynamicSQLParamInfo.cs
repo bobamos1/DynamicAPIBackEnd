@@ -1,19 +1,19 @@
 ﻿using DynamicSQLFetcher;
 
-namespace APIDynamic
+namespace DynamicStructureObjects
 {
     public class DynamicSQLParamInfo
     {
-        public long id { get; set; }
-        public long ProprietyID { get; set; }
-        public string varAffected { get; set; }
-        public List<DynamicValidator> Validators { get; set; }
-        public static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value, id_ValidatorType FROM ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @SQLParamInfoID", true, true);
-        public static readonly Query insertSQLParamInfo = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO SQLParamInfos (id_Propriety, id_RouteQuery, varAffected) VALUES (@PropretyID, @RouteQueryID, @VarAffected)", true, true);
-        public DynamicSQLParamInfo(long id, string varAffected, long ProprietyID)
+        internal long id { get; set; }
+        internal long ProprietyID { get; set; }
+        internal string VarAffected { get; set; }
+        internal List<DynamicValidator> Validators { get; set; }
+        internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value, id_ValidatorType FROM ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @SQLParamInfoID", true, true);
+        internal static readonly Query insertSQLParamInfo = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO SQLParamInfos (id_Propriety, id_RouteQuery, varAffected) VALUES (@PropretyID, @RouteQueryID, @VarAffected)", true, true);
+        internal DynamicSQLParamInfo(long id, string VarAffected, long ProprietyID)
         {
             this.id = id;
-            this.varAffected = varAffected;
+            this.VarAffected = VarAffected;
             this.ProprietyID = ProprietyID;
         }
         internal static async Task<DynamicSQLParamInfo> init(DynamicSQLParamInfo paramInfo)
@@ -24,8 +24,8 @@ namespace APIDynamic
                         .setParam("SQLParamInfoID", (paramInfo.ProprietyID == 1 ? paramInfo.id : paramInfo.ProprietyID))
                     )
                 ).ToList();
-            //foreach (var query in paramInfo.dynamicValidators)
-            //await DynamicValidator.init(query);
+            foreach (var query in paramInfo.Validators)
+                await DynamicValidator.init(query);
             return paramInfo;
         }
         public async static Task<DynamicSQLParamInfo> addSQLParamInfo(string VarAffected, long ProprietyID, long RouteQueryID)

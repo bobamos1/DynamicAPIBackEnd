@@ -1,19 +1,19 @@
 ﻿using DynamicSQLFetcher;
 
-namespace APIDynamic
+namespace DynamicStructureObjects
 {
-    public class DynamicParamInitializer
+    internal class DynamicParamInitializer
     {
-        public string AssociatedVarName { get; set; }
-        public object Value { get; set; }
-        public bool IsStatic { get; set; }
-        public static readonly Query insertParamInitializer = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ListVars (name, value, id_CSharpType, id_link) VALUES (@Name, @Value, @CSharpTypeID, @LinkID)", true, true);
-        public DynamicParamInitializer(string AssociatedVarName, string Value, long CSharpType)
+        internal string AssociatedVarName { get; set; }
+        internal object Value { get; set; }
+        internal bool IsStatic { get; set; }
+        internal static readonly Query insertParamInitializer = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ListVars (name, value, id_CSharpType, id_link) VALUES (@Name, @Value, @CSharpTypeID, @LinkID)", true, true);
+        internal DynamicParamInitializer(string AssociatedVarName, string Value, long CSharpType)
         {
             this.AssociatedVarName = AssociatedVarName;
             this.Value = SetValue(Value, (CSharpTypes)CSharpType);
         }
-        public object SetValue(string value, CSharpTypes CSharpType)
+        internal object SetValue(string value, CSharpTypes CSharpType)
         {
             if (CSharpType == CSharpTypes.REFERENCE)
             {
@@ -23,7 +23,7 @@ namespace APIDynamic
             this.IsStatic = true;
             return value;
         }
-        public async static Task<DynamicParamInitializer> addParamInitializer(string AssociatedVarName, string Value, CSharpTypes CSharpType, long linkID)
+        internal async static Task<DynamicParamInitializer> addParamInitializer(string AssociatedVarName, string Value, CSharpTypes CSharpType, long linkID)
         {
             await DynamicController.executor.ExecuteInsertWithLastID(
                 insertParamInitializer

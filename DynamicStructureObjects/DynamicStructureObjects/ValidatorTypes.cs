@@ -1,4 +1,4 @@
-﻿namespace APIDynamic
+﻿namespace DynamicStructureObjects
 {
     public enum ValidatorTypes
     {

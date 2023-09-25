@@ -1,10 +1,6 @@
 ﻿using DynamicSQLFetcher;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Threading.Tasks;
 
-namespace APIDynamic
+namespace DynamicStructureObjects
 {
     public static class DynamicTaskExtensions
     {
@@ -33,9 +29,9 @@ namespace APIDynamic
             await task[controllerName].addFilter(routeName, index, name, showType, VarAffected);
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addSQLParamInfo(this Dictionary<string, DynamicController> task, string controllerName, string routeName, int index, string varAffected, long ProprietyID)
+        public async static Task<Dictionary<string, DynamicController>> addSQLParamInfo(this Dictionary<string, DynamicController> task, string controllerName, string routeName, int index, string varAffected, string ProprietyName)
         {
-            await task[controllerName].addSQLParamInfo(routeName, index, varAffected, ProprietyID);
+            await task[controllerName].addSQLParamInfo(routeName, index, varAffected, ProprietyName);
             return task;
         }
         public async static Task<Dictionary<string, DynamicController>> addValidatorForSQLParam(this Dictionary<string, DynamicController> task, string controllerName, string routeName, int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
@@ -91,9 +87,9 @@ namespace APIDynamic
         {
             return await (await task).addFilter(controllerName, routeName, index, name, showType, VarAffected);
         }
-        public async static Task<Dictionary<string, DynamicController>> addSQLParamInfo(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, int index, string varAffected, long ProprietyID)
+        public async static Task<Dictionary<string, DynamicController>> addSQLParamInfo(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, int index, string varAffected, string ProprietyName)
         {
-            return await (await task).addSQLParamInfo(controllerName, routeName, index, varAffected, ProprietyID);
+            return await (await task).addSQLParamInfo(controllerName, routeName, index, varAffected, ProprietyName);
         }
         public async static Task<Dictionary<string, DynamicController>> addValidatorForSQLParam(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
@@ -135,9 +131,9 @@ namespace APIDynamic
         {
             return await (await task).addRouteQuery(routeName, queryString, QueryType, CompleteCheck, CompleteAuth);
         }
-        public async static Task<DynamicController> addSQLParamInfo(this Task<DynamicController> task, string routeName, int index, string varAffected, long ProprietyID)
+        public async static Task<DynamicController> addSQLParamInfo(this Task<DynamicController> task, string routeName, int index, string varAffected, string ProprietyName)
         {
-            return await (await task).addSQLParamInfo(routeName, index, varAffected, ProprietyID);
+            return await (await task).addSQLParamInfo(routeName, index, varAffected, ProprietyName);
         }
         public async static Task<DynamicController> addValidatorForSQLParam(this Task<DynamicController> task, string routeName, int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
