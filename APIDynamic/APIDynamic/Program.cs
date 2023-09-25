@@ -30,7 +30,7 @@ var summaries = new[]
 };
 Query test = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id", true, true);
 Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure);
-//await BDInit.InitDB(controllers);
+//await BDInit.InitDB(controllers);//keep it commit
 app.MapGet("/weatherforecast", () =>
 {
     var forecast = Enumerable.Range(1, 5).Select(index =>
