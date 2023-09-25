@@ -35,7 +35,7 @@ namespace APIDynamic
                         .setParam("routeQueryID", query.id)
                     )
                 ).ToList();
-            foreach (var filter in query.filters)
+            foreach (var filter in query.Filters)
                 await DynamicFilter.init(filter);
             return query;
         }
@@ -66,7 +66,7 @@ namespace APIDynamic
         }
         public async Task<DynamicQueryForRoute> addFilter(string name, ShowTypes showType, string VarAffected)
         {
-            filters.Add(await DynamicFilter.addFilter(filters.Count, name, showType, ParamsInfos[VarAffected].id));
+            Filters.Add(await DynamicFilter.addFilter(Filters.Count, name, showType, ParamsInfos[VarAffected].id));
             return this;
         }
         public async Task<DynamicQueryForRoute> addSQLParamInfo(string varAffected, long ProprietyID)

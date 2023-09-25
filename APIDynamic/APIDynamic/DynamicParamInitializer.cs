@@ -1,4 +1,6 @@
-﻿namespace APIDynamic
+﻿using DynamicSQLFetcher;
+
+namespace APIDynamic
 {
     public class DynamicParamInitializer
     {

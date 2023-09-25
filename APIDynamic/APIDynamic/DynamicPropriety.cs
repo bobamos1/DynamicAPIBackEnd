@@ -1,10 +1,7 @@
 ﻿using DynamicSQLFetcher;
-<<<<<<< Updated upstream
-=======
 using Microsoft.AspNetCore.Routing;
 using System;
 using System.Runtime.CompilerServices;
->>>>>>> Stashed changes
 
 namespace APIDynamic
 {

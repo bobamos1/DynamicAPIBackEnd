@@ -25,8 +25,8 @@ namespace APIDynamic
         {
             route.Queries = new List<DynamicQueryForRoute>();
             route.Queries = (await DynamicController.executor.SelectQuery<DynamicQueryForRoute>(getQueries.setParam("RouteID", route.id))).ToList(); 
-            route.roles = (await DynamicController.executor.SelectArray<long>(getRoles.setParam("RouteID", route.id))).ToList();
-            foreach (var query in route.queries)
+            route.Roles = (await DynamicController.executor.SelectArray<long>(getRoles.setParam("RouteID", route.id))).ToList();
+            foreach (var query in route.Queries)
                 await DynamicQueryForRoute.init(query);
             return route;
         }
@@ -77,12 +77,12 @@ namespace APIDynamic
                     .setParam("RoleID", RoleID)
                     .setParam("ProprietyID", id)
                 );
-            roles.Add(RoleID);
+            Roles.Add(RoleID);
             return this;
         }
         public bool CanUse(params long[] rolesUser)
         {
-            return rolesUser.Any(role => roles.Contains(role));
+            return rolesUser.Any(role => Roles.Contains(role));
         }
     }
 }

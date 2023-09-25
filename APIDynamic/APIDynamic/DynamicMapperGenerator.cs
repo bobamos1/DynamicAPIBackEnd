@@ -16,7 +16,7 @@ namespace APIDynamic
         public static readonly Query insertMapperGenerator = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO LinkProprietiesControllers (id_propriety, id_controller) VALUES (@PropretyID, @ControllerID)", true, true);
         public static readonly Query getMapperGeneratorSingleInfo = Query.fromQueryString(QueryTypes.ROW, "SELECT TOP (1) @LinkID AS id, @ControllerID AS controllerID, urlR.id AS RouteID, SQLString AS queryString, id_queryType AS IDQueryType, completeCheck AS CompleteCheck, p.name AS ProprietyName FROM URLRoutes urlR INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = @PropertyID WHERE urlR.id_baseRoute = 1 AND rq.ind = 1 AND urlR.id_controller = @ControllerID", true, true);
         public static readonly Query getControllerID = Query.fromQueryString(QueryTypes.VALUE, "SELECT id FROM Controllers WHERE name = @ControllerName", true, true);
-        public DynamicMapperGenerator(long id, long controllerID, long routeID, string queryString, long QueryTypeID, bool CompleteCheck, bool CompleteAuth string ProprietyName)
+        public DynamicMapperGenerator(long id, long controllerID, long routeID, string queryString, long QueryTypeID, bool CompleteCheck, bool CompleteAuth, string ProprietyName)
         {
             this.id = id;
             this.controllerID = controllerID;
