@@ -11,7 +11,10 @@ namespace APIDynamic
                 .addController("Produits", true)
                 .addController("Categories", true)
                 .addController("Commandes", true)
+                .addController("produits_par_commande", true)
                 .addController("Clients", true)
+                .addController("Collaborateurs", true)
+                .addController("Compagnies", true)
                 ;
 
             await controllers["Produits"]
@@ -91,6 +94,29 @@ namespace APIDynamic
                         .addSQLParamInfo("id_ville")
                         .addSQLParamInfo("id_employe")
                 ;
+            await controllers["produits_par_commande"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, id_produit, id_commande, quantite, prix_unitaire FROM produits_par_commande", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, id_produit, id_commande, quantite, prix_unitaire FROM produits_par_commande WHERE id = @id", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                .addRoute("InsertProduit")
+                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) VALUES (@id_produit, @id_commande, @quantite, @prix_unitaire)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("id_produit")
+                        .addSQLParamInfo("id_commande")
+                        .addSQLParamInfo("quantite")
+                        .addSQLParamInfo("prix_unitaire")
+                /*.addRoute("DeleteProduit_commande")
+                    .//addRouteQuery("DELETE FROM produits_par_commande WHERE id = @id", QueryTypes.DELETE, true, true)
+                        .addSQLParamInfo("id")
+                */
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPADATE produits_par_commande SET id_produit = @_id_produit, id_commande = @_id_commande, quantite = @_quantite, prix_unitaire = @_prix_unitaire", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("id_produit")
+                        .addSQLParamInfo("id_commande")
+                        .addSQLParamInfo("quantite")
+                        .addSQLParamInfo("prix_unitaire")
+                ;
             await controllers["Clients"]
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif FROM clients", QueryTypes.SELECT, true, true)
@@ -98,7 +124,7 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id, nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif FROM clients WHERE p.id = @id", QueryTypes.SELECT, true, true)
                         .addSQLParamInfo("id")
                 .addRoute(BaseRoutes.INSERT)
-                    .addRouteQuery("INSERT INTO clients (id, nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@id, @nom, @prenom, @date_naissance, @adresse_courriel, @mdp, @token, @sel, @actif)", QueryTypes.INSERT, true, true)
+                    .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@id, @nom, @prenom, @date_naissance, @adresse_courriel, @mdp, @token, @sel, @actif)", QueryTypes.INSERT, true, true)
                         .addSQLParamInfo("nom")
                         .addSQLParamInfo("prenom")
                         .addSQLParamInfo("date_naissance")
@@ -118,19 +144,52 @@ namespace APIDynamic
                         .addSQLParamInfo("sel")
                         .addSQLParamInfo("actif")
                 ;
+            await controllers["Collaborateurs"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom, prenom, telephone, adresse_courriel, id_compagnie FROM collaborateurs", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom, prenom, telephone, adresse_courriel, id_compagnie FROM collaborateurs WHERE id = @id", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO collaborateurs (nom, prenom, telephone, adresse_courriel, id_compagnie) VALUES (@nom, @prenom, @telephone, @adresse_courriel, @id_compagnie)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("prenom")
+                        .addSQLParamInfo("telephone")
+                        .addSQLParamInfo("adresse_courriel")
+                        .addSQLParamInfo("id_compagnie")
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE collaborateurs SET nom = @_nom, prenom = @_prenom, telephone = @_telephone, adresse_courriel = @_adresse_courriel, id_compagnie = @_id_compagnie WHERE id = @id", QueryTypes.UPDATE, true, true)
+                            .addSQLParamInfo("id")
+                            .addSQLParamInfo("nom")
+                            .addSQLParamInfo("prenom")
+                            .addSQLParamInfo("telephone")
+                            .addSQLParamInfo("adresse_courriel")
+                            .addSQLParamInfo("id_compagnie")
+                ;
+            await controllers["Compagnies"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom, telephone, adresse_courriel, contact FROM compagnies", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom, telephone, adresse_courriel, contact FROM compagnies WHERE id = @id", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO compagnies (nom, telephone, adresse_courriel, contact) VALUES (@nom, @telephone, @adresse_courriel, @contact)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("id")
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("telephone")
+                        .addSQLParamInfo("adresse_courriel")
+                        .addSQLParamInfo("contact")
+               .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE compagnies SET nom = @_nom, telephone = @_telephone, adresse_courriel = @_adresse_courriel, contact = @contact WHERE id = @id", QueryTypes.UPDATE, true, true)
+                            .addSQLParamInfo("id")
+                            .addSQLParamInfo("nom")
+                            .addSQLParamInfo("telephone")
+                            .addSQLParamInfo("adresse_courriel")
+                            .addSQLParamInfo("contact")
+                ;
 
 
 
-
-
-                      ,[nom]
-      ,[prenom]
-      ,[date_naissance]
-      ,[adresse_courriel]
-      ,[mdp]
-      ,[token]
-      ,[sel]
-      ,[actif]
         }
     }
 }
