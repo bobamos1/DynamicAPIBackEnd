@@ -17,6 +17,7 @@ namespace DynamicStructureObjects
         {
             this.id = id;
             this.Name = Name;
+            this.Queries = new List<DynamicQueryForRoute>();
         }
         internal static async Task<DynamicRoute> init(DynamicRoute route)
         {
@@ -49,17 +50,35 @@ namespace DynamicStructureObjects
         }
         public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
         {
-            Queries.Add(await DynamicQueryForRoute.addRouteQuery(Queries.Count, queryString, QueryType, id, CompleteCheck, CompleteAuth));
+            Queries.Add(await DynamicQueryForRoute.addRouteQuery(Queries.Count + 1, queryString, QueryType, id, CompleteCheck, CompleteAuth));
             return this;
+        }
+        public Task<DynamicRoute> addSQLParamInfo(int indexQuery, string varAffected)
+        {
+            return addSQLParamInfo(indexQuery, varAffected, 1);
         }
         public async Task<DynamicRoute> addSQLParamInfo(int indexQuery, string varAffected, long ProprietyID)
         {
             await Queries[indexQuery].addSQLParamInfo(varAffected, ProprietyID);
             return this;
         }
+        public Task<DynamicRoute> addSQLParamInfo(string varAffected)
+        {
+            return addSQLParamInfo(varAffected, 1);
+        }
+        public async Task<DynamicRoute> addSQLParamInfo(string varAffected, long ProprietyID)
+        {
+            await Queries.Last().addSQLParamInfo(varAffected, ProprietyID);
+            return this;
+        }
         public async Task<DynamicRoute> addValidator(int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
             await Queries[indexQuery].addValidator(VarAffected, Value, ValidatorType);
+            return this;
+        }
+        public async Task<DynamicRoute> addValidator(string Value, ValidatorTypes ValidatorType)
+        {
+            await Queries.Last().addValidator(Value, ValidatorType);
             return this;
         }
         public async Task<DynamicRoute> addFilter(int indexQuery, string name, ShowTypes showType, string VarAffected)

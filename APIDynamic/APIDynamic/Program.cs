@@ -3,11 +3,10 @@ using DynamicStructureObjects;
 using DynamicSQLFetcher;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 SQLExecutor.Initialize(builder.Configuration);
-string connectionString = SQLExecutor.GetConnectionString("structure");
-Console.WriteLine(connectionString);
-SQLExecutor executorStructure = new SQLExecutor(connectionString);
+SQLExecutor executorStructure = new SQLExecutor(SQLExecutor.GetConnectionString("structure"));
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -28,7 +27,6 @@ var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
-Query test = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id", true, true);
 Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure);
 //await BDInit.InitDB(controllers);//keep it commit
 app.MapGet("/weatherforecast", () =>

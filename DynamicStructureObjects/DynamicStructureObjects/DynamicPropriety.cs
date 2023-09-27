@@ -10,7 +10,7 @@ namespace DynamicStructureObjects
         internal bool ReadOnly { get; set; }        
         internal List<DynamicValidator> Validators { get; set; }
         internal ShowTypes ShowType { get; set; }
-        internal DynamicMapperGenerator mapperGenerator { get; set; }
+        internal DynamicMapperGenerator MapperGenerator { get; set; }
         internal Dictionary<long, bool> roles { get; set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT id, canModify FROM PermissionProprieties INNER JOIN Roles ON id = id_role WHERE id_propriety = @ProprietyID", true, true);
         internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true, true);
@@ -25,6 +25,7 @@ namespace DynamicStructureObjects
             this.ReadOnly = ReadOnly;
             this.ShowType = (ShowTypes)ShowTypeID;
             this.Validators = new List<DynamicValidator>();
+            this.MapperGenerator = null;
         }
         internal static async Task<DynamicPropriety> init(DynamicPropriety propriety)
         {
@@ -36,13 +37,13 @@ namespace DynamicStructureObjects
                 ).ToList();
             if (propriety.ShowType == ShowTypes.Ref)
             {
-                propriety.mapperGenerator = 
+                propriety.MapperGenerator = 
                     await DynamicController.executor.SelectSingle<DynamicMapperGenerator>(
                         getMapperGenerator
                             .setParam("ProprietyID", propriety.id)
                         );
-                if (propriety.mapperGenerator is not null)
-                    await DynamicMapperGenerator.init(propriety.mapperGenerator);
+                if (propriety.MapperGenerator is not null)
+                    await DynamicMapperGenerator.init(propriety.MapperGenerator);
             }
             propriety.roles = (
                 await DynamicController.executor.SelectDictionary<long, bool>(
@@ -73,7 +74,7 @@ namespace DynamicStructureObjects
         {
             if (ShowType != ShowTypes.Ref)
                 throw new Exception("cannot add mapper on not ref proprety");
-            mapperGenerator = await DynamicMapperGenerator.addMapperGenerator(ControllerName, id, linkers);
+            MapperGenerator = await DynamicMapperGenerator.addMapperGenerator(ControllerName, id, linkers);
             return this;
         }
         public async Task<DynamicPropriety> addValidator(string Value, ValidatorTypes ValidatorType)

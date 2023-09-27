@@ -620,6 +620,14 @@ INSERT QueryTypes (name)
 VALUES 
 ('UPDATE'), ('SELECT'), ('ARRAY'), ('VALUE'), ('ROW'), ('CBO')
 GO
+INSERT Controllers (name, isMain)
+VALUES 
+('NULL', 0)
+GO
+INSERT Proprieties (name, isMain, id_ShowType, id_controller, isReadOnly)
+VALUES 
+('NULL', 0, 1, 1, 1)
+GO
 /*
 INSERT URLRoutes (name, id_baseRoute, id_controller) VALUES (NULL, 1, 1)
 GO
@@ -627,10 +635,6 @@ INSERT RouteQueries (ind, SQLString, id_queryType, id_route, completeCheck)
 VALUES 
 (1, 'SELECT id FROM produits', 2, 1, 1),
 (2, 'SELECT nom FROM produits WHERE id = @id', 2, 1, 1)
-GO
-INSERT Proprieties (name, isMain, id_ShowType, id_controller, isReadOnly)
-VALUES 
-('NULL', 0, 1, 1, 1), ('description', 1, 2, 1, 0), ('prix', 1, 4, 1, 0), ('quantiteInventaire', 1, 3, 1, 0), ('categorie', 1, 2, 1, 0), ('etat', 1, 2, 1, 0), ('Produits', 0, 1, 2, 0)
 GO
 */
 SELECT c.name, t1.name, d.name, t2.name FROM Colonnes c INNER JOIN DataTypes d ON d.id = c.id_datatype INNER JOIN Tables t1 ON t1.id = c.id_table  LEFT JOIN Tables_Colonnes tc ON tc.id_colonne = c.id LEFT JOIN Tables t2 ON t2.id = tc.id_table

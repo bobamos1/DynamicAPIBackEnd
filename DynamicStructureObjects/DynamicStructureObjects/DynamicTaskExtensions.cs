@@ -1,4 +1,5 @@
 ﻿using DynamicSQLFetcher;
+using System.Threading.Tasks;
 
 namespace DynamicStructureObjects
 {
@@ -131,13 +132,29 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRouteQuery(routeName, queryString, QueryType, CompleteCheck, CompleteAuth);
         }
+        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        {
+            return await (await task).addRouteQuery(queryString, QueryType, CompleteCheck, CompleteAuth);
+        }
         public async static Task<DynamicController> addSQLParamInfo(this Task<DynamicController> task, string routeName, int index, string varAffected, string ProprietyName)
         {
             return await (await task).addSQLParamInfo(routeName, index, varAffected, ProprietyName);
         }
+        public async static Task<DynamicController> addSQLParamInfo(this Task<DynamicController> task, string varAffected, string ProprietyName)
+        {
+            return await (await task).addSQLParamInfo(varAffected, ProprietyName);
+        }
+        public async static Task<DynamicController> addSQLParamInfo(this Task<DynamicController> task, string varAffected)
+        {
+            return await (await task).addSQLParamInfo(varAffected);
+        }
         public async static Task<DynamicController> addValidatorForSQLParam(this Task<DynamicController> task, string routeName, int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
             return await (await task).addValidatorForSQLParam(routeName, indexQuery, VarAffected, Value, ValidatorType);
+        }
+        public async static Task<DynamicController> addValidatorForSQLParam(this Task<DynamicController> task, string Value, ValidatorTypes ValidatorType)
+        {
+            return await (await task).addValidatorForSQLParam(Value, ValidatorType);
         }
         public async static Task<DynamicController> addFilter(this Task<DynamicController> task, string routeName, int index, string name, ShowTypes showType, string VarAffected)
         {
@@ -171,9 +188,21 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRouteQuery(queryString, QueryType, CompleteCheck, CompleteAuth);
         }
+        public async static Task<DynamicRoute> addSQLParamInfo(this Task<DynamicRoute> task, int index, string varAffected)
+        {
+            return await (await task).addSQLParamInfo(index, varAffected);
+        }
         public async static Task<DynamicRoute> addSQLParamInfo(this Task<DynamicRoute> task, int index, string varAffected, long ProprietyID)
         {
             return await (await task).addSQLParamInfo(index, varAffected, ProprietyID);
+        }
+        public async static Task<DynamicRoute> addSQLParamInfo(this Task<DynamicRoute> task, string varAffected)
+        {
+            return await (await task).addSQLParamInfo(varAffected);
+        }
+        public async static Task<DynamicRoute> addSQLParamInfo(this Task<DynamicRoute> task, string varAffected, long ProprietyID)
+        {
+            return await (await task).addSQLParamInfo(varAffected, ProprietyID);
         }
         public async static Task<DynamicRoute> addValidator(this Task<DynamicRoute> task, int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
@@ -195,9 +224,17 @@ namespace DynamicStructureObjects
         {
             return await (await task).addSQLParamInfo(varAffected, ProprietyID);
         }
+        public async static Task<DynamicQueryForRoute> addSQLParamInfo(this Task<DynamicQueryForRoute> task, string varAffected)
+        {
+            return await (await task).addSQLParamInfo(varAffected);
+        }
         public async static Task<DynamicQueryForRoute> addValidator(this Task<DynamicQueryForRoute> task, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
             return await (await task).addValidator(VarAffected, Value, ValidatorType);
+        }
+        public async static Task<DynamicQueryForRoute> addValidator(this Task<DynamicQueryForRoute> task, string Value, ValidatorTypes ValidatorType)
+        {
+            return await (await task).addValidator(Value, ValidatorType);
         }
         public async static Task<DynamicQueryForRoute> addFilter(this Task<DynamicQueryForRoute> task, string name, ShowTypes showType, string VarAffected)
         {

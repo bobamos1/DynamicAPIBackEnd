@@ -16,11 +16,25 @@ namespace DynamicStructureObjects
         internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isReadOnly AS ReadOnly, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true, true);
         internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, COALESCE(BaseRoutes.name, URLRoutes.name) AS Name FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true, true);
         internal static readonly Query insertController = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Controllers (name, isMain) VALUES (@Name, @IsMain)", true, true);
+        public long getProperityID(string ProprietyName)
+        {
+            return Proprieties.First(propriety => propriety.Name == ProprietyName).id;
+        }
+        public DynamicRoute getRoute(BaseRoutes baseRoute)
+        {
+            return getRoute(baseRoute.Value());
+        }
+        public DynamicRoute getRoute(string routeName)
+        {
+            return Routes.First(route => route.Name == routeName);
+        }
         private DynamicController(long id, string Name, bool IsMain)
         {
             this.id = id;
             this.Name = Name;
             this.IsMain = IsMain;
+            this.Routes = new List<DynamicRoute>();
+            this.Proprieties = new List<DynamicPropriety>();
         }
         private static async Task<DynamicController> init(DynamicController controller)
         {
@@ -69,6 +83,11 @@ namespace DynamicStructureObjects
             await Routes.First(route => route.Name == routeName).addRouteQuery(queryString, QueryType, CompleteCheck, CompleteAuth);
             return this;
         }
+        public async Task<DynamicController> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        {
+            await Routes.Last().addRouteQuery(queryString, QueryType, CompleteCheck, CompleteAuth);
+            return this;
+        }
         public async Task<DynamicController> addSQLParamInfo(string routeName, int index, string varAffected, string ProprietyName)
         {
             long proprietyID = 1;
@@ -77,9 +96,26 @@ namespace DynamicStructureObjects
             await Routes.First(route => route.Name == routeName).addSQLParamInfo(index, varAffected, proprietyID);
             return this;
         }
+        public async Task<DynamicController> addSQLParamInfo(string varAffected, string ProprietyName)
+        {
+            long proprietyID = 1;
+            if (ProprietyName is not null)
+                proprietyID = Proprieties.First(propriety => propriety.Name == ProprietyName).id;
+            await Routes.Last().addSQLParamInfo(varAffected, proprietyID);
+            return this;
+        }
+        public Task<DynamicController> addSQLParamInfo(string varAffected)
+        {
+            return addSQLParamInfo(varAffected, null);
+        }
         public async Task<DynamicController> addValidatorForSQLParam(string routeName, int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
             await Routes.First(route => route.Name == routeName).addValidator(indexQuery, VarAffected, Value, ValidatorType);
+            return this;
+        }
+        public async Task<DynamicController> addValidatorForSQLParam(string Value, ValidatorTypes ValidatorType)
+        {
+            await Routes.Last().addValidator(Value, ValidatorType);
             return this;
         }
         public async Task<DynamicController> addFilter(string routeName, int index, string name, ShowTypes showType, string VarAffected)

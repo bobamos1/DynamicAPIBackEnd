@@ -8,7 +8,7 @@ namespace DynamicStructureObjects
         internal long controllerID { get; set; }
         internal long routeID { get; set; }
         internal Query query { get; set; }
-        internal DynamicMapper mapper { get; set; }
+        internal DynamicMapper Mapper { get; set; }
         internal string ProprietyName { get; set; }
         internal Dictionary<string, object> baseParameters { get; set; }
         internal Dictionary<string, string> parametersToLink { get; set; }
@@ -23,6 +23,9 @@ namespace DynamicStructureObjects
             this.routeID = routeID; 
             this.query = Query.fromQueryString((QueryTypes)QueryTypeID, queryString, CompleteCheck, CompleteAuth);
             this.ProprietyName = ProprietyName;
+            this.Mapper = null;
+            this.baseParameters = new Dictionary<string, object>();
+            this.parametersToLink = new Dictionary<string, string>();
         }
         internal static async Task<DynamicMapperGenerator> init(DynamicMapperGenerator mapperGenerator)
         {
@@ -33,12 +36,12 @@ namespace DynamicStructureObjects
                     );
             mapperGenerator.baseParameters = parameters.Where(param => param.IsStatic).ToDictionary(item => item.AssociatedVarName, item => item.Value);
             mapperGenerator.parametersToLink = parameters.Where(param => !param.IsStatic).ToDictionary(item => item.AssociatedVarName, item => ParserLib.Parser.to<string>(item.Value));
-            mapperGenerator.mapper = new DynamicMapper(mapperGenerator.ProprietyName, mapperGenerator.parametersToLink, mapperGenerator.baseParameters);
+            mapperGenerator.Mapper = new DynamicMapper(mapperGenerator.ProprietyName, mapperGenerator.parametersToLink, mapperGenerator.baseParameters);
             return mapperGenerator;
         }
         internal DynamicMapper updateMapper()
         {
-            return this.mapper.updateQuery(query.Parse("id"));//faudra gerer les authorizations
+            return this.Mapper.updateQuery(query.Parse("id"));//faudra gerer les authorizations
         }
         internal async static Task<DynamicMapperGenerator> addMapperGenerator(string ControllerName, long ProprietyID, params ParamLinker[] linkers)
         {
