@@ -15,6 +15,13 @@ namespace APIDynamic
                 .addController("Clients", true)
                 .addController("Collaborateurs", true)
                 .addController("Compagnies", true)
+                .addController("Villes", true)
+                .addController("Provinces", true)
+                .addController("Employes", true)
+                .addController("EtatsCommandes", true)
+                .addController("TypesPreferencesGraphique", true)
+                .addController("Couleurs", true)
+                .addController("PreferencesGraphiques", true)
                 ;
 
             await controllers["Produits"]
@@ -187,7 +194,69 @@ namespace APIDynamic
                             .addSQLParamInfo("adresse_courriel")
                             .addSQLParamInfo("contact")
                 ;
-
+            await controllers["Villes"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom, id_province FROM villes", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom, id_province WHERE id = @id FROM villes", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                ;
+            await controllers["Provinces"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom FROM provinces", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom WHERE id = @id FROM provinces", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                ;
+            await controllers["Employes"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif FROM employes", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif FROM employes WHERE p.id = @id", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@id, @nom, @prenom, @date_naissance, @adresse_courriel, @mdp, @token, @sel, @actif)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("prenom")
+                        .addSQLParamInfo("date_naissance")
+                        .addSQLParamInfo("adresse_courriel")
+                        .addSQLParamInfo("mdp")
+                        .addSQLParamInfo("token")
+                        .addSQLParamInfo("sel")
+                        .addSQLParamInfo("actif")
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE employes SET nom = @_nom, prenom = @_prenom, date_naissance = @_date_naissance, adresse_courriel = @_adresse_courriel, mdp = @_mdp, token = @_token, sel = @_sel, actif = @_actif WHERE id = @id", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("prenom")
+                        .addSQLParamInfo("date_naissance")
+                        .addSQLParamInfo("adresse_courriel")
+                        .addSQLParamInfo("mdp")
+                        .addSQLParamInfo("token")
+                        .addSQLParamInfo("sel")
+                        .addSQLParamInfo("actif")
+                ;
+            await controllers["EtatsCommandes"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom, descriptions FROM etats_commandes", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom, descriptions WHERE id = @id FROM etats_commandes", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                ;
+            await controllers["TypesPreferencesGraphique"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom, code_html FROM types_preferences_graphique", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes .GET)
+                    .addRouteQuery("SELECT id, nom, code_html FROM types_preferences_graphique WHERE id = @id", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO types_preferences_graphique (nom, code_html) VALUES (@nom, @code_html)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("code_html")
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE types_preferences_graphique SET nom = @_nom, code_html = @_code_html", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("code_html")
+                ;
 
 
         }
