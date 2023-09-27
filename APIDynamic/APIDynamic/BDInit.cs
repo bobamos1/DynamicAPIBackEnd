@@ -22,9 +22,18 @@ namespace APIDynamic
                 .addController("TypesPreferencesGraphique", true)
                 .addController("Couleurs", true)
                 .addController("PreferencesGraphiques", true)
+                .addController("TypesMedia", true)
+                .addController("Media", true)
+                .addController("ReseauxSociaux", true)
+                .addController("EtatsProduits", true)
                 ;
 
             await controllers["Produits"]
+                .addPropriety("nom", true, true, ShowTypes.STRING)
+                .addPropriety("descriptions", true, true, ShowTypes.STRING)
+                .addPropriety("prix", true, true, ShowTypes.FLOAT)
+                .addPropriety("c.nom", true, true, ShowTypes.STRING)
+                .addPropriety("ep.nom", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, nom, descriptions, prix, c.nom as categorie, ep.nom FROM produits p INNER JOIN categorie c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -257,8 +266,85 @@ namespace APIDynamic
                         .addSQLParamInfo("nom")
                         .addSQLParamInfo("code_html")
                 ;
+            await controllers["Couleurs"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom, code_hex FROM couleurs", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom, code_hex FROM couleurs WHERE id = @id", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO couleurs (nom, code_hex) VALUES (@nom, @code_hex)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("code_hex")
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE couleurs SET nom = @_nom, code_hex = @_code_hex", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("code_hex")
+                ;
+            await controllers["PreferencesGraphiques"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom, id_couleurs, id_types_preferences FROM preferences_graphiques", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom, id_couleurs, id_types_preferences FROM preferences_graphiques WHERE id = @id", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO preferences_graphiques (nom, id_couleurs, id_types_preferences) VALUES (@nom, @id_couleurs, @id_types_preferences)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("id_couleurs")
+                        .addSQLParamInfo("id_types_preferences")
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE preferences_graphiques SET nom = @_nom, id_couleurs = @_id_couleurs, id_types_preferences = @_id_types_preferences", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("id_couleurs")
+                        .addSQLParamInfo("id_types_preferences")
+                ;
+            await controllers["TypesMedia"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom, descriptions FROM types_medias", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom, descriptions FROM types_medias WHERE id = @id", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO types_medias (nom, descriptions) VALUES (@nom, @descriptions)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("descriptions")
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE types_medias SET nom = @_nom, descriptions = @_descriptions", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("descriptions")
+                ;
+            await controllers["Media"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom, descriptions FROM media", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom, liens, id_types_media FROM media WHERE id = @id", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO media (nom, liens, id_types_media) VALUES (@nom, @liens, @id_types_media)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("liens")
+                        .addSQLParamInfo("id_types_media")
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE media SET nom = @_nom, liens = @_liens, id_types_media = @_id_types_media", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("liens")
+                        .addSQLParamInfo("id_types_media")
+                ;
+            await controllers["ReseauxSociaux"]
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id, nom FROM reseaux_sociaux", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addRouteQuery("SELECT id, nom FROM reseaux_sociaux WHERE id = @id", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id")
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO reseaux_sociaux (nom) VALUES (@nom)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("nom")
 
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE reseaux_sociaux SET nom = @_nom", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("nom")
 
+                ;
         }
     }
 }
