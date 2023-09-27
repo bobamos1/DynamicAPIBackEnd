@@ -16,6 +16,9 @@
     <Reference Include="DynamicSQLFetcher">
       <HintPath>..\..\DynamicSQLFetcher.dll</HintPath>
     </Reference>
+    <Reference Include="DynamicStructureObjects">
+      <HintPath>..\..\DynamicStructureObjects.dll</HintPath>
+    </Reference>
     <Reference Include="ParserLib">
       <HintPath>..\..\ParserLib.dll</HintPath>
     </Reference>

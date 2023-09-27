@@ -1,4 +1,4 @@
-﻿namespace APIDynamic
+﻿namespace DynamicStructureObjects
 {
     [AttributeUsage(AttributeTargets.Field)]
     public class ValueAttribute : Attribute
@@ -9,10 +9,6 @@
         {
             Value = value;
         }
-    }
-    public interface IEnumWithLong
-    {
-        long ToLong();
     }
     public static class EnumHelper
     {
