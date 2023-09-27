@@ -13,6 +13,7 @@ namespace APIDynamic
             controllers["Produits"].addRouteAPI(RouteTypes.GET, "GetAll",
                 async (queries, context) => Results.Ok(await executorData.SelectQuery(queries[0]))
             );
+            //Ajoute les routes de l'API ici
         }
         public static Dictionary<string, string> LoadConnectionStrings(IConfiguration configuration)
         {
