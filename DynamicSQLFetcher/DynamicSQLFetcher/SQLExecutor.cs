@@ -91,6 +91,20 @@ namespace DynamicSQLFetcher
                 queriesDict.Add(query.Item1.Parse(query.Item2), query.Item1.getParameters());
             return ExecuteQueryWithTransaction(_connectionString, queriesDict);
         }
+        public Task<int> ExecuteQueryWithTransaction(params Query[] queries)
+        {
+            Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
+            foreach (var query in queries)
+                queriesDict.Add(query.Parse(), query.getParameters());
+            return ExecuteQueryWithTransaction(_connectionString, queriesDict);
+        }
+        public Task<int> ExecuteQueryWithTransaction(params string[] queries)
+        {
+            Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
+            foreach (var query in queries)
+                queriesDict.Add(query, new DynamicParameters());
+            return ExecuteQueryWithTransaction(_connectionString, queriesDict);
+        }
         public static Task<IEnumerable<dynamic>> SelectQuery(string connectionString, Query query, params string[] authorizedColumns)
         {
             return SelectQuery(connectionString, query.Parse(authorizedColumns), query.getParameters());

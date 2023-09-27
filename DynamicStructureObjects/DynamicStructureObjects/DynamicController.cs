@@ -1,4 +1,12 @@
 ﻿using DynamicSQLFetcher;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using ParserLib;
+using System.Collections;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Xml.Linq;
 
 namespace DynamicStructureObjects
 {
@@ -8,6 +16,7 @@ namespace DynamicStructureObjects
         public string Name { get; internal set; }
         internal bool IsMain { get; set; }
         internal static SQLExecutor executor { get; set; }
+        internal static WebApplication app { get; set; }
         internal static Dictionary<string, long> RolesAvailable { get; set; }
         internal List<DynamicRoute> Routes { get; set; }
         internal List<DynamicPropriety> Proprieties { get; set; }
@@ -16,18 +25,6 @@ namespace DynamicStructureObjects
         internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isReadOnly AS ReadOnly, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true, true);
         internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, COALESCE(BaseRoutes.name, URLRoutes.name) AS Name FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true, true);
         internal static readonly Query insertController = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Controllers (name, isMain) VALUES (@Name, @IsMain)", true, true);
-        public long getProperityID(string ProprietyName)
-        {
-            return Proprieties.First(propriety => propriety.Name == ProprietyName).id;
-        }
-        public DynamicRoute getRoute(BaseRoutes baseRoute)
-        {
-            return getRoute(baseRoute.Value());
-        }
-        public DynamicRoute getRoute(string routeName)
-        {
-            return Routes.First(route => route.Name == routeName);
-        }
         private DynamicController(long id, string Name, bool IsMain)
         {
             this.id = id;
@@ -56,6 +53,34 @@ namespace DynamicStructureObjects
                 controllers.Add(controller.Name, await init(controller));
             return controllers;
         }
+        public static async Task resetStructureData()
+        {
+            List<KeyValuePair<string, bool>> tablesToDeleteContent = new List<KeyValuePair<string, bool>>()
+                .Add("ValidatorProprietyValues", false)
+                .Add("ValidatorSQLParamInfoValues", false)
+                .Add("Filters", true)
+                .Add("SQLParamInfos", true)
+                .Add("PermissionRoutes", false)
+                .Add("PermissionProprieties", false)
+                .Add("RouteQueries", true)
+                .Add("URLRoutes", true)
+                .Add("ListVars", true)
+                .Add("LinkProprietiesControllers", true)
+                .Add("Proprieties", true)
+                .Add("Controllers", true)
+            ;
+            List<string> queriesToRun = new List<string>();
+            foreach (var table in tablesToDeleteContent)
+            {
+                queriesToRun.Add($"DELETE {table.Key}");
+                if (table.Value)
+                    queriesToRun.Add($"DBCC CHECKIDENT ('{table.Key}', RESEED, 0)");
+            }
+            queriesToRun.Add("INSERT Controllers (name, isMain) VALUES ('NULL', 0)");
+            queriesToRun.Add("INSERT Proprieties (name, isMain, id_ShowType, id_controller, isReadOnly) VALUES ('NULL', 0, 1, 1, 1)");
+            await executor.ExecuteQueryWithTransaction(queriesToRun.ToArray());
+        }
+        #region adds
         public async static Task<DynamicController> addController(string Name, bool IsMain)
         {
             return new DynamicController(
@@ -148,6 +173,7 @@ namespace DynamicStructureObjects
             await Proprieties.First(propriety => propriety.Name == ProprietyName).addAuthorizedRole(RoleID, CanModify);
             return this;
         }
+        #endregion
         internal IEnumerable<string> AuthorizedToSee(params long[] roles)
         {
             return Proprieties.Where(propriety => propriety.CanSee(roles)).Select(propriety => propriety.Name);
@@ -155,6 +181,40 @@ namespace DynamicStructureObjects
         internal IEnumerable<string> AuthorizedToModify(params long[] roles)
         {
             return Proprieties.Where(propriety => propriety.CanModify(roles)).Select(propriety => propriety.Name);
+        }
+        public static void setApp(WebApplication app)
+        {
+            DynamicController.app = app;
+        }
+
+        public long getProperityID(string ProprietyName)
+        {
+            return Proprieties.First(propriety => propriety.Name == ProprietyName).id;
+        }
+        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, HttpContext, IResult> function)
+        {
+            addRouteAPI(routeType, routeName, async (queries, context) => function(queries, context));
+        }
+
+        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, HttpContext, Task<IResult>> function)
+        {
+            DynamicRoute route = Routes.First(route => route.Name == routeName);
+            List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();
+
+            Func<HttpContext, Task<IResult>> delegateMethod = async (context) =>
+            {
+                if (!Cross(route.Roles, new long[] { 1, 2 }))
+                    return Results.Forbid();
+
+                return await function(queries, context);
+            };
+
+            app.MapRoute(routeType, $"/{Name}/{routeName}", delegateMethod).WithName(routeName);
+        }
+
+        public static bool Cross(IEnumerable<long> arr1, IEnumerable<long> arr2)
+        {
+            return arr1.Any(item => arr2.Contains(item));
         }
     }
 }

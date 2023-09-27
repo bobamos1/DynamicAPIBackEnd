@@ -1,10 +1,35 @@
 ﻿using DynamicSQLFetcher;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
 namespace DynamicStructureObjects
 {
     public static class DynamicTaskExtensions
     {
+        public static RouteHandlerBuilder MapRoute(this WebApplication app, RouteTypes routeType, string routePath, Func<HttpContext, Task<IResult>> delegateMethod)
+        {
+            switch (routeType)
+            {
+                case RouteTypes.GET:
+                    return app.MapGet(routePath, delegateMethod);
+                case RouteTypes.POST:
+                    return app.MapPost(routePath, delegateMethod);
+                default:
+                    throw new ArgumentException("Invalid routeType");
+            }
+        }
+        public static List<KeyValuePair<TK, TV>> Add<TK, TV>(this List<KeyValuePair<TK, TV>> dict, TK key, TV value)
+        {
+            dict.Add(new KeyValuePair<TK, TV>(key, value));
+            return dict;
+        }
+
+
+
+
+
+
         public async static Task<Dictionary<string, DynamicController>> addController(this Dictionary<string, DynamicController> task, string Name, bool IsMain)
         {
             task.Add(Name, await DynamicController.addController(Name, IsMain));
