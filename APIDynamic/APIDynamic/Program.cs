@@ -5,8 +5,7 @@ using DynamicSQLFetcher;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-SQLExecutor.Initialize(builder.Configuration);
-SQLExecutor executorStructure = new SQLExecutor(SQLExecutor.GetConnectionString("structure"));
+Dictionary<string, string> connectionStrings = RoutesInit.LoadConnectionStrings(builder.Configuration);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -22,13 +21,31 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(new SQLExecutor(connectionStrings["structure"]));
+//await BDInit.InitDB(controllers);//keep it commit
+RoutesInit.InitRoutes(controllers, app, connectionStrings);
+app.Run();
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+SQLExecutor executorStructure = new SQLExecutor(builder.Configuration.GetConnectionString("structure"));
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure);
-//await BDInit.InitDB(controllers);//keep it commit
+};*/
+/*
 app.MapGet("/weatherforecast", () =>
 {
     var forecast = Enumerable.Range(1, 5).Select(index =>
@@ -86,10 +103,10 @@ app.MapGet("/test",
 )
 .WithName("test");
 
-
-app.Run();
-
+*/
+/*
 internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+*/

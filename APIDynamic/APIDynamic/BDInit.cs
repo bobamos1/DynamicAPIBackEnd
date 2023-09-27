@@ -3,10 +3,11 @@ using DynamicStructureObjects;
 
 namespace APIDynamic
 {
-    public class BDInit
+    public static class BDInit
     {
         public async static Task InitDB(Dictionary<string, DynamicController> controllers)
         {
+            await DynamicController.resetStructureData();
             await controllers
                 .addController("Produits", true)
                 .addController("Categories", true)
@@ -35,7 +36,7 @@ namespace APIDynamic
                 .addPropriety("c.nom", true, true, ShowTypes.STRING)
                 .addPropriety("ep.nom", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT id, nom, descriptions, prix, c.nom as categorie, ep.nom FROM produits p INNER JOIN categorie c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id", QueryTypes.SELECT, true, true)
+                    .addRouteQuery("SELECT p.id, p.nom, p.descriptions, prix, c.nom as categorie, ep.nom FROM produits p INNER JOIN categories c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
                     .addRouteQuery("SELECT id, nom, descriptions, prix, c.nom as categorie, ep.nom FROM produits p INNER JOIN categorie c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id WHERE p.id = @id", QueryTypes.SELECT, true, true)
                         .addSQLParamInfo("id")

@@ -69,6 +69,8 @@ namespace ParserLib
 
         public static bool toBool(object obj, bool defVal = default(bool))
         {
+            if (obj is bool boolean)
+                return boolean;
             if (!IsNullOrEmpty(obj))
                 if (obj.GetType().FullName == "System.Boolean")
                     return Convert.ToBoolean(obj);
@@ -84,7 +86,7 @@ namespace ParserLib
                 }
             return defVal == default(bool) ? false : defVal;
         }
-
+        /*
         public static Image getImage(string path, Image defVal = default(Image), string defaultPath = "")
         {
             if (path == "")
@@ -98,6 +100,7 @@ namespace ParserLib
             catch { }
             return defVal;
         }
+        */
         public static T toNumber<T>(object obj, T defVal = default(T))
         {
             defVal = defVal.Equals(default(T)) ? (T)Convert.ChangeType(0, typeof(T)) : defVal;
@@ -173,9 +176,13 @@ namespace ParserLib
                 return (T)(object)toString(obj, (string)(object)defVal);
             if (typeof(T) == typeof(DateTime))
                 return (T)(object)toDateTime(obj, (DateTime)(object)defVal);
-            if (typeof(T) == typeof(Image) || typeof(T) == typeof(Bitmap))
-                return (T)(object)getImage(to(obj, ""), (Image)(object)defVal, "");
+            //if (typeof(T) == typeof(Image) || typeof(T) == typeof(Bitmap))
+                //return (T)(object)getImage(to(obj, ""), (Image)(object)defVal, "");
             return toNumber(obj, defVal);
+        }
+        public static T To<T>(this object obj, T defaultValue = default(T))
+        {
+            return to<T>(obj, defaultValue);
         }
         public static object toNull<T>(object obj)
         {
