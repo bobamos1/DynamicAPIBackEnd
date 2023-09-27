@@ -618,7 +618,7 @@ VALUES
 GO
 INSERT QueryTypes (name) 
 VALUES 
-('UPDATE'), ('SELECT'), ('ARRAY'), ('VALUE'), ('ROW'), ('CBO')
+('UPDATE'), ('SELECT'), ('ARRAY'), ('VALUE'), ('ROW'), ('CBO'), ('INSERT')
 GO
 INSERT Controllers (name, isMain)
 VALUES 
@@ -641,3 +641,8 @@ SELECT c.name, t1.name, d.name, t2.name FROM Colonnes c INNER JOIN DataTypes d O
 
 
 
+
+SELECT * FROM Controllers
+SELECT COALESCE(BaseRoutes.name, URLRoutes.name) AS Name, * FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute
+SELECT * FROM RouteQueries ORDER BY ind
+SELECT * FROM SQLParamInfos
