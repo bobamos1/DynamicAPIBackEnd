@@ -14,7 +14,26 @@ namespace APIDynamic
                 async (queries, context) => Results.Ok(await executorData.SelectQuery(queries[0]))
             );
             //Ajoute les routes de l'API ici
+            /*
+            controllers["Commandes"].addRouteAPI(RouteTypes.POST, "CommandeCheckout",
+                async (queries, body) => {
+                    try
+                    {
+
+                        //var data = body as Dictionary<string, object>;
+                        return Results.Ok(await executorData.SelectQuery(queries[1]));
+
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+                    return Results.NotFound();
+                });
+            */
         }
+
+         
         public static Dictionary<string, string> LoadConnectionStrings(IConfiguration configuration)
         {
             SQLExecutor.Initialize(configuration);

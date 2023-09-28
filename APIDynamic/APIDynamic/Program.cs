@@ -81,6 +81,7 @@ app.MapGet("/newTestValue", async () =>
     return Results.Ok(await executorStructure.SelectValue(query));
 })
 .WithName("newTestValue");
+
 app.MapGet("/newTestValueSpecific", async () =>
 {
     //return Results.Ok("ok");

@@ -1,5 +1,6 @@
 ﻿using DynamicSQLFetcher;
 using DynamicStructureObjects;
+using System.ComponentModel.Design;
 
 namespace APIDynamic
 {
@@ -36,17 +37,18 @@ namespace APIDynamic
                 .addPropriety("categorie", true, true, ShowTypes.STRING)
                 .addPropriety("ep.nom", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT p.id, p.nom, p.descriptions, prix, c.nom as categorie, ep.nom FROM produits p INNER JOIN categories c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id", QueryTypes.SELECT, true, true)
+                    .addRouteQuery("SELECT p.id, p.nom, p.descriptions, prix, c.nom AS categorie, ep.nom FROM produits p INNER JOIN categories c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
-                    .addRouteQuery("SELECT id, nom, descriptions, prix, c.nom as categorie, ep.nom FROM produits p INNER JOIN categorie c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id WHERE p.id = @id", QueryTypes.SELECT, true, true)
+                    .addRouteQuery("SELECT id, nom, descriptions, prix, c.nom AS categorie, ep.nom FROM produits p INNER JOIN categorie c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id WHERE p.id = @id", QueryTypes.SELECT, true, true)
                         .addSQLParamInfo("id")
+                            
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO produits (nom, descriptions, prix, id_categorie, id_etat_produit) VALUES (@nom, @descriptions, @prix, @id_categorie, @id_etat_produit", QueryTypes.INSERT, true, true)
-                        .addSQLParamInfo("nom")
-                        .addSQLParamInfo("descriptions")
-                        .addSQLParamInfo("prix")
-                        .addSQLParamInfo("id_categorie")
-                        .addSQLParamInfo("id_etat_produit")
+                        .addSQLParamInfo("nom", "nom")
+                        .addSQLParamInfo("descriptions", "descriptions")
+                        .addSQLParamInfo("prix", "prix")
+                        .addSQLParamInfo("id_categorie", "id_categorie")
+                        .addSQLParamInfo("id_etat_produit", "id_etat_produit")
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, prix = @_prix, id_categorie = @_id_categorie, id_etat_produit = @_id_etat_produit WHERE id = @id", QueryTypes.UPDATE, true, true)
                         .addSQLParamInfo("nom")
@@ -110,6 +112,9 @@ namespace APIDynamic
                         .addSQLParamInfo("id_etat_commande")
                         .addSQLParamInfo("id_ville")
                         .addSQLParamInfo("id_employe")
+                    .addRoute("CommandeCheckout")
+                        .addRouteQuery("UPDATE commandes SET id_etat_commande = 2 WHERE id = @id", QueryTypes.UPDATE, true, true)
+                            .addSQLParamInfo("id")
                 ;
             await controllers["produits_par_commande"]
                 .addRoute(BaseRoutes.GETALL)
