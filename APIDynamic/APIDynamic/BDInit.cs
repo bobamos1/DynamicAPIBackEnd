@@ -31,11 +31,12 @@ namespace APIDynamic
                 ;
 
             await controllers["Produits"]
+                .addPropriety("id", true, true, ShowTypes.INT)
                 .addPropriety("nom", true, true, ShowTypes.STRING)
                 .addPropriety("descriptions", true, true, ShowTypes.STRING)
                 .addPropriety("prix", true, true, ShowTypes.FLOAT)
-                .addPropriety("categorie", true, true, ShowTypes.STRING)
-                .addPropriety("ep.nom", true, true, ShowTypes.STRING)
+                .addPropriety("id_categorie", true, true, ShowTypes.STRING)
+                .addPropriety("id_etat_produit", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT p.id, p.nom, p.descriptions, prix, c.nom AS categorie, ep.nom FROM produits p INNER JOIN categories c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -58,6 +59,10 @@ namespace APIDynamic
                         .addSQLParamInfo("id_etat_produit")
                 ;
             await controllers["Categories"]
+                .addPropriety("id", true, true , ShowTypes.INT)
+                .addPropriety("nom", true, true, ShowTypes.STRING)
+                .addPropriety("descriptions", true, true, ShowTypes.INT)
+                .addPropriety("id_categorie_mere", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT a.id, a.nom, a.descriptions, b.nom FROM categories a INNER JOIN categories b ON a.id_categorie_mere = b.id", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -76,6 +81,10 @@ namespace APIDynamic
                         .addSQLParamInfo("id_categorie_mere")
                 ;
             await controllers["Commandes"]
+                .addPropriety("id", true, true, ShowTypes.INT)
+                .addPropriety("nom", true, true, ShowTypes.STRING)
+                .addPropriety("descriptions", true, true, ShowTypes.INT)
+                .addPropriety("id_categorie_mere", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe FROM commandes", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
