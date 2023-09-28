@@ -1,13 +1,13 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 
 namespace DynamicStructureObjects
 {
     public static class DynamicTaskExtensions
     {
-        public static RouteHandlerBuilder MapRoute(this WebApplication app, RouteTypes routeType, string routePath, Func<HttpContext, Task<IResult>> delegateMethod)
+
+        public static RouteHandlerBuilder MapRoute(this WebApplication app, RouteTypes routeType, string routePath, Func<HttpRequest, Task<IResult>> delegateMethod)
         {
             switch (routeType)
             {
