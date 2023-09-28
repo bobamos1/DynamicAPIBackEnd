@@ -2,11 +2,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using ParserLib;
-using System.Collections;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Xml.Linq;
+using System.Text.Json;
+using System.Data;
 
 namespace DynamicStructureObjects
 {
@@ -182,34 +179,83 @@ namespace DynamicStructureObjects
         {
             return Proprieties.Where(propriety => propriety.CanModify(roles)).Select(propriety => propriety.Name);
         }
-        public static void setApp(WebApplication app)
+        public IEnumerable<DynamicPropriety> getAuthorizedProprieties(params long[] roles)
+        {
+            return Proprieties.Where(propriety => propriety.CanSee(roles));
+        }
+        public IEnumerable<DynamicRoute> getAuthorizedRoutes(params long[] roles)
+        {
+            return Routes.Where(route => route.CanUse(roles) || true);
+        }
+        public static void initRoutesControllersInfo(WebApplication app, List<DynamicController> controllers)
         {
             DynamicController.app = app;
+            foreach (var controller in controllers)
+                controller.setBaseInfoRoutes();
         }
-
+        internal void setBaseInfoRoutes()
+        {
+            app.MapGet($"/{Name}/Info/Propriety", (HttpRequest request) =>
+            {
+                return Task.FromResult<IResult>(Results.Ok(getAuthorizedProprieties(new long[] { 1, 2 })));
+            }).WithName($"{Name}InfoPropriety");
+            app.MapGet($"/{Name}/Info/Routes", (HttpRequest request) =>
+            {
+                return Task.FromResult<IResult>(Results.Ok(getAuthorizedRoutes(new long[] { 1, 2 })));
+            }).WithName($"{Name}InfoRoutes");
+            foreach (var route in Routes)
+            {
+                app.MapGet($"/{Name}/Info/RouteFilters/{route.Name}", (HttpRequest request) =>
+                {
+                    if (!route.CanUse(new long[] { 1, 2 }))
+                        return Task.FromResult<IResult>(Results.Forbid());
+                    List<DynamicFilter> filters = new List<DynamicFilter>();
+                    foreach (var query in route.Queries)
+                        filters.AddRange(query.Filters);
+                    return Task.FromResult<IResult>(Results.Ok(filters));
+                }).WithName($"{Name}Info{route.Name}Filters");
+                app.MapGet($"/{Name}/Info/RouteVariables/{route.Name}", (HttpRequest request) =>
+                {
+                    if (!route.CanUse(new long[] { 1, 2 }))
+                        return Task.FromResult<IResult>(Results.Forbid());
+                    List<DynamicSQLParamInfo> paramInfo = new List<DynamicSQLParamInfo>();
+                    foreach (var query in route.Queries)
+                        paramInfo.AddRange(query.ParamsInfos.Values);
+                    return Task.FromResult<IResult>(Results.Ok(paramInfo));
+                }).WithName($"{Name}Info{route.Name}Variables");
+            }
+        }
         public long getProperityID(string ProprietyName)
         {
             return Proprieties.First(propriety => propriety.Name == ProprietyName).id;
         }
-        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, HttpContext, IResult> function)
+        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, dynamic, IResult> function)
         {
             addRouteAPI(routeType, routeName, async (queries, context) => function(queries, context));
         }
 
-        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, HttpContext, Task<IResult>> function)
+        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, dynamic, Task<IResult>> function)
         {
             DynamicRoute route = Routes.First(route => route.Name == routeName);
             List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();
 
-            Func<HttpContext, Task<IResult>> delegateMethod = async (context) =>
+            Func<HttpRequest, Task<IResult>> delegateMethod = async (context) =>
             {
-                if (!Cross(route.Roles, new long[] { 1, 2 }))
+                /*
+                if (!route.CanUse( new long[] { 1, 2 })))
                     return Results.Forbid();
+                */
+                using (var requestBodyStream = new StreamReader(context.Body))
+                {
+                    string requestBody = await requestBodyStream.ReadToEndAsync();
+                    dynamic keyValuePairs = null;
+                    if (!string.IsNullOrWhiteSpace(requestBody))
+                        keyValuePairs = JsonSerializer.Deserialize<dynamic>(requestBody);
 
-                return await function(queries, context);
+                    return await function(queries, keyValuePairs);
+                }
             };
-
-            app.MapRoute(routeType, $"/{Name}/{routeName}", delegateMethod).WithName(routeName);
+            app.MapRoute(routeType, $"/{Name}/{routeName}", delegateMethod).WithName($"{Name}{routeName}");
         }
 
         public static bool Cross(IEnumerable<long> arr1, IEnumerable<long> arr2)

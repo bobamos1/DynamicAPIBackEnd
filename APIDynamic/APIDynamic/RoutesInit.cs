@@ -9,9 +9,20 @@ namespace APIDynamic
         public static void InitRoutes(Dictionary<string, DynamicController> controllers, WebApplication app, Dictionary<string, string> connectionStrings)
         {
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
-            DynamicController.setApp(app);
-            controllers["Produits"].addRouteAPI(RouteTypes.GET, "GetAll",
-                async (queries, context) => Results.Ok(await executorData.SelectQuery(queries[0]))
+            DynamicController.initRoutesControllersInfo(app, controllers.Values.ToList());
+            controllers["Produits"].addRouteAPI(RouteTypes.POST, "GetAll",
+                async (queries, bodyData) =>
+                {
+                    return Results.Ok(bodyData);
+                    //return Results.Ok(await executorData.SelectQuery(queries[0]));
+                }
+            );
+            controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientsCommande",
+                async (queries, context) =>
+                {
+
+                    return Results.Ok();
+                }
             );
         }
         public static Dictionary<string, string> LoadConnectionStrings(IConfiguration configuration)

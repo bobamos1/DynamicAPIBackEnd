@@ -1,12 +1,34 @@
 using APIDynamic;
 using DynamicStructureObjects;
 using DynamicSQLFetcher;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 Dictionary<string, string> connectionStrings = RoutesInit.LoadConnectionStrings(builder.Configuration);
 
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x =>
+{
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey
+        (Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"])),
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true
+    };
+});
+builder.Services.AddAuthorization();
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -21,9 +43,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(new SQLExecutor(connectionStrings["structure"]));
 //await BDInit.InitDB(controllers);//keep it commit
 RoutesInit.InitRoutes(controllers, app, connectionStrings);
+
+
 app.Run();
 
 
@@ -44,8 +70,8 @@ SQLExecutor executorStructure = new SQLExecutor(builder.Configuration.GetConnect
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};*/
-/*
+};
+
 app.MapGet("/weatherforecast", () =>
 {
     var forecast = Enumerable.Range(1, 5).Select(index =>
@@ -60,13 +86,15 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
-app.MapGet("/newTest", async () =>
+app.MapGet("/newTest", (HttpContext context) =>
 {
     //return Results.Ok("ok");
     Query query = Query.fromQueryString(QueryTypes.CBO, "SELECT name, id FROM Tables");
-    return Results.Ok(await executorStructure.SelectDictionary(query));
+    //return Results.Ok(await executorStructure.SelectDictionary(query));
+    return Results.Ok("allo");
 })
 .WithName("newTest");
+
 app.MapGet("/newTestArray", async () =>
 {
     //return Results.Ok("ok");
