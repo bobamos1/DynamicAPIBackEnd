@@ -27,25 +27,11 @@ namespace APIDynamic
             controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientsCommande",
                 async (queries, bodyData) =>
                 {
-                    var dictionary = ToDict(bodyData);
-                    var dictionary2 = ToDict(dictionary["conds"]);
-                    long da = dictionary2["id_User"];
-                    long data = bodyData.conds.id_User;
-                    long userID = bodyData.UserID;
-                    //return Results.Ok(userID);
-                    return Results.Ok(data);//bodyData.conds.id_User);
+                    var dictionary = (Dictionary<string, object>)bodyData["conds"];
+                    long da = (long)dictionary["id_User"];
+                    return Results.Ok(bodyData);
                 }, true
             );
-        }
-        public static Dictionary<string, object> ToDict(dynamic dynObj)
-        {
-            var dictionary = new Dictionary<string, object>();
-            foreach (PropertyDescriptor propertyDescriptor in TypeDescriptor.GetProperties(dynObj))
-            {
-                object obj = propertyDescriptor.GetValue(dynObj);
-                dictionary.Add(propertyDescriptor.Name, obj);
-            }
-            return dictionary;
         }
         public static Dictionary<string, string> LoadConnectionStrings(IConfiguration configuration)
         {
