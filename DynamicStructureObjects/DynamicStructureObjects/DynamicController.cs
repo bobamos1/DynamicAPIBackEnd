@@ -2,8 +2,19 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using System.Text.Json;
+//using System.Text.Json;
+using System.Dynamic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Data;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace DynamicStructureObjects
 {
@@ -15,6 +26,8 @@ namespace DynamicStructureObjects
         internal static SQLExecutor executor { get; set; }
         internal static WebApplication app { get; set; }
         internal static Dictionary<string, long> RolesAvailable { get; set; }
+        internal static string apiKey { get; set; }
+        internal static TimeSpan TokenLifetime = TimeSpan.FromHours(2);
         internal List<DynamicRoute> Routes { get; set; }
         internal List<DynamicPropriety> Proprieties { get; set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles", true, true);
@@ -41,13 +54,15 @@ namespace DynamicStructureObjects
                 await DynamicPropriety.init(propriety);
             return controller;
         }
-        public static async Task<Dictionary<string, DynamicController>> initControllers(SQLExecutor executor)
+        public static async Task<Dictionary<string, DynamicController>> initControllers(SQLExecutor executor, string apiKey)
         {
+            DynamicController.apiKey = apiKey;
             DynamicController.executor = executor;
             RolesAvailable = await executor.SelectDictionary<string, long>(getRoles);
             Dictionary<string, DynamicController> controllers = new Dictionary<string, DynamicController>();
             foreach (var controller in await executor.SelectQuery<DynamicController>(getControllers))
                 controllers.Add(controller.Name, await init(controller));
+            controllers.Remove("NULL");
             return controllers;
         }
         public static async Task resetStructureData()
@@ -173,17 +188,33 @@ namespace DynamicStructureObjects
         #endregion
         internal IEnumerable<string> AuthorizedToSee(params long[] roles)
         {
-            return Proprieties.Where(propriety => propriety.CanSee(roles)).Select(propriety => propriety.Name);
+            return AuthorizedToSee((IEnumerable<long>)roles);
         }
         internal IEnumerable<string> AuthorizedToModify(params long[] roles)
         {
-            return Proprieties.Where(propriety => propriety.CanModify(roles)).Select(propriety => propriety.Name);
+            return AuthorizedToModify((IEnumerable<long>)roles);
         }
         public IEnumerable<DynamicPropriety> getAuthorizedProprieties(params long[] roles)
         {
-            return Proprieties.Where(propriety => propriety.CanSee(roles));
+            return getAuthorizedProprieties((IEnumerable<long>)roles);
         }
         public IEnumerable<DynamicRoute> getAuthorizedRoutes(params long[] roles)
+        {
+            return getAuthorizedRoutes((IEnumerable<long>)roles);
+        }
+        internal IEnumerable<string> AuthorizedToSee(IEnumerable<long> roles)
+        {
+            return Proprieties.Where(propriety => propriety.CanSee(roles)).Select(propriety => propriety.Name);
+        }
+        internal IEnumerable<string> AuthorizedToModify(IEnumerable<long> roles)
+        {
+            return Proprieties.Where(propriety => propriety.CanModify(roles)).Select(propriety => propriety.Name);
+        }
+        public IEnumerable<DynamicPropriety> getAuthorizedProprieties(IEnumerable<long> roles)
+        {
+            return Proprieties.Where(propriety => propriety.CanSee(roles));
+        }
+        public IEnumerable<DynamicRoute> getAuthorizedRoutes(IEnumerable<long> roles)
         {
             return Routes.Where(route => route.CanUse(roles) || true);
         }
@@ -193,30 +224,41 @@ namespace DynamicStructureObjects
             foreach (var controller in controllers)
                 controller.setBaseInfoRoutes();
         }
+        public static void addPolicies(Dictionary<string, DynamicController> controllers, AuthorizationOptions options)
+        {
+            foreach (var controller in controllers)
+                foreach (var route in controller.Value.Routes)
+                {
+                    options.AddPolicy($"{controller.Key}_{route.Name}_Policy", policy =>
+                    {
+                        policy.Requirements.Add(new HasRoleRequirement(route.Roles));
+                    });
+                }
+        }
         internal void setBaseInfoRoutes()
         {
-            app.MapGet($"/{Name}/Info/Propriety", (HttpRequest request) =>
+            app.MapGet($"/{Name}/Info/Propriety", ([FromHeader(Name = "Authorization")] string JWT) =>
             {
-                return Task.FromResult<IResult>(Results.Ok(getAuthorizedProprieties(new long[] { 1, 2 })));
+                return Task.FromResult<IResult>(Results.Ok(getAuthorizedProprieties(ParseRoles(ParseClaim(JWT)))));
             }).WithName($"{Name}InfoPropriety");
-            app.MapGet($"/{Name}/Info/Routes", (HttpRequest request) =>
+            app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string JWT) =>
             {
-                return Task.FromResult<IResult>(Results.Ok(getAuthorizedRoutes(new long[] { 1, 2 })));
+                return Task.FromResult<IResult>(Results.Ok(getAuthorizedRoutes(ParseRoles(ParseClaim(JWT)))));
             }).WithName($"{Name}InfoRoutes");
             foreach (var route in Routes)
             {
-                app.MapGet($"/{Name}/Info/RouteFilters/{route.Name}", (HttpRequest request) =>
+                app.MapGet($"/{Name}/Info/RouteFilters/{route.Name}", ([FromHeader(Name = "Authorization")] string JWT) =>
                 {
-                    if (!route.CanUse(new long[] { 1, 2 }))
+                    if (!route.CanUse(ParseRoles(ParseClaim(JWT))))
                         return Task.FromResult<IResult>(Results.Forbid());
                     List<DynamicFilter> filters = new List<DynamicFilter>();
                     foreach (var query in route.Queries)
                         filters.AddRange(query.Filters);
                     return Task.FromResult<IResult>(Results.Ok(filters));
                 }).WithName($"{Name}Info{route.Name}Filters");
-                app.MapGet($"/{Name}/Info/RouteVariables/{route.Name}", (HttpRequest request) =>
+                app.MapGet($"/{Name}/Info/RouteVariables/{route.Name}", ([FromHeader(Name = "Authorization")] string JWT) =>
                 {
-                    if (!route.CanUse(new long[] { 1, 2 }))
+                    if (!route.CanUse(ParseRoles(ParseClaim(JWT))))
                         return Task.FromResult<IResult>(Results.Forbid());
                     List<DynamicSQLParamInfo> paramInfo = new List<DynamicSQLParamInfo>();
                     foreach (var query in route.Queries)
@@ -229,38 +271,119 @@ namespace DynamicStructureObjects
         {
             return Proprieties.First(propriety => propriety.Name == ProprietyName).id;
         }
-        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, dynamic, IResult> function)
+        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, dynamic, IResult> function, bool requireAuthorization = true)
         {
-            addRouteAPI(routeType, routeName, async (queries, context) => function(queries, context));
+            addRouteAPI(routeType, routeName, async (queries, bodyData) => function(queries, bodyData), requireAuthorization);
         }
 
-        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, dynamic, Task<IResult>> function)
+        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, dynamic, Task<IResult>> function, bool requireAuthorization = true)
         {
             DynamicRoute route = Routes.First(route => route.Name == routeName);
             List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();
-
-            Func<HttpRequest, Task<IResult>> delegateMethod = async (context) =>
+            Func<dynamic, string, Task<IResult>> delegateMethod = async ([FromBody] dynamic request, [FromHeader(Name = "Authorization")] string JWT) =>
             {
-                /*
-                if (!route.CanUse( new long[] { 1, 2 })))
-                    return Results.Forbid();
-                */
-                using (var requestBodyStream = new StreamReader(context.Body))
+                long userID = -1;
+                string jsonString = request.ToString();
+                //dynamic bodyData = /*await ParseBody(request);*/JArray.Parse(jsonData);
+                var bodyData = JsonConvert.DeserializeObject<dynamic>(jsonString)!;
+                //long test = bodyData.conds.id_User;
+                if (requireAuthorization)
                 {
-                    string requestBody = await requestBodyStream.ReadToEndAsync();
-                    dynamic keyValuePairs = null;
-                    if (!string.IsNullOrWhiteSpace(requestBody))
-                        keyValuePairs = JsonSerializer.Deserialize<dynamic>(requestBody);
+                    var jsonToken = ParseClaim(JWT);
+                    if (false)//jsonToken is null || !route.CanUse(ParseRoles(jsonToken)))
+                        return Results.Forbid();
+                    //if (!route.CanUse(ParseRoles(JWT)))
+                    //return Results.Forbid();
 
-                    return await function(queries, keyValuePairs);
+                    userID = ParseUserID(jsonToken);
+                    if (userID == -1)
+                        return Results.Forbid();
+                    bodyData.UserID = userID;
                 }
+                return await function(queries, bodyData);
+            }; 
+            var routeBuilder = app.MapRoute(routeType, $"/{Name}/{routeName}", delegateMethod).WithName($"{Name}{routeName}").WithGroupName(Name);
+            /*
+            if (requireAuthorization)
+                routeBuilder.RequireAuthorization($"{Name}_{route.Name}_Policy");*/
+        }
+        public static async Task<JObject> ParseBody(HttpRequest request)
+        {
+            
+            using (var requestBodyStream = new StreamReader(request.Body))
+            {
+                string requestBody = await requestBodyStream.ReadToEndAsync();
+                if (!string.IsNullOrWhiteSpace(requestBody))
+                    return JObject.Parse(requestBody);
+                return new JObject();
+            }
+            //return JsonSerializer.Deserialize<dynamic>(request.ToString());
+        }
+        public static IEnumerable<long> ParseRoles(JwtSecurityToken token)
+        {
+            var rolesClaim = ParseClaim(token, ClaimTypes.Role);
+            if (rolesClaim is null)
+                return new long[0];
+            return rolesClaim.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(role => long.Parse(role.Trim()));
+        }
+        public static long ParseUserID(JwtSecurityToken token)
+        {
+            var userID = ParseClaim(token, ClaimTypes.UserData);
+            if (userID is null)
+                return -1;
+            return long.Parse(userID);
+        }
+        public static JwtSecurityToken ParseClaim(string token)
+        {
+            token = token.Split(' ')[1];
+            return new JwtSecurityTokenHandler().ReadToken(token) as JwtSecurityToken;
+        }
+        public static string ParseClaim(JwtSecurityToken token, string type)
+        {
+            var rolesClaim = token.Claims.FirstOrDefault(c => c.Type == type)?.Value;
+
+            if (string.IsNullOrWhiteSpace(rolesClaim))
+                return null;
+            return rolesClaim;
+        }
+        public static string CreateToken(string username, string email, long userId, params long[] roles)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.UserData, userId.ToString()),
+                new Claim(ClaimTypes.Role, string.Join(',', roles))
             };
-            app.MapRoute(routeType, $"/{Name}/{routeName}", delegateMethod).WithName($"{Name}{routeName}");
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.Add(TokenLifetime),
+                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(apiKey)), SecurityAlgorithms.HmacSha512Signature));
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         public static bool Cross(IEnumerable<long> arr1, IEnumerable<long> arr2)
         {
             return arr1.Any(item => arr2.Contains(item));
+        }
+        private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+        private static bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512(passwordSalt))
+            {
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computedHash.SequenceEqual(passwordHash);
+            }
         }
     }
 }
