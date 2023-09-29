@@ -4,11 +4,43 @@ using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 Dictionary<string, string> connectionStrings = RoutesInit.LoadConnectionStrings(builder.Configuration);
 
+
+// Add services to the container.
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Description = "The API Key to access the API",
+        Type = SecuritySchemeType.ApiKey,
+        Name = "JWT",
+        In = ParameterLocation.Header,
+        Scheme = "ApiKeyScheme"
+    });
+    var scheme = new OpenApiSecurityScheme
+    {
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "ApiKey"
+        },
+        In = ParameterLocation.Header
+    };
+    var requirement = new OpenApiSecurityRequirement
+    {
+        { scheme, new List<string>() }
+    };
+    options.AddSecurityRequirement(requirement);
+    //options.OperationFilter<SecurityRequirementsOperationFilter>();
+});
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -28,28 +60,31 @@ builder.Services.AddAuthentication(x =>
         ValidateIssuerSigningKey = true
     };
 });
-builder.Services.AddAuthorization();
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddAuthorization(/*options =>
+{
+    //DynamicController.addPolicies(controllers, options);
+}*/);
+builder.Services.AddCors(options => options.AddPolicy(name: "NgOrigins",
+    policy =>
+    {
+        policy.WithOrigins("http://localhost:4200").AllowAnyMethod().AllowAnyHeader();
+    }));
 var app = builder.Build();
 
+Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(new SQLExecutor(connectionStrings["structure"]), builder.Configuration["JwtSettings:Key"]);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors("NgOrigins");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(new SQLExecutor(connectionStrings["structure"]));
 //await BDInit.InitDB(controllers);//keep it commit
+
 RoutesInit.InitRoutes(controllers, app, connectionStrings);
-
-
 app.Run();
 
 

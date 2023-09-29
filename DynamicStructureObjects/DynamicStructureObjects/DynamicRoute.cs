@@ -98,6 +98,11 @@ namespace DynamicStructureObjects
         }
         internal bool CanUse(params long[] rolesUser)
         {
+            return CanUse((IEnumerable<long>)rolesUser);
+        }
+
+        internal bool CanUse(IEnumerable<long> rolesUser)
+        {
             return rolesUser.Any(role => Roles.Contains(role));
         }
     }

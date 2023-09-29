@@ -1,6 +1,11 @@
 ﻿using DynamicSQLFetcher;
 using DynamicStructureObjects;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using ParserLib;
+using System.ComponentModel;
 
 namespace APIDynamic
 {
@@ -13,17 +18,34 @@ namespace APIDynamic
             controllers["Produits"].addRouteAPI(RouteTypes.POST, "GetAll",
                 async (queries, bodyData) =>
                 {
+                    string token = DynamicController.CreateToken("bob", "bob@gmail.com", 1, 1, 2, 3);
+                    return Results.Ok(token);
                     return Results.Ok(bodyData);
                     //return Results.Ok(await executorData.SelectQuery(queries[0]));
-                }
+                }, true
             );
             controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientsCommande",
-                async (queries, context) =>
+                async (queries, bodyData) =>
                 {
-
-                    return Results.Ok();
-                }
+                    var dictionary = ToDict(bodyData);
+                    var dictionary2 = ToDict(dictionary["conds"]);
+                    long da = dictionary2["id_User"];
+                    long data = bodyData.conds.id_User;
+                    long userID = bodyData.UserID;
+                    //return Results.Ok(userID);
+                    return Results.Ok(data);//bodyData.conds.id_User);
+                }, true
             );
+        }
+        public static Dictionary<string, object> ToDict(dynamic dynObj)
+        {
+            var dictionary = new Dictionary<string, object>();
+            foreach (PropertyDescriptor propertyDescriptor in TypeDescriptor.GetProperties(dynObj))
+            {
+                object obj = propertyDescriptor.GetValue(dynObj);
+                dictionary.Add(propertyDescriptor.Name, obj);
+            }
+            return dictionary;
         }
         public static Dictionary<string, string> LoadConnectionStrings(IConfiguration configuration)
         {

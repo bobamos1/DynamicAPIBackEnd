@@ -7,7 +7,7 @@ namespace DynamicStructureObjects
     public static class DynamicTaskExtensions
     {
 
-        public static RouteHandlerBuilder MapRoute(this WebApplication app, RouteTypes routeType, string routePath, Func<HttpRequest, Task<IResult>> delegateMethod)
+        public static RouteHandlerBuilder MapRoute(this WebApplication app, RouteTypes routeType, string routePath, Func<dynamic, string, Task<IResult>> delegateMethod)
         {
             switch (routeType)
             {
