@@ -42,7 +42,6 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GET)
                     .addRouteQuery("SELECT id, nom, descriptions, prix, c.nom AS categorie, ep.nom FROM produits p INNER JOIN categorie c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id WHERE p.id = @id", QueryTypes.SELECT, true, true)
                         .addSQLParamInfo("id")
-                            
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO produits (nom, descriptions, prix, id_categorie, id_etat_produit) VALUES (@nom, @descriptions, @prix, @id_categorie, @id_etat_produit", QueryTypes.INSERT, true, true)
                         .addSQLParamInfo("nom", "nom")
@@ -126,6 +125,11 @@ namespace APIDynamic
                             .addSQLParamInfo("id")
                 ;
             await controllers["produits_par_commande"]
+                .addPropriety("id", true, true, ShowTypes.INT)
+                .addPropriety("id_produit", true, true, ShowTypes.INT)
+                .addPropriety("id_commande", true, true, ShowTypes.INT)
+                .addPropriety("quantite", true, true, ShowTypes.INT)
+                .addPropriety("prix_unitaire", true, true, ShowTypes.FLOAT)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, id_produit, id_commande, quantite, prix_unitaire FROM produits_par_commande", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -149,6 +153,15 @@ namespace APIDynamic
                         .addSQLParamInfo("prix_unitaire")
                 ;
             await controllers["Clients"]
+                .addPropriety("id", true, true, ShowTypes.INT)
+                .addPropriety("nom", true, true, ShowTypes.STRING)
+                .addPropriety("prenom", true, true, ShowTypes.STRING)
+                .addPropriety("date_naissance", true, true, ShowTypes.STRING)
+                .addPropriety("adresse_courriel", true, true, ShowTypes.STRING)
+                .addPropriety("mdp", true, true, ShowTypes.STRING)
+                .addPropriety("token", true, true, ShowTypes.STRING)
+                .addPropriety("sel", true, true, ShowTypes.STRING)
+                .addPropriety("actif", true, true, ShowTypes.INT)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif FROM clients", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -176,6 +189,12 @@ namespace APIDynamic
                         .addSQLParamInfo("actif")
                 ;
             await controllers["Collaborateurs"]
+                .addPropriety("id", true, true, ShowTypes.INT)
+                .addPropriety("nom", true, true, ShowTypes.STRING)
+                .addPropriety("prenom", true, true, ShowTypes.STRING)
+                .addPropriety("telephone", true, true, ShowTypes.INT)
+                .addPropriety("adresse_courriel", true, true, ShowTypes.STRING)
+                .addPropriety("id_compagnie", true, true, ShowTypes.INT)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, nom, prenom, telephone, adresse_courriel, id_compagnie FROM collaborateurs", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -198,6 +217,12 @@ namespace APIDynamic
                             .addSQLParamInfo("id_compagnie")
                 ;
             await controllers["Compagnies"]
+                .addPropriety("id", true, true, ShowTypes.INT)
+                .addPropriety("nom", true, true, ShowTypes.STRING)
+                .addPropriety("prenom", true, true, ShowTypes.STRING)
+                .addPropriety("telephone", true, true, ShowTypes.INT)
+                .addPropriety("adresse_courriel", true, true, ShowTypes.STRING)
+                .addPropriety("contact", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, nom, telephone, adresse_courriel, contact FROM compagnies", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -219,6 +244,9 @@ namespace APIDynamic
                             .addSQLParamInfo("contact")
                 ;
             await controllers["Villes"]
+                .addPropriety("id", true, true, ShowTypes.INT)
+                .addPropriety("nom", true, true, ShowTypes.STRING)
+                .addPropriety("id_province", true, true, ShowTypes.INT)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, nom, id_province FROM villes", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -226,6 +254,8 @@ namespace APIDynamic
                         .addSQLParamInfo("id")
                 ;
             await controllers["Provinces"]
+                .addPropriety("id", true, true, ShowTypes.INT)
+                .addPropriety("nom", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, nom FROM provinces", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -233,6 +263,15 @@ namespace APIDynamic
                         .addSQLParamInfo("id")
                 ;
             await controllers["Employes"]
+                .addPropriety("id", true, true, ShowTypes.INT)
+                .addPropriety("nom", true, true, ShowTypes.STRING)
+                .addPropriety("prenom", true, true, ShowTypes.STRING)
+                .addPropriety("date_naissance", true, true, ShowTypes.STRING)
+                .addPropriety("adresse_courriel", true, true, ShowTypes.STRING)
+                .addPropriety("mdp", true, true, ShowTypes.STRING)
+                .addPropriety("token", true, true, ShowTypes.STRING)
+                .addPropriety("sel", true, true, ShowTypes.STRING)
+                .addPropriety("actif", true, true, ShowTypes.INT)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif FROM employes", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -260,6 +299,9 @@ namespace APIDynamic
                         .addSQLParamInfo("actif")
                 ;
             await controllers["EtatsCommandes"]
+                .addPropriety("id", true, true, ShowTypes.INT)
+                .addPropriety("nom", true, true, ShowTypes.STRING)
+                .addPropriety("descriptions", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, nom, descriptions FROM etats_commandes", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)

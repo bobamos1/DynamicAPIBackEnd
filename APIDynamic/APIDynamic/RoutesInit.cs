@@ -17,7 +17,7 @@ namespace APIDynamic
                     //return Results.Ok(await executorData.SelectQuery(queries[0]));
                 }
             );
-            controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientsCommande",
+            controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientCommandes",
                 async (queries, context) =>
                 {
 
