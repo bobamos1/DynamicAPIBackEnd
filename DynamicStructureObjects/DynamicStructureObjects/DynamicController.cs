@@ -15,6 +15,7 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace DynamicStructureObjects
 {
@@ -45,7 +46,7 @@ namespace DynamicStructureObjects
         }
         private static async Task<DynamicController> init(DynamicController controller)
         {
-            
+
             controller.Routes = (await executor.SelectQuery<DynamicRoute>(getRoutes.setParam("controllerID", controller.id))).ToList();
             controller.Proprieties = (await executor.SelectQuery<DynamicPropriety>(getProprieties.setParam("controllerID", controller.id))).ToList();
             foreach (var route in controller.Routes)
@@ -200,11 +201,11 @@ namespace DynamicStructureObjects
         {
             return Routes.Where(route => route.CanUse(roles) || true);
         }
-        public static void initRoutesControllersInfo(WebApplication app, List<DynamicController> controllers)
+        public static void initRoutesControllersInfo(WebApplication app, Dictionary<string, DynamicController> controllers)
         {
             DynamicController.app = app;
             foreach (var controller in controllers)
-                controller.setBaseInfoRoutes();
+                controller.Value.setBaseInfoRoutes();
         }
         public static void addPolicies(Dictionary<string, DynamicController> controllers, AuthorizationOptions options)
         {
@@ -253,9 +254,9 @@ namespace DynamicStructureObjects
         {
             return Proprieties.First(propriety => propriety.Name == ProprietyName).id;
         }
-        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, Dictionary<string, object>, IResult> function, bool requireAuthorization = true)
+        public void addRouteAPI(RouteTypes routeType, BaseRoutes routeName, Func<List<Query>, Dictionary<string, object>, Task<IResult>> function, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
         {
-            addRouteAPI(routeType, routeName, async (queries, bodyData) => function(queries, bodyData), requireAuthorization);
+            addRouteAPI(routeType, routeName.Value(), function, requireAuthorization, getAuthorizedCols, onlyModify);
         }
 
         public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, Dictionary<string, object>, Task<IResult>> function, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
@@ -280,7 +281,7 @@ namespace DynamicStructureObjects
                 if (!route.validateParams(bodyData))
                     return Results.Forbid();
                 return await function(queries, bodyData);
-            }; 
+            };
             var routeBuilder = app.MapRoute(routeType, $"/{Name}/{routeName}", delegateMethod).WithName($"{Name}{routeName}").WithGroupName(Name);
             /*
             if (requireAuthorization)
@@ -293,37 +294,29 @@ namespace DynamicStructureObjects
             if (jObject is null)
                 return dictionary;
             foreach (var property in jObject.Properties())
-            {
-                if (property.Value.Type == JTokenType.Object)
-                {
-                    dictionary[property.Name] = JObjectToDictionary((JObject)property.Value);
-                }
-                else if (property.Value.Type == JTokenType.Array)
-                {
-                    // Convert JArray to List<object>
-                    List<object> list = new List<object>();
-                    foreach (var item in (JArray)property.Value)
-                    {
-                        if (item.Type == JTokenType.Object)
-                        {
-                            // Recursively convert nested JObject to Dictionary
-                            list.Add(JObjectToDictionary((JObject)item));
-                        }
-                        else
-                        {
-                            list.Add(((JValue)item).Value);
-                        }
-                    }
-                    dictionary[property.Name] = list;
-                }
-                else
-                {
-                    // Add the property to the dictionary
-                    dictionary[property.Name] = ((JValue)property.Value).Value;
-                }
-            }
-
+                dictionary[property.Name] = dispatchJItem(property.Value);
             return dictionary;
+        }
+        public static IEnumerable<object> JArrayToList(JArray jArray)
+        {
+            List<object> list = new List<object>();
+            if (jArray is null)
+                return list;
+            foreach (var item in jArray)
+                list.Add(dispatchJItem(item));
+            return list;
+        }
+        public static object dispatchJItem(JToken item)
+        {
+            switch (item.Type)
+            {
+                case JTokenType.Object:
+                    return JObjectToDictionary((JObject)item);
+                case JTokenType.Array:
+                    return JArrayToList((JArray)item);
+                default:
+                    return ((JValue)item).Value;
+            }
         }
         public static IEnumerable<long> ParseRoles(JwtSecurityToken token)
         {
