@@ -171,6 +171,11 @@ namespace DynamicStructureObjects
             await Proprieties.First(propriety => propriety.Name == ProprietyName).addValidator(Value, ValidatorType);
             return this;
         }
+        public async Task<DynamicController> addValidatorForPropriety(string Value, ValidatorTypes ValidatorType)
+        {
+            await Proprieties.Last().addValidator(Value, ValidatorType);
+            return this;
+        }
         public async Task<DynamicController> addMapperGenerator(string ProprietyName, string ControllerName, params ParamLinker[] linkers)
         {
             await Proprieties.First(propriety => propriety.Name == ProprietyName).addMapperGenerator(ControllerName, linkers);
