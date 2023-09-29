@@ -271,34 +271,27 @@ namespace DynamicStructureObjects
         {
             return Proprieties.First(propriety => propriety.Name == ProprietyName).id;
         }
-        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, dynamic, IResult> function, bool requireAuthorization = true)
+        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, Dictionary<string, object>, IResult> function, bool requireAuthorization = true)
         {
             addRouteAPI(routeType, routeName, async (queries, bodyData) => function(queries, bodyData), requireAuthorization);
         }
 
-        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, dynamic, Task<IResult>> function, bool requireAuthorization = true)
+        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, Dictionary<string, object>, Task<IResult>> function, bool requireAuthorization = true)
         {
             DynamicRoute route = Routes.First(route => route.Name == routeName);
             List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();
             Func<dynamic, string, Task<IResult>> delegateMethod = async ([FromBody] dynamic request, [FromHeader(Name = "Authorization")] string JWT) =>
             {
-                long userID = -1;
-                string jsonString = request.ToString();
-                //dynamic bodyData = /*await ParseBody(request);*/JArray.Parse(jsonData);
-                var bodyData = JsonConvert.DeserializeObject<dynamic>(jsonString)!;
-                //long test = bodyData.conds.id_User;
+                var bodyData = JObjectToDictionary(JObject.Parse(request.ToString()));
                 if (requireAuthorization)
                 {
                     var jsonToken = ParseClaim(JWT);
                     if (false)//jsonToken is null || !route.CanUse(ParseRoles(jsonToken)))
                         return Results.Forbid();
-                    //if (!route.CanUse(ParseRoles(JWT)))
-                    //return Results.Forbid();
 
-                    userID = ParseUserID(jsonToken);
-                    if (userID == -1)
+                    bodyData["UserID"] = ParseUserID(jsonToken);
+                    if (bodyData["UserID"] == -1)
                         return Results.Forbid();
-                    bodyData.UserID = userID;
                 }
                 return await function(queries, bodyData);
             }; 
@@ -307,17 +300,44 @@ namespace DynamicStructureObjects
             if (requireAuthorization)
                 routeBuilder.RequireAuthorization($"{Name}_{route.Name}_Policy");*/
         }
-        public static async Task<JObject> ParseBody(HttpRequest request)
+        public static Dictionary<string, object> JObjectToDictionary(JObject jObject)
         {
-            
-            using (var requestBodyStream = new StreamReader(request.Body))
+            Dictionary<string, object> dictionary = new Dictionary<string, object>();
+            if (jObject is null)
+                return dictionary;
+            foreach (var property in jObject.Properties())
             {
-                string requestBody = await requestBodyStream.ReadToEndAsync();
-                if (!string.IsNullOrWhiteSpace(requestBody))
-                    return JObject.Parse(requestBody);
-                return new JObject();
+                if (property.Value.Type == JTokenType.Object)
+                {
+                    // Recursively convert nested JObject to Dictionary
+                    dictionary[property.Name] = JObjectToDictionary((JObject)property.Value);
+                }
+                else if (property.Value.Type == JTokenType.Array)
+                {
+                    // Convert JArray to List<object>
+                    List<object> list = new List<object>();
+                    foreach (var item in (JArray)property.Value)
+                    {
+                        if (item.Type == JTokenType.Object)
+                        {
+                            // Recursively convert nested JObject to Dictionary
+                            list.Add(JObjectToDictionary((JObject)item));
+                        }
+                        else
+                        {
+                            list.Add(((JValue)item).Value);
+                        }
+                    }
+                    dictionary[property.Name] = list;
+                }
+                else
+                {
+                    // Add the property to the dictionary
+                    dictionary[property.Name] = ((JValue)property.Value).Value;
+                }
             }
-            //return JsonSerializer.Deserialize<dynamic>(request.ToString());
+
+            return dictionary;
         }
         public static IEnumerable<long> ParseRoles(JwtSecurityToken token)
         {
@@ -385,5 +405,21 @@ namespace DynamicStructureObjects
                 return computedHash.SequenceEqual(passwordHash);
             }
         }
+
+
+
+
+        /*
+        public static async Task<JObject> ParseBody(HttpRequest request)
+        {
+            using (var requestBodyStream = new StreamReader(request.Body))
+            {
+                string requestBody = await requestBodyStream.ReadToEndAsync();
+                if (!string.IsNullOrWhiteSpace(requestBody))
+                    return JObject.Parse(requestBody);
+                return new JObject();
+            }
+        }
+        */
     }
 }
