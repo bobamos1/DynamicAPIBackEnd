@@ -22,15 +22,15 @@ namespace APIDynamic
                     return Results.Ok(token);
                     return Results.Ok(bodyData);
                     //return Results.Ok(await executorData.SelectQuery(queries[0]));
-                }, true
+                }, false
             );
             controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientsCommande",
                 async (queries, bodyData) =>
                 {
                     var dictionary = (Dictionary<string, object>)bodyData["conds"];
-                    long da = (long)dictionary["id_User"];
-                    return Results.Ok(bodyData);
-                }, true
+                    object da = dictionary["id_User"];
+                    return Results.Ok(da);
+                }, true, true
             );
             //Ajoute les routes de l'API ici
             /*

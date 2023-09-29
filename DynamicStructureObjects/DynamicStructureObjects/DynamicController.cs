@@ -186,32 +186,14 @@ namespace DynamicStructureObjects
             return this;
         }
         #endregion
-        internal IEnumerable<string> AuthorizedToSee(params long[] roles)
+        public IEnumerable<DynamicPropriety> getAuthorizedProprieties(bool onlyModify, params long[] roles)
         {
-            return AuthorizedToSee((IEnumerable<long>)roles);
+            return getAuthorizedProprieties(onlyModify, (IEnumerable<long>)roles);
         }
-        internal IEnumerable<string> AuthorizedToModify(params long[] roles)
+        public IEnumerable<DynamicPropriety> getAuthorizedProprieties(bool onlyModify, IEnumerable<long> roles)
         {
-            return AuthorizedToModify((IEnumerable<long>)roles);
-        }
-        public IEnumerable<DynamicPropriety> getAuthorizedProprieties(params long[] roles)
-        {
-            return getAuthorizedProprieties((IEnumerable<long>)roles);
-        }
-        public IEnumerable<DynamicRoute> getAuthorizedRoutes(params long[] roles)
-        {
-            return getAuthorizedRoutes((IEnumerable<long>)roles);
-        }
-        internal IEnumerable<string> AuthorizedToSee(IEnumerable<long> roles)
-        {
-            return Proprieties.Where(propriety => propriety.CanSee(roles)).Select(propriety => propriety.Name);
-        }
-        internal IEnumerable<string> AuthorizedToModify(IEnumerable<long> roles)
-        {
-            return Proprieties.Where(propriety => propriety.CanModify(roles)).Select(propriety => propriety.Name);
-        }
-        public IEnumerable<DynamicPropriety> getAuthorizedProprieties(IEnumerable<long> roles)
-        {
+            if (onlyModify)
+                return Proprieties.Where(propriety => propriety.CanModify(roles));
             return Proprieties.Where(propriety => propriety.CanSee(roles));
         }
         public IEnumerable<DynamicRoute> getAuthorizedRoutes(IEnumerable<long> roles)
@@ -239,7 +221,7 @@ namespace DynamicStructureObjects
         {
             app.MapGet($"/{Name}/Info/Propriety", ([FromHeader(Name = "Authorization")] string JWT) =>
             {
-                return Task.FromResult<IResult>(Results.Ok(getAuthorizedProprieties(ParseRoles(ParseClaim(JWT)))));
+                return Task.FromResult<IResult>(Results.Ok(getAuthorizedProprieties(false, ParseRoles(ParseClaim(JWT)))));
             }).WithName($"{Name}InfoPropriety");
             app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string JWT) =>
             {
@@ -276,23 +258,27 @@ namespace DynamicStructureObjects
             addRouteAPI(routeType, routeName, async (queries, bodyData) => function(queries, bodyData), requireAuthorization);
         }
 
-        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, Dictionary<string, object>, Task<IResult>> function, bool requireAuthorization = true)
+        public void addRouteAPI(RouteTypes routeType, string routeName, Func<List<Query>, Dictionary<string, object>, Task<IResult>> function, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
         {
             DynamicRoute route = Routes.First(route => route.Name == routeName);
             List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();
             Func<dynamic, string, Task<IResult>> delegateMethod = async ([FromBody] dynamic request, [FromHeader(Name = "Authorization")] string JWT) =>
             {
-                var bodyData = JObjectToDictionary(JObject.Parse(request.ToString()));
+                Dictionary<string, object> bodyData = JObjectToDictionary(JObject.Parse(request.ToString()));
                 if (requireAuthorization)
                 {
                     var jsonToken = ParseClaim(JWT);
-                    if (false)//jsonToken is null || !route.CanUse(ParseRoles(jsonToken)))
+                    var roles = ParseRoles(jsonToken);
+                    if (jsonToken is null || !route.CanUse(roles) && false)
                         return Results.Forbid();
-
-                    bodyData["UserID"] = ParseUserID(jsonToken);
-                    if (bodyData["UserID"] == -1)
+                    if (getAuthorizedCols)
+                        bodyData["AuthorizedProprieties"] = getAuthorizedProprieties(onlyModify, roles).Select(prop => prop.Name);
+                    bodyData["CurrentUserID"] = ParseUserID(jsonToken);
+                    if (bodyData["CurrentUserID"].Equals(-1))
                         return Results.Forbid();
                 }
+                if (!route.validateParams(bodyData))
+                    return Results.Forbid();
                 return await function(queries, bodyData);
             }; 
             var routeBuilder = app.MapRoute(routeType, $"/{Name}/{routeName}", delegateMethod).WithName($"{Name}{routeName}").WithGroupName(Name);
@@ -300,6 +286,7 @@ namespace DynamicStructureObjects
             if (requireAuthorization)
                 routeBuilder.RequireAuthorization($"{Name}_{route.Name}_Policy");*/
         }
+
         public static Dictionary<string, object> JObjectToDictionary(JObject jObject)
         {
             Dictionary<string, object> dictionary = new Dictionary<string, object>();
@@ -309,7 +296,6 @@ namespace DynamicStructureObjects
             {
                 if (property.Value.Type == JTokenType.Object)
                 {
-                    // Recursively convert nested JObject to Dictionary
                     dictionary[property.Name] = JObjectToDictionary((JObject)property.Value);
                 }
                 else if (property.Value.Type == JTokenType.Array)

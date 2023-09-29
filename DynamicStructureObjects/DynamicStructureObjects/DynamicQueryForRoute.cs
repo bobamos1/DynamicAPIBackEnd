@@ -1,4 +1,5 @@
 ﻿using DynamicSQLFetcher;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace DynamicStructureObjects
 {
@@ -88,6 +89,16 @@ namespace DynamicStructureObjects
             if (lastSQLParamAdded is null)
                 throw new Exception();
             return addValidator(lastSQLParamAdded, Value, ValidatorType);
+        }
+        internal bool validateParams(Dictionary<string, object> bodyData)
+        {
+            return ParamsInfos.All(param =>
+            {
+                object val;
+                if (!bodyData.TryGetValue(param.Key, out val))
+                    return !param.Value.isRequired;
+                return param.Value.validateParam(val);
+            });
         }
     }
 }

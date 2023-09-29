@@ -1,4 +1,5 @@
 ﻿using DynamicSQLFetcher;
+using System.Reflection.Metadata.Ecma335;
 
 namespace DynamicStructureObjects
 {
@@ -104,6 +105,10 @@ namespace DynamicStructureObjects
         internal bool CanUse(IEnumerable<long> rolesUser)
         {
             return rolesUser.Any(role => Roles.Contains(role));
+        }
+        internal bool validateParams(Dictionary<string, object> bodyData)
+        {
+            return Queries.All(query => query.validateParams(bodyData));
         }
     }
 }

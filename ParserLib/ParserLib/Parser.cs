@@ -170,6 +170,8 @@ namespace ParserLib
         {
             if (obj is null)
                 return defVal;
+            if (obj is T objCasted)
+                return objCasted;
             if (typeof(T) == typeof(bool))
                 return (T)(object)toBool(obj, (bool)(object)defVal);
             if (typeof(T) == typeof(string))
