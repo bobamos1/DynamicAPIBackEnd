@@ -95,10 +95,14 @@ namespace APIDynamic
                         .addSQLParamInfo("id_categorie_mere")
                 ;
             await controllers["Commandes"]
-                .addPropriety("id", true, true, ShowTypes.INT)
-                .addPropriety("nom", true, true, ShowTypes.STRING)
-                .addPropriety("descriptions", true, true, ShowTypes.INT)
-                .addPropriety("id_categorie_mere", true, true, ShowTypes.STRING)
+                .addPropriety("numero_facture", true, true, ShowTypes.INT)
+                .addPropriety("montant_brut", true, true, ShowTypes.FLOAT)
+                .addPropriety("no_civique_livraison", true, true, ShowTypes.STRING)
+                .addPropriety("rue_livraison", true, true, ShowTypes.STRING)
+                .addPropriety("id_client", true, true, ShowTypes.INT)
+                .addPropriety("id_etat_commande", true, true, ShowTypes.INT)
+                .addPropriety("id_ville", true, true, ShowTypes.INT)
+                .addPropriety("id_employe", true, true, ShowTypes.INT)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe FROM commandes", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
