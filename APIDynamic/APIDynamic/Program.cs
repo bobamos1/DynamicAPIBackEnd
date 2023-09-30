@@ -71,8 +71,8 @@ builder.Services.AddCors(options => options.AddPolicy(name: "NgOrigins",
     }));
 var app = builder.Build();
 SQLExecutor executorStructure = new SQLExecutor(connectionStrings["structure"]);
-await BDInit.InitDB(executorStructure);//keep it commit
-Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure, builder.Configuration["JwtSettings:Key"]);
+await BDInit.InitDB(executorStructure, true);//keep it commit
+Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure, builder.Configuration["JwtSettings:Key"]); //
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

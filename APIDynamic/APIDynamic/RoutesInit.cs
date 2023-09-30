@@ -1,6 +1,7 @@
 ﻿using DynamicSQLFetcher;
 using DynamicStructureObjects;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core.Features;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -15,16 +16,24 @@ namespace APIDynamic
         {
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
             DynamicController.initRoutesControllersInfo(app, controllers);
-            DynamicController.MakeBaseRoutesDefinition(controllers, executorData);/*
-            controllers["Produits"].addRouteAPI(RouteTypes.POST, "GetAll",
+            DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
+            controllers["Clients"].addRouteAPI(RouteTypes.POST, "Connection",
                 async (queries, bodyData) =>
                 {
-                    string token = DynamicController.CreateToken("bob", "bob@gmail.com", 1, 1, 2, 3);
+                    string username = "bob";
+                    string email = "bob@gmail.com";
+                    long userID = 1;
+                    /*ressortir les données si dessus au lieu qu'ils soient hard codé
+                     create token
+                    hard code le role client pour le client
+                    ou
+                    Ressortir le rôle du client*/
+                    string token = DynamicConnection.CreateToken(username, email, userID, (long)Roles.Client);
                     return Results.Ok(token);
-                    return Results.Ok(bodyData);
+                    //return Results.Ok(bodyData);
                     //return Results.Ok(await executorData.SelectQuery(queries[0]));
                 }, false
-            );*/
+            );
             controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientCommandes",
                 async (queries, bodyData) =>
                 {
@@ -34,6 +43,7 @@ namespace APIDynamic
                 }, true, true
             );
             //Ajoute les routes de l'API ici
+
             /*
             controllers["Commandes"].addRouteAPI(RouteTypes.POST, "CommandeCheckout",
                 async (queries, body) => {

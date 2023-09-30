@@ -1,14 +1,25 @@
 ﻿using DynamicSQLFetcher;
 using DynamicStructureObjects;
 using System.ComponentModel.Design;
+using System.Xml.Linq;
 
 namespace APIDynamic
 {
     public static class BDInit
     {
-        public async static Task InitDB(SQLExecutor executor)
+        public static Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Roles (name) VALUES (@Name)", true, true);
+        public async static Task InitDB(SQLExecutor executor, bool resetRoles)
         {
             await DynamicController.resetStructureData(executor);
+            if (resetRoles)
+            {
+                await executor.ExecuteQueryWithTransaction("DELETE Roles", "DBCC CHECKIDENT ('Roles', RESEED, 0)");
+                foreach (Roles role in Enum.GetValues(typeof(Roles)))
+                    await executor.ExecuteInsertWithLastID(
+                        insertRole
+                            .setParam("Name", role.Value())
+                    );
+            }
             await InitDB(new Dictionary<string, DynamicController>());
         }
         public async static Task InitDB(Dictionary<string, DynamicController> controllers)
@@ -43,10 +54,10 @@ namespace APIDynamic
                 .addPropriety("descriptions", true, true, ShowTypes.STRING)
                     //.addValidatorForSQLParam("true", ValidatorTypes.REQUIRED)
                 .addPropriety("prix", true, true, ShowTypes.FLOAT)
-                .addPropriety("id_categorie", true, true, ShowTypes.INT)
-                    //.addValidatorForSQLParam("true", ValidatorTypes.REQUIRED)
+                .addPropriety("id_categorie", true, true, ShowTypes.STRING)
+                .addPropriety("nom_categorie", true, true, ShowTypes.STRING)
                 .addPropriety("id_etat_produit", true, true, ShowTypes.STRING)
-                    //.addValidatorForSQLParam("true", ValidatorTypes.REQUIRED)
+                .addPropriety("nom_etat_produit", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT p.id, p.nom, p.descriptions, prix, c.nom AS categorie, ep.nom FROM produits p INNER JOIN categories c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
@@ -97,7 +108,8 @@ namespace APIDynamic
                         .addSQLParamInfo("descriptions")
                         .addSQLParamInfo("id_categorie_mere")
                 .addRoute(BaseRoutes.UPDATE)
-                    .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, id_categorie_mere = @_id_categorie_mere WHERE id = @id", QueryTypes.UPDATE, true, true)
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                    .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, id_categorie_mere = @_id_categorie_mere WHERE id = @id", QueryTypes.UPDATE, true, false)
                         .addSQLParamInfo("id")
                         .addSQLParamInfo("nom")
                         .addSQLParamInfo("descriptions")
@@ -217,6 +229,11 @@ namespace APIDynamic
                         .addSQLParamInfo("token")
                         .addSQLParamInfo("sel")
                         .addSQLParamInfo("actif")
+                .addRoute("Connection")
+                    .addRouteQuery("SELECT adresse_courriel FROM client WHERE adresse_courriel = @adresse_courriel", QueryTypes.VALUE, true, true)
+                        .addSQLParamInfo("adresse_courriel")
+                    .addRouteQuery("SELECT mdp FROM clients WHERE mdp = @mdp", QueryTypes.VALUE, true, true)
+                        .addSQLParamInfo("mdp")
                 ;
             await controllers["Collaborateurs"]
                 .addPropriety("id", true, true, ShowTypes.INT)
