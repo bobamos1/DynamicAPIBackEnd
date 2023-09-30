@@ -15,7 +15,7 @@ namespace APIDynamic
         {
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
             DynamicController.initRoutesControllersInfo(app, controllers);
-            MakeBaseRoutesDefinition(controllers);
+            DynamicController.MakeBaseRoutesDefinition(controllers, executorData);/*
             controllers["Produits"].addRouteAPI(RouteTypes.POST, "GetAll",
                 async (queries, bodyData) =>
                 {
@@ -24,8 +24,8 @@ namespace APIDynamic
                     return Results.Ok(bodyData);
                     //return Results.Ok(await executorData.SelectQuery(queries[0]));
                 }, false
-            );
-            controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientsCommande",
+            );*/
+            controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientCommandes",
                 async (queries, bodyData) =>
                 {
                     var dictionary = (Dictionary<string, object>)bodyData["conds"];
@@ -66,16 +66,6 @@ namespace APIDynamic
                     connectionStrings[key] = value;
             }
             return connectionStrings;
-        }
-        public static void MakeBaseRoutesDefinition(Dictionary<string, DynamicController> controllers)
-        {
-            foreach (var controller in controllers)
-            {
-                controller.Value.addRouteAPI(RouteTypes.GET, BaseRoutes.GETALL, async (queries, bodyData) =>
-                {
-                    return Results.Ok();
-                });
-            }
         }
     }
 }

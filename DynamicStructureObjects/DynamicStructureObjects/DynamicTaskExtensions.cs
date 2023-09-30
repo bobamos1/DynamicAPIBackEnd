@@ -15,6 +15,10 @@ namespace DynamicStructureObjects
                     return app.MapGet(routePath, delegateMethod);
                 case RouteTypes.POST:
                     return app.MapPost(routePath, delegateMethod);
+                case RouteTypes.PUT:
+                    return app.MapPut(routePath, delegateMethod);
+                case RouteTypes.DELETE:
+                    return app.MapDelete(routePath, delegateMethod);
                 default:
                     throw new ArgumentException("Invalid routeType");
             }

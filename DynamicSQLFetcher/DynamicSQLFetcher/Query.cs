@@ -59,14 +59,17 @@ namespace DynamicSQLFetcher
         }
         public Query addParams(Dictionary<string, object> paramsUsed)
         {
-            foreach (var param in paramsUsed)
-                this.paramsUsed[param.Key] = param.Value;
+            object currentVar;
+            foreach (var variable in variablesInQuery)
+            {
+                if (paramsUsed.TryGetValue(variable.Key, out currentVar))
+                    this.paramsUsed[variable.Key] = currentVar;
+            }
             return this;
         }
-        public Query setParam(Dictionary<string, object> paramsUsed)
+        public Query setParams(Dictionary<string, object> paramsUsed)
         {
-            this.paramsUsed = paramsUsed;
-            return this;
+            return clearParams().addParams(paramsUsed);
         }
         public Query setParam(string paramName, object paramValue)
         {
@@ -138,6 +141,10 @@ namespace DynamicSQLFetcher
             if (queryType != QueryTypes.SELECT)
                 throw new Exception("need to be of type select to add pagination");
             return string.Format("{0} {1}", Parse(authorizedColumns), getPagination(page, step));
+        }
+        public KeyValuePair<Query, string[]> AddCols(params string[] authorizedColumns)
+        {
+            return new KeyValuePair<Query, string[]>(this, authorizedColumns);
         }
         public string Parse(params string[] authorizedColumns)
         {

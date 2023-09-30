@@ -12,5 +12,11 @@
         INSERT = 4,
         [Value("UPDATE")]
         UPDATE = 5,
+        [Value("GetAllDetailed")]
+        GETALLDETAILED = 6,
+        [Value("GetDetailed")]
+        GETDETAILED = 7,
+        [Value("CBO")]
+        CBO = 8,
     }
 }

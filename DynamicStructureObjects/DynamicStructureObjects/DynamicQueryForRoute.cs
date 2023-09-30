@@ -37,6 +37,8 @@ namespace DynamicStructureObjects
                 ).ToList();
             foreach (var filter in query.Filters)
                 await DynamicFilter.init(filter);
+            if (!query.query.variablesInQuery.All(variable => query.ParamsInfos.ContainsKey(variable.Key)))
+                throw new Exception($"There are variables in Query not in ParamInfo for query {query.id}");
             return query;
         }
         public async static Task<DynamicQueryForRoute> addRouteQuery(int index, string queryString, QueryTypes QueryType, long RouteID, bool CompleteCheck, bool CompleteAuth)

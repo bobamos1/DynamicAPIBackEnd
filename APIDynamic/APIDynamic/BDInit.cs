@@ -8,7 +8,7 @@ namespace APIDynamic
     {
         public async static Task InitDB(Dictionary<string, DynamicController> controllers)
         {
-            await DynamicController.resetStructureData();
+            //await DynamicController.resetStructureData();
             await controllers
                 .addController("Produits", true)
                 .addController("Categories", true)
@@ -135,9 +135,9 @@ namespace APIDynamic
                         .addSQLParamInfo("id_etat_commande")
                         .addSQLParamInfo("id_ville")
                         .addSQLParamInfo("id_employe")
-                    .addRoute("CommandeCheckout")
-                        .addRouteQuery("UPDATE commandes SET id_etat_commande = 2 WHERE id = @id", QueryTypes.UPDATE, true, true)
-                            .addSQLParamInfo("id")
+                .addRoute("CommandeCheckout")
+                    .addRouteQuery("UPDATE commandes SET id_etat_commande = 2 WHERE id = @id", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("id")
                 ;
             await controllers["produits_par_commande"]
                 .addPropriety("id", true, true, ShowTypes.INT)
@@ -184,6 +184,7 @@ namespace APIDynamic
                         .addSQLParamInfo("id")
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@id, @nom, @prenom, @date_naissance, @adresse_courriel, @mdp, @token, @sel, @actif)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("id")
                         .addSQLParamInfo("nom")
                         .addSQLParamInfo("prenom")
                         .addSQLParamInfo("date_naissance")
@@ -194,6 +195,7 @@ namespace APIDynamic
                         .addSQLParamInfo("actif")
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE clients SET nom = @_nom, prenom = @_prenom, date_naissance = @_date_naissance, adresse_courriel = @_adresse_courriel, mdp = @_mdp, token = @_token, sel = @_sel, actif = @_actif WHERE id = @id", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("id")
                         .addSQLParamInfo("nom")
                         .addSQLParamInfo("prenom")
                         .addSQLParamInfo("date_naissance")
@@ -224,12 +226,12 @@ namespace APIDynamic
                         .addSQLParamInfo("id_compagnie")
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE collaborateurs SET nom = @_nom, prenom = @_prenom, telephone = @_telephone, adresse_courriel = @_adresse_courriel, id_compagnie = @_id_compagnie WHERE id = @id", QueryTypes.UPDATE, true, true)
-                            .addSQLParamInfo("id")
-                            .addSQLParamInfo("nom")
-                            .addSQLParamInfo("prenom")
-                            .addSQLParamInfo("telephone")
-                            .addSQLParamInfo("adresse_courriel")
-                            .addSQLParamInfo("id_compagnie")
+                        .addSQLParamInfo("id")
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("prenom")
+                        .addSQLParamInfo("telephone")
+                        .addSQLParamInfo("adresse_courriel")
+                        .addSQLParamInfo("id_compagnie")
                 ;
             await controllers["Compagnies"]
                 .addPropriety("id", true, true, ShowTypes.INT)
@@ -252,11 +254,11 @@ namespace APIDynamic
                         .addSQLParamInfo("contact")
                .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE compagnies SET nom = @_nom, telephone = @_telephone, adresse_courriel = @_adresse_courriel, contact = @contact WHERE id = @id", QueryTypes.UPDATE, true, true)
-                            .addSQLParamInfo("id")
-                            .addSQLParamInfo("nom")
-                            .addSQLParamInfo("telephone")
-                            .addSQLParamInfo("adresse_courriel")
-                            .addSQLParamInfo("contact")
+                        .addSQLParamInfo("id")
+                        .addSQLParamInfo("nom")
+                        .addSQLParamInfo("telephone")
+                        .addSQLParamInfo("adresse_courriel")
+                        .addSQLParamInfo("contact")
                 ;
             await controllers["Villes"]
                 .addPropriety("id", true, true, ShowTypes.INT)
