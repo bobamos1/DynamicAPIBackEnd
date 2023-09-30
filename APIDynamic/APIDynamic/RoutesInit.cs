@@ -16,16 +16,19 @@ namespace APIDynamic
         {
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
             DynamicController.initRoutesControllersInfo(app, controllers);
-            DynamicController.MakeBaseRoutesDefinition(controllers, executorData);/*
-            controllers["Produits"].addRouteAPI(RouteTypes.POST, "GetAll",
+            DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
+            controllers["Clients"].addRouteAPI(RouteTypes.POST, "Connection",
                 async (queries, bodyData) =>
                 {
-                    string token = DynamicController.CreateToken("bob", "bob@gmail.com", 1, 1, 2, 3);
+                    string username = "bob";
+                    string email = "bob@gmail.com";
+                    long userID = 1;
+                    string token = DynamicConnection.CreateToken(username, email, userID, Roles.Client);
                     return Results.Ok(token);
                     return Results.Ok(bodyData);
                     //return Results.Ok(await executorData.SelectQuery(queries[0]));
                 }, false
-            );*/
+            );
             controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientCommandes",
                 async (queries, bodyData) =>
                 {
@@ -42,7 +45,7 @@ namespace APIDynamic
                     var dict = (Dictionary<string, object>)bodyData["connexion"];
                     object da = dict["connexion"];
                     return Results.Ok(da);
-                } true, true
+                }, true, true
             );
             /*
             controllers["Commandes"].addRouteAPI(RouteTypes.POST, "CommandeCheckout",

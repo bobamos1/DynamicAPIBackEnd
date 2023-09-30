@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.IdentityModel.Tokens;
+using ParserLib;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -59,6 +60,10 @@ namespace DynamicStructureObjects
             if (string.IsNullOrWhiteSpace(rolesClaim))
                 return null;
             return rolesClaim;
+        }
+        public static string CreateToken(string username, string email, long userId, params Enum[] roles)
+        {
+            return CreateToken(username, email, userId, roles.Select(role => role.To<long>()).ToArray());
         }
         public static string CreateToken(string username, string email, long userId, params long[] roles)
         {

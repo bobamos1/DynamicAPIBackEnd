@@ -1,6 +1,10 @@
-﻿namespace APIDynamic
+﻿using DynamicStructureObjects;
+
+namespace APIDynamic
 {
-    public class Roles
+    public enum Roles
     {
+        [Value("Client")]
+        Client = 1
     }
 }

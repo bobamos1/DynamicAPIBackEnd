@@ -1,14 +1,25 @@
 ﻿using DynamicSQLFetcher;
 using DynamicStructureObjects;
 using System.ComponentModel.Design;
+using System.Xml.Linq;
 
 namespace APIDynamic
 {
     public static class BDInit
     {
-        public async static Task InitDB(SQLExecutor executor)
+        public static Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Roles (name) VALUES (@Name)", true, true);
+        public async static Task InitDB(SQLExecutor executor, bool resetRoles)
         {
             await DynamicController.resetStructureData(executor);
+            if (resetRoles)
+            {
+                await executor.ExecuteQueryWithTransaction("DELETE Roles", "DBCC CHECKIDENT ('Roles', RESEED, 0)");
+                foreach (Roles role in Enum.GetValues(typeof(Roles)))
+                    await executor.ExecuteInsertWithLastID(
+                        insertRole
+                            .setParam("Name", role.Value())
+                    );
+            }
             await InitDB(new Dictionary<string, DynamicController>());
         }
         public async static Task InitDB(Dictionary<string, DynamicController> controllers)
