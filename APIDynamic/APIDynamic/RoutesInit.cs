@@ -1,6 +1,7 @@
 ﻿using DynamicSQLFetcher;
 using DynamicStructureObjects;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core.Features;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -34,6 +35,15 @@ namespace APIDynamic
                 }, true, true
             );
             //Ajoute les routes de l'API ici
+
+            controllers["Clients"].addRouteAPI(RouteTypes.GET, "VerifyClient",
+                async (queries, bodyData) =>
+                {
+                    var dict = (Dictionary<string, object>)bodyData["connexion"];
+                    object da = dict["connexion"];
+                    return Results.Ok(da);
+                } true, true
+            );
             /*
             controllers["Commandes"].addRouteAPI(RouteTypes.POST, "CommandeCheckout",
                 async (queries, body) => {
