@@ -5,7 +5,6 @@ using System.Runtime.Serialization;
 
 namespace DynamicStructureObjects
 {
-    [Serializable]
     public class DynamicRoute
     {
         public long id { get; internal set; }

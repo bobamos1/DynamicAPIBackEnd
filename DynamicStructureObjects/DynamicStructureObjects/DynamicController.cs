@@ -22,7 +22,6 @@ using System.Runtime.Serialization;
 
 namespace DynamicStructureObjects
 {
-    [Serializable]
     public class DynamicController
     {
         public long id { get; internal set; }
@@ -31,8 +30,6 @@ namespace DynamicStructureObjects
         internal static SQLExecutor executor { get; set; }
         internal static WebApplication app { get; set; }
         internal static Dictionary<string, long> RolesAvailable { get; set; }
-        internal static string apiKey { get; set; }
-        internal static TimeSpan TokenLifetime = TimeSpan.FromHours(2);
         public List<DynamicRoute> Routes { get; internal set; }
         public List<DynamicPropriety> Proprieties { get; internal set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles", true, true);
@@ -61,7 +58,7 @@ namespace DynamicStructureObjects
         }
         public static async Task<Dictionary<string, DynamicController>> initControllers(SQLExecutor executor, string apiKey)
         {
-            DynamicController.apiKey = apiKey;
+            DynamicConnection.apiKey = apiKey;
             DynamicController.executor = executor;
             RolesAvailable = await executor.SelectDictionary<string, long>(getRoles);
             Dictionary<string, DynamicController> controllers = new Dictionary<string, DynamicController>();
@@ -236,17 +233,17 @@ namespace DynamicStructureObjects
         {
             app.MapGet($"/{Name}/Info/Propriety", ([FromHeader(Name = "Authorization")] string JWT) =>
             {
-                return Task.FromResult<IResult>(Results.Ok(getAuthorizedProprieties(false, ParseRoles(ParseClaim(JWT)))));
+                return Task.FromResult<IResult>(Results.Ok(getAuthorizedProprieties(false, DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT)))));
             }).WithName($"{Name}InfoPropriety");
             app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string JWT) =>
             {
-                return Task.FromResult<IResult>(Results.Ok(getAuthorizedRoutes(ParseRoles(ParseClaim(JWT)))));
+                return Task.FromResult<IResult>(Results.Ok(getAuthorizedRoutes(DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT)))));
             }).WithName($"{Name}InfoRoutes");
             foreach (var route in Routes)
             {
                 app.MapGet($"/{Name}/Info/RouteFilters/{route.Name}", ([FromHeader(Name = "Authorization")] string JWT) =>
                 {
-                    if (!route.CanUse(ParseRoles(ParseClaim(JWT))))
+                    if (!route.CanUse(DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT))))
                         return Task.FromResult<IResult>(Results.Forbid());
                     List<DynamicFilter> filters = new List<DynamicFilter>();
                     foreach (var query in route.Queries)
@@ -255,7 +252,7 @@ namespace DynamicStructureObjects
                 }).WithName($"{Name}Info{route.Name}Filters");
                 app.MapGet($"/{Name}/Info/RouteVariables/{route.Name}", ([FromHeader(Name = "Authorization")] string JWT) =>
                 {
-                    if (!route.CanUse(ParseRoles(ParseClaim(JWT))))
+                    if (!route.CanUse(DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT))))
                         return Task.FromResult<IResult>(Results.Forbid());
                     List<DynamicSQLParamInfo> paramInfo = new List<DynamicSQLParamInfo>();
                     foreach (var query in route.Queries)
@@ -284,13 +281,13 @@ namespace DynamicStructureObjects
                 Dictionary<string, object> bodyData = JObjectToDictionary(JObject.Parse(request.ToString()));
                 if (requireAuthorization)
                 {
-                    var jsonToken = ParseClaim(JWT);
-                    var roles = ParseRoles(jsonToken);
+                    var jsonToken = DynamicConnection.ParseClaim(JWT);
+                    var roles = DynamicConnection.ParseRoles(jsonToken);
                     if (jsonToken is null || !route.CanUse(roles) && false)
                         return Results.Forbid();
                     if (getAuthorizedCols)
                         bodyData["AuthorizedProprieties"] = getAuthorizedProprieties(onlyModify, roles).Select(prop => prop.Name).ToArray();
-                    bodyData["CurrentUserID"] = ParseUserID(jsonToken);
+                    bodyData["CurrentUserID"] = DynamicConnection.ParseUserID(jsonToken);
                     if (bodyData["CurrentUserID"].Equals(-1))
                         return Results.Forbid();
                     if (getRoles)
@@ -336,71 +333,10 @@ namespace DynamicStructureObjects
                     return ((JValue)item).Value;
             }
         }
-        public static IEnumerable<long> ParseRoles(JwtSecurityToken token)
-        {
-            var rolesClaim = ParseClaim(token, ClaimTypes.Role);
-            if (rolesClaim is null)
-                return new long[0];
-            return rolesClaim.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                    .Select(role => long.Parse(role.Trim()));
-        }
-        public static long ParseUserID(JwtSecurityToken token)
-        {
-            var userID = ParseClaim(token, ClaimTypes.UserData);
-            if (userID is null)
-                return -1;
-            return long.Parse(userID);
-        }
-        public static JwtSecurityToken ParseClaim(string token)
-        {
-            token = token.Split(' ')[1];
-            return new JwtSecurityTokenHandler().ReadToken(token) as JwtSecurityToken;
-        }
-        public static string ParseClaim(JwtSecurityToken token, string type)
-        {
-            var rolesClaim = token.Claims.FirstOrDefault(c => c.Type == type)?.Value;
-
-            if (string.IsNullOrWhiteSpace(rolesClaim))
-                return null;
-            return rolesClaim;
-        }
-        public static string CreateToken(string username, string email, long userId, params long[] roles)
-        {
-            List<Claim> claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Email, email),
-                new Claim(ClaimTypes.UserData, userId.ToString()),
-                new Claim(ClaimTypes.Role, string.Join(',', roles))
-            };
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.Now.Add(TokenLifetime),
-                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(apiKey)), SecurityAlgorithms.HmacSha512Signature));
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
 
         public static bool Cross(IEnumerable<long> arr1, IEnumerable<long> arr2)
         {
             return arr1.Any(item => arr2.Contains(item));
-        }
-        private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
-        }
-
-        private static bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return computedHash.SequenceEqual(passwordHash);
-            }
         }
 
         public static void MakeBaseRoutesDefinition(Dictionary<string, DynamicController> controllers, SQLExecutor executorData)
@@ -451,6 +387,13 @@ namespace DynamicStructureObjects
                         string[] authorizedProprieties = (string[])bodyData["AuthorizedProprieties"];
                         List<DynamicMapper> mappers = controller.Value.getMappersGenerated(controllers, (IEnumerable<long>)bodyData["AuthorizedProprieties"], authorizedProprieties);
                         return Results.Ok(await executorData.DetailedSelectQuery(queries[1], mappers, authorizedProprieties));
+                    }, true, true, false, true);
+                if (controller.Value.hasRoute(BaseRoutes.GETDETAILED.Value()))
+                    controller.Value.addRouteAPI(RouteTypes.GET, BaseRoutes.GETDETAILED, async (queries, bodyData) =>
+                    {
+                        string[] authorizedProprieties = (string[])bodyData["AuthorizedProprieties"];
+                        List<DynamicMapper> mappers = controller.Value.getMappersGenerated(controllers, (IEnumerable<long>)bodyData["AuthorizedProprieties"], authorizedProprieties);
+                        return Results.Ok(await executorData.DetailedSelectQuerySingle(queries[1], mappers, authorizedProprieties));
                     }, true, true, false, true);
             }
         }
