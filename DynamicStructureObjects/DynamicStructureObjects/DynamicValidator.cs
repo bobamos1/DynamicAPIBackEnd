@@ -4,10 +4,10 @@ using ParserLib;
 
 namespace DynamicStructureObjects
 {
-    internal class DynamicValidator
+    public class DynamicValidator
     {
-        internal ValidatorTypes ValidatorType { get; set; }
-        internal object Value { get; set; }
+        public ValidatorTypes ValidatorType { get; internal set; }
+        public object Value { get; internal set; }
         internal static readonly Query insertSQLParamInfoValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorSQLParamInfoValues (id_SQLParamInfo, id_ValidatorType, value) VALUES (@ParentID, @ValidatorTypeID, @Value)", true, true);
         internal static readonly Query insertProprietyValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorProprietyValues (id_ValidatorType, id_ValidatorType, value) VALUES (@ParentID, @ValidatorTypeID, @Value)", true, true);
         internal DynamicValidator(string Value, long ValidatorTypeID)

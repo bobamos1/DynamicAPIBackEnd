@@ -2,17 +2,17 @@
 
 namespace DynamicStructureObjects
 {
-    internal class DynamicMapperGenerator
+    public class DynamicMapperGenerator
     {
-        internal long id { get; set; }
-        internal long controllerID { get; set; }
-        internal string controllerName { get; set; }
-        internal long routeID { get; set; }
-        internal Query query { get; set; }
-        internal DynamicMapper Mapper { get; set; }
-        internal string ProprietyName { get; set; }
-        internal Dictionary<string, object> baseParameters { get; set; }
-        internal Dictionary<string, string> parametersToLink { get; set; }
+        public long id { get; internal set; }
+        public long controllerID { get; internal set; }
+        public string controllerName { get; internal set; }
+        public long routeID { get; internal set; }
+        public Query query { get; internal set; }
+        public DynamicMapper Mapper { get; internal set; }
+        public string ProprietyName { get; internal set; }
+        public Dictionary<string, object> baseParameters { get; set; }
+        public Dictionary<string, string> parametersToLink { get; set; }
         internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT name AS AssociatedVarName, value AS Value, id_CSharpType AS CSharpType FROM ListVars WHERE id_link = @link", true, true);
         internal static readonly Query insertMapperGenerator = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO LinkProprietiesControllers (id_propriety, id_controller) VALUES (@PropretyID, @ControllerID)", true, true);
         internal static readonly Query getMapperGeneratorSingleInfo = Query.fromQueryString(QueryTypes.ROW, "SELECT TOP (1) @LinkID AS id, @ControllerID AS controllerID, c.Name AS controllerName, urlR.id AS RouteID, SQLString AS queryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, p.name AS ProprietyName FROM URLRoutes urlR INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = @PropertyID INNER JOIN Controllers c ON c.id = @ControllerID WHERE urlR.id_baseRoute = 1 AND rq.ind = 1 AND urlR.id_controller = @ControllerID", true, true);

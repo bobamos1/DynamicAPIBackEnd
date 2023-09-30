@@ -18,21 +18,23 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using System.Collections;
+using System.Runtime.Serialization;
 
 namespace DynamicStructureObjects
 {
+    [Serializable]
     public class DynamicController
     {
-        internal long id { get; set; }
+        public long id { get; internal set; }
         public string Name { get; internal set; }
-        internal bool IsMain { get; set; }
+        public bool IsMain { get; internal set; }
         internal static SQLExecutor executor { get; set; }
         internal static WebApplication app { get; set; }
         internal static Dictionary<string, long> RolesAvailable { get; set; }
         internal static string apiKey { get; set; }
         internal static TimeSpan TokenLifetime = TimeSpan.FromHours(2);
-        internal List<DynamicRoute> Routes { get; set; }
-        internal List<DynamicPropriety> Proprieties { get; set; }
+        public List<DynamicRoute> Routes { get; internal set; }
+        public List<DynamicPropriety> Proprieties { get; internal set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles", true, true);
         internal static readonly Query getControllers = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, name AS Name, isMain AS IsMain FROM Controllers", true, true);
         internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isReadOnly AS ReadOnly, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true, true);
@@ -211,7 +213,7 @@ namespace DynamicStructureObjects
         }
         public IEnumerable<DynamicRoute> getAuthorizedRoutes(IEnumerable<long> roles)
         {
-            return Routes.Where(route => route.CanUse(roles) || true);
+            return Routes.Where(route => route.CanUse(roles));
         }
         public static void initRoutesControllersInfo(WebApplication app, Dictionary<string, DynamicController> controllers)
         {

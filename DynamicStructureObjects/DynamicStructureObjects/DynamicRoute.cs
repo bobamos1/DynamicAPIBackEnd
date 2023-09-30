@@ -1,15 +1,17 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Http;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.Serialization;
 
 namespace DynamicStructureObjects
 {
+    [Serializable]
     public class DynamicRoute
     {
-        internal long id { get; set; }
-        internal string Name { get; set; }
-        internal List<DynamicQueryForRoute> Queries { get; set; }
-        internal List<long> Roles { get; set; }
+        public long id { get; internal set; }
+        public string Name { get; internal set; }
+        public List<DynamicQueryForRoute> Queries { get; internal set; }
+        public List<long> Roles { get; internal set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id FROM PermissionRoutes INNER JOIN Roles ON id = id_role WHERE id_route = @RouteID", true, true);
         internal static readonly Query getQueries = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, SQLString AS queryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, completeAuth AS CompleteAuth FROM RouteQueries WHERE id_route = @RouteID ORDER BY ind", true, true);
         internal static readonly Query insertRoute = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO URLRoutes (name, id_baseRoute, id_controller) VALUES (@Name, @BaseRouteID, @ControllerID)", true, true);
@@ -20,12 +22,14 @@ namespace DynamicStructureObjects
             this.id = id;
             this.Name = Name;
             this.Queries = new List<DynamicQueryForRoute>();
+            this.Roles = new List<long>();
         }
         internal static async Task<DynamicRoute> init(DynamicRoute route)
         {
             route.Queries = new List<DynamicQueryForRoute>();
             route.Queries = (await DynamicController.executor.SelectQuery<DynamicQueryForRoute>(getQueries.setParam("RouteID", route.id))).ToList(); 
             route.Roles = (await DynamicController.executor.SelectArray<long>(getRoles.setParam("RouteID", route.id))).ToList();
+            route.Roles.Add(1);
             foreach (var query in route.Queries)
                 await DynamicQueryForRoute.init(query);
             return route;

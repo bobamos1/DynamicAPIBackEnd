@@ -11,13 +11,13 @@ namespace DynamicSQLFetcher
 {
     public class Query
     {
-        internal QueryTypes queryType { get; set; }
-        internal string query { get; set; }
-        internal List<SQLVariableInfo> varsInfoList { get; set; }
-        public Dictionary<string, bool> variablesInQuery { get; set; }
-        internal Dictionary<string, string> selectColumns { get; set; }
-        internal Dictionary<string, object> paramsUsed { get; set; }
-        internal bool completeCheck { get; set; }
+        public QueryTypes queryType { get; internal set; }
+        public string query { get; internal set; }
+        public List<SQLVariableInfo> varsInfoList { get; internal set; }
+        public Dictionary<string, bool> variablesInQuery { get; internal set; }
+        public Dictionary<string, string> selectColumns { get; internal set; }
+        public Dictionary<string, object> paramsUsed { get; internal set; }
+        public bool completeCheck { get; internal set; }
         public Query(QueryTypes queryType)
         {
             this.queryType = queryType;

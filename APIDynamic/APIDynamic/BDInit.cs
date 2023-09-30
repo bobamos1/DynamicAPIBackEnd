@@ -6,6 +6,11 @@ namespace APIDynamic
 {
     public static class BDInit
     {
+        public async static Task InitDB(SQLExecutor executor)
+        {
+            await DynamicController.resetStructureData(executor);
+            await InitDB(new Dictionary<string, DynamicController>());
+        }
         public async static Task InitDB(Dictionary<string, DynamicController> controllers)
         {
             //await DynamicController.resetStructureData();
@@ -102,7 +107,7 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe FROM commandes", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
-                    .addRouteQuery("SELECT numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe WHERE id = @id FROM commandes", QueryTypes.SELECT, true, true)
+                    .addRouteQuery("SELECT numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe FROM commandes WHERE id = @id", QueryTypes.SELECT, true, true)
                         .addSQLParamInfo("id")
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO commandes (numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (@numero_facture, @montant_brut, @no_civique_livraison, @rue_livraison, @id_client, @id_etat_commande, @id_ville, @id_employe)", QueryTypes.INSERT, true, true)
@@ -296,6 +301,7 @@ namespace APIDynamic
                         .addSQLParamInfo("id")
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@id, @nom, @prenom, @date_naissance, @adresse_courriel, @mdp, @token, @sel, @actif)", QueryTypes.INSERT, true, true)
+                        .addSQLParamInfo("id")
                         .addSQLParamInfo("nom")
                         .addSQLParamInfo("prenom")
                         .addSQLParamInfo("date_naissance")
@@ -306,6 +312,7 @@ namespace APIDynamic
                         .addSQLParamInfo("actif")
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE employes SET nom = @_nom, prenom = @_prenom, date_naissance = @_date_naissance, adresse_courriel = @_adresse_courriel, mdp = @_mdp, token = @_token, sel = @_sel, actif = @_actif WHERE id = @id", QueryTypes.UPDATE, true, true)
+                        .addSQLParamInfo("id")
                         .addSQLParamInfo("nom")
                         .addSQLParamInfo("prenom")
                         .addSQLParamInfo("date_naissance")
