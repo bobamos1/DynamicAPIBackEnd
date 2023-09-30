@@ -205,11 +205,18 @@ namespace DynamicStructureObjects
         {
             return await (await task).addAuthorizedRouteRole(routeName, RoleID);
         }
+        public async static Task<DynamicController> addAuthorizedRouteRoles(this Task<DynamicController> task, params long[] roles)
+        {
+            return await (await task).addAuthorizedRouteRoles(roles);
+        }
         public async static Task<DynamicController> addAuthorizedProprietyRole(this Task<DynamicController> task, string ProprietyName, long RoleID, bool CanModify)
         {
             return await (await task).addAuthorizedProprietyRole(ProprietyName, RoleID, CanModify);
         }
-
+        public async static Task<DynamicController> addAuthorizedProprietyRoles(this Task<DynamicController> task, params KeyValuePair<long, bool>[] roles)
+        {
+            return await (await task).addAuthorizedProprietyRoles(roles);
+        }
 
 
 

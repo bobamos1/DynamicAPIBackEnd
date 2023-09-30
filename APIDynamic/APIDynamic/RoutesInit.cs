@@ -23,9 +23,14 @@ namespace APIDynamic
                     string username = "bob";
                     string email = "bob@gmail.com";
                     long userID = 1;
-                    string token = DynamicConnection.CreateToken(username, email, userID, Roles.Client);
+                    /*ressortir les données si dessus au lieu qu'ils soient hard codé
+                     create token
+                    hard code le role client pour le client
+                    ou
+                    Ressortir le rôle du client*/
+                    string token = DynamicConnection.CreateToken(username, email, userID, (long)Roles.Client);
                     return Results.Ok(token);
-                    return Results.Ok(bodyData);
+                    //return Results.Ok(bodyData);
                     //return Results.Ok(await executorData.SelectQuery(queries[0]));
                 }, false
             );
@@ -39,14 +44,6 @@ namespace APIDynamic
             );
             //Ajoute les routes de l'API ici
 
-            controllers["Clients"].addRouteAPI(RouteTypes.GET, "VerifyClient",
-                async (queries, bodyData) =>
-                {
-                    var dict = (Dictionary<string, object>)bodyData["connexion"];
-                    object da = dict["connexion"];
-                    return Results.Ok(da);
-                }, true, true
-            );
             /*
             controllers["Commandes"].addRouteAPI(RouteTypes.POST, "CommandeCheckout",
                 async (queries, body) => {

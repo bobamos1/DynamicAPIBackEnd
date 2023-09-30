@@ -33,7 +33,7 @@ namespace DynamicStructureObjects
         internal static Dictionary<string, long> RolesAvailable { get; set; }
         public List<DynamicRoute> Routes { get; internal set; }
         public List<DynamicPropriety> Proprieties { get; internal set; }
-        internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles", true, true);
+        internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles");
         internal static readonly Query getControllers = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, name AS Name, isMain AS IsMain FROM Controllers", true, true);
         internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isReadOnly AS ReadOnly, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true, true);
         internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, COALESCE(BaseRoutes.name, URLRoutes.name) AS Name FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true, true);
@@ -188,36 +188,28 @@ namespace DynamicStructureObjects
             await Proprieties.First(propriety => propriety.Name == ProprietyName).addMapperGenerator(ControllerName, linkers);
             return this;
         }
-        public Task<DynamicController> addAuthorizedRouteRole(string routeName, Enum Role)
-        {
-            return addAuthorizedRouteRole(routeName, Role.To<long>());
-        }
         public async Task<DynamicController> addAuthorizedRouteRole(string routeName, long RoleID)
         {
             await Routes.First(route => route.Name == routeName).addAuthorizedRole(RoleID);
             return this;
         }
-        public async Task<DynamicController> addAuthorizedRouteRoles(params Enum[] roles)
+        public async Task<DynamicController> addAuthorizedRouteRoles(params long[] roles)
         {
             DynamicRoute route = Routes.Last();
             foreach (var role in roles)
-                await route.addAuthorizedRole(role.To<long>());
+                await route.addAuthorizedRole(role);
             return this;
-        }
-        public Task<DynamicController> addAuthorizedProprietyRole(string ProprietyName, Enum Role, bool CanModify)
-        {
-            return addAuthorizedProprietyRole(ProprietyName, Role.To<long>(), CanModify);
         }
         public async Task<DynamicController> addAuthorizedProprietyRole(string ProprietyName, long RoleID, bool CanModify)
         {
             await Proprieties.First(propriety => propriety.Name == ProprietyName).addAuthorizedRole(RoleID, CanModify);
             return this;
         }
-        public async Task<DynamicController> addAuthorizedProprietyRole(params KeyValuePair<Enum, bool>[] roles)
+        public async Task<DynamicController> addAuthorizedProprietyRoles(params KeyValuePair<long, bool>[] roles)
         {
             DynamicPropriety propriety = Proprieties.Last();
             foreach (var role in roles)
-                await propriety.addAuthorizedRole(role.Key.To<long>(), role.Value);
+                await propriety.addAuthorizedRole(role.Key, role.Value);
             return this;
         }
         #endregion
