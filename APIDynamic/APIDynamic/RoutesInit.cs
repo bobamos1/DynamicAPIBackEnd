@@ -14,7 +14,8 @@ namespace APIDynamic
         public static void InitRoutes(Dictionary<string, DynamicController> controllers, WebApplication app, Dictionary<string, string> connectionStrings)
         {
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
-            DynamicController.initRoutesControllersInfo(app, controllers.Values.ToList());
+            DynamicController.initRoutesControllersInfo(app, controllers);
+            DynamicController.MakeBaseRoutesDefinition(controllers, executorData);/*
             controllers["Produits"].addRouteAPI(RouteTypes.POST, "GetAll",
                 async (queries, bodyData) =>
                 {
@@ -22,15 +23,15 @@ namespace APIDynamic
                     return Results.Ok(token);
                     return Results.Ok(bodyData);
                     //return Results.Ok(await executorData.SelectQuery(queries[0]));
-                }, true
-            );
-            controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientsCommande",
+                }, false
+            );*/
+            controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientCommandes",
                 async (queries, bodyData) =>
                 {
                     var dictionary = (Dictionary<string, object>)bodyData["conds"];
-                    long da = (long)dictionary["id_User"];
-                    return Results.Ok(bodyData);
-                }, true
+                    object da = dictionary["id_User"];
+                    return Results.Ok(da);
+                }, true, true
             );
             //Ajoute les routes de l'API ici
             /*

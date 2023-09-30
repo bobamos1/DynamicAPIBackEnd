@@ -11,13 +11,13 @@ namespace DynamicSQLFetcher
 {
     public class Query
     {
-        internal QueryTypes queryType { get; set; }
-        internal string query { get; set; }
-        internal List<SQLVariableInfo> varsInfoList { get; set; }
-        public Dictionary<string, bool> variablesInQuery { get; set; }
-        internal Dictionary<string, string> selectColumns { get; set; }
-        internal Dictionary<string, object> paramsUsed { get; set; }
-        internal bool completeCheck { get; set; }
+        public QueryTypes queryType { get; internal set; }
+        public string query { get; internal set; }
+        public List<SQLVariableInfo> varsInfoList { get; internal set; }
+        public Dictionary<string, bool> variablesInQuery { get; internal set; }
+        public Dictionary<string, string> selectColumns { get; internal set; }
+        public Dictionary<string, object> paramsUsed { get; internal set; }
+        public bool completeCheck { get; internal set; }
         public Query(QueryTypes queryType)
         {
             this.queryType = queryType;
@@ -59,14 +59,17 @@ namespace DynamicSQLFetcher
         }
         public Query addParams(Dictionary<string, object> paramsUsed)
         {
-            foreach (var param in paramsUsed)
-                this.paramsUsed[param.Key] = param.Value;
+            object currentVar;
+            foreach (var variable in variablesInQuery)
+            {
+                if (paramsUsed.TryGetValue(variable.Key, out currentVar))
+                    this.paramsUsed[variable.Key] = currentVar;
+            }
             return this;
         }
-        public Query setParam(Dictionary<string, object> paramsUsed)
+        public Query setParams(Dictionary<string, object> paramsUsed)
         {
-            this.paramsUsed = paramsUsed;
-            return this;
+            return clearParams().addParams(paramsUsed);
         }
         public Query setParam(string paramName, object paramValue)
         {
@@ -138,6 +141,10 @@ namespace DynamicSQLFetcher
             if (queryType != QueryTypes.SELECT)
                 throw new Exception("need to be of type select to add pagination");
             return string.Format("{0} {1}", Parse(authorizedColumns), getPagination(page, step));
+        }
+        public KeyValuePair<Query, string[]> AddCols(params string[] authorizedColumns)
+        {
+            return new KeyValuePair<Query, string[]>(this, authorizedColumns);
         }
         public string Parse(params string[] authorizedColumns)
         {

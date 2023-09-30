@@ -1,10 +1,10 @@
 ﻿namespace DynamicSQLFetcher
 {
-    internal class SQLVariableInfo
+    public class SQLVariableInfo
     {
-        internal string ConditionalString { get; set; }
-        internal string VarName { get; set; }
-        internal bool isSQLText { get; set; }
+        public string ConditionalString { get; internal set; }
+        public string VarName { get; internal set; }
+        public bool isSQLText { get; internal set; }
         internal SQLVariableInfo(string ConditionalString, string VarName, bool isSQLText)
         {
             this.ConditionalString = ConditionalString;

@@ -4,17 +4,17 @@ namespace DynamicStructureObjects
 {
     public class DynamicPropriety
     {
-        internal long id { get; set; }
-        internal string Name { get; set; }
-        internal bool IsMain { get; set; }
-        internal bool ReadOnly { get; set; }        
-        internal List<DynamicValidator> Validators { get; set; }
-        internal ShowTypes ShowType { get; set; }
-        internal DynamicMapperGenerator MapperGenerator { get; set; }
-        internal Dictionary<long, bool> roles { get; set; }
+        public long id { get; internal set; }
+        public string Name { get; internal set; }
+        public bool IsMain { get; internal set; }
+        public bool ReadOnly { get; internal set; }
+        public List<DynamicValidator> Validators { get; internal set; }
+        public ShowTypes ShowType { get; internal set; }
+        public DynamicMapperGenerator MapperGenerator { get; internal set; }
+        public Dictionary<long, bool> roles { get; internal set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT id, canModify FROM PermissionProprieties INNER JOIN Roles ON id = id_role WHERE id_propriety = @ProprietyID", true, true);
         internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true, true);
-        internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT lnk.id AS id, c.id AS controllerID, urlR.id AS RouteID, SQLString AS queryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, p.name AS ProprietyName FROM LinkProprietiesControllers lnk INNER JOIN Controllers c ON c.id = lnk.id_controller INNER JOIN URLRoutes urlR ON urlR.id_controller = c.id INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = lnk.id_propriety WHERE urlR.id_baseRoute = 1 AND rq.ind = 1 AND lnk.id_propriety = @ProprietyID", true, true);
+        internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT lnk.id AS id, c.id AS controllerID, c.Name AS controllerName, urlR.id AS RouteID, SQLString AS queryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, p.name AS ProprietyName FROM LinkProprietiesControllers lnk INNER JOIN Controllers c ON c.id = lnk.id_controller INNER JOIN URLRoutes urlR ON urlR.id_controller = c.id INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = lnk.id_propriety WHERE urlR.id_baseRoute = 1 AND rq.ind = 1 AND lnk.id_propriety = @ProprietyID", true, true);
         internal static readonly Query insertPropriety = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Proprieties (name, isMain, isReadOnly,id_ShowType, id_controller) VALUES (@Name, @IsMain, @IsReadOnly, @ShowTypeID, @ControllerID)", true, true);
         internal static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionProprieties(id_propriety, id_role, canModify) VALUES(@ProprietyID, @RoleID, @CanModify)", true, true);
         internal DynamicPropriety(long id, string Name, bool IsMain, bool ReadOnly, long ShowTypeID)

@@ -9,10 +9,10 @@ namespace DynamicSQLFetcher
 {
     public class DynamicMapper
     {
-        internal string propetyName { get; set; }
-        internal string query { get; set; }
-        internal Dictionary<string, object> baseParameters { get; set; }
-        internal Dictionary<string, string> parametersToLink { get; set; }
+        public string propetyName { get; internal set; }
+        public string query { get; internal set; }
+        public Dictionary<string, object> baseParameters { get; internal set; }
+        public Dictionary<string, string> parametersToLink { get; internal set; }
         public DynamicMapper(string propetyName, string query, Dictionary<string, string> parametersToLink, Dictionary<string, object> baseParameters)
         {
             this.propetyName = propetyName;

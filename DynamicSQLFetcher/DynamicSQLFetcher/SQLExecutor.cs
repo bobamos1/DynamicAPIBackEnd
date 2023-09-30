@@ -98,6 +98,20 @@ namespace DynamicSQLFetcher
                 queriesDict.Add(query.Parse(), query.getParameters());
             return ExecuteQueryWithTransaction(_connectionString, queriesDict);
         }
+        public Task<int> ExecuteQueryWithTransaction(params KeyValuePair<Query, string[]>[] queries)
+        {
+            Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
+            foreach (var query in queries)
+                queriesDict.Add(query.Key.Parse(query.Value), query.Key.getParameters());
+            return ExecuteQueryWithTransaction(_connectionString, queriesDict);
+        }
+        public Task<int> ExecuteQueryWithTransaction(string[] authorizedColumns, params Query[] queries)
+        {
+            Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
+            foreach (var query in queries)
+                queriesDict.Add(query.Parse(authorizedColumns), query.getParameters());
+            return ExecuteQueryWithTransaction(_connectionString, queriesDict);
+        }
         public Task<int> ExecuteQueryWithTransaction(params string[] queries)
         {
             Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
@@ -287,6 +301,7 @@ namespace DynamicSQLFetcher
                     }
                     catch (Exception ex)
                     {
+                        recordsUpdated = 0;
                         trans.Rollback();
                     }
                 }
@@ -313,6 +328,7 @@ namespace DynamicSQLFetcher
                     }
                     catch (Exception ex)
                     {
+                        lastInserted = 0;
                         trans.Rollback();
                     }
                 }

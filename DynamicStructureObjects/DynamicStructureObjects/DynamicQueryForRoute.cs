@@ -1,14 +1,15 @@
 ﻿using DynamicSQLFetcher;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace DynamicStructureObjects
 {
     public class DynamicQueryForRoute
     {
-        internal long id { get; set; }
-        internal Query query { get; set; }
-        internal bool CompleteAuth { get; set; }
-        internal Dictionary<string, DynamicSQLParamInfo> ParamsInfos { get; set; }
-        internal List<DynamicFilter> Filters { get; set; }
+        public long id { get; internal set; }
+        public Query query { get; internal set; }
+        public bool CompleteAuth { get; internal set; }
+        public Dictionary<string, DynamicSQLParamInfo> ParamsInfos { get; internal set; }
+        public List<DynamicFilter> Filters { get; internal set; }
         internal static readonly Query getFilters = Query.fromQueryString(QueryTypes.SELECT, "SELECT Filters.id AS id, name AS Name, SQLParamInfos.varAffected AS VarAffected FROM Filters INNER JOIN SQLParamInfos ON SQLParamInfos.id = id_SQLParamInfo WHERE id_RouteQuery = @routeQueryID ORDER BY name, ind", true, true);
         internal static readonly Query getSQLParamInfos = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, varAffected AS VarAffected, id_Propriety AS ProprietyID FROM SQLParamInfos WHERE id_RouteQuery = @RouteQueryID", true, true);
         internal static readonly Query insertRouteQuery = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO RouteQueries (ind, SQLString, id_queryType, id_route, completeCheck, completeAuth) VALUES (@Index, @SQLString, @QueryTypeID, @RouteID, @CompleteCheck, @CompleteAuth)", true, true);
@@ -36,6 +37,8 @@ namespace DynamicStructureObjects
                 ).ToList();
             foreach (var filter in query.Filters)
                 await DynamicFilter.init(filter);
+            if (!query.query.variablesInQuery.All(variable => query.ParamsInfos.ContainsKey(variable.Key)))
+                throw new Exception($"There are variables in Query not in ParamInfo for query {query.id}");
             return query;
         }
         public async static Task<DynamicQueryForRoute> addRouteQuery(int index, string queryString, QueryTypes QueryType, long RouteID, bool CompleteCheck, bool CompleteAuth)
@@ -88,6 +91,16 @@ namespace DynamicStructureObjects
             if (lastSQLParamAdded is null)
                 throw new Exception();
             return addValidator(lastSQLParamAdded, Value, ValidatorType);
+        }
+        internal bool validateParams(Dictionary<string, object> bodyData)
+        {
+            return ParamsInfos.All(param =>
+            {
+                object val;
+                if (!bodyData.TryGetValue(param.Key, out val))
+                    return !param.Value.isRequired;
+                return param.Value.validateParam(val);
+            });
         }
     }
 }
