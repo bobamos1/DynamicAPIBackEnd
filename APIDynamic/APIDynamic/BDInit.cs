@@ -220,6 +220,10 @@ namespace APIDynamic
                         .addSQLParamInfo("token")
                         .addSQLParamInfo("sel")
                         .addSQLParamInfo("actif")
+                .addRoute("VerifyClient")
+                    .addRouteQuery("SELECT adresse_courriel, mdp FROM client WHERE adresse_courriel = @adresse_courriel AND mdp = @mdp", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("adresse_courriel")
+                        .addSQLParamInfo("mdp")
                 ;
             await controllers["Collaborateurs"]
                 .addPropriety("id", true, true, ShowTypes.INT)
