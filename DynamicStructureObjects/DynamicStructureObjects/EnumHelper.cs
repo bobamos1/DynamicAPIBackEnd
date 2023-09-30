@@ -27,5 +27,7 @@
             return attribute?.Value;
         }
         public static string Value<TEnum>(this TEnum enumEntry) where TEnum : struct, Enum => ValueOf<TEnum>(enumEntry);
+        public static KeyValuePair<TEnum, bool> CanModify<TEnum>(this TEnum enumEntry) where TEnum : struct, Enum => new KeyValuePair<TEnum, bool>(enumEntry, true);
+        public static KeyValuePair<TEnum, bool> CannotModify<TEnum>(this TEnum enumEntry) where TEnum : struct, Enum => new KeyValuePair<TEnum, bool>(enumEntry, false);
     }
 }

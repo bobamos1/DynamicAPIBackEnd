@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using System.Collections;
 using System.Runtime.Serialization;
+using ParserLib;
 
 namespace DynamicStructureObjects
 {
@@ -187,14 +188,36 @@ namespace DynamicStructureObjects
             await Proprieties.First(propriety => propriety.Name == ProprietyName).addMapperGenerator(ControllerName, linkers);
             return this;
         }
+        public Task<DynamicController> addAuthorizedRouteRole(string routeName, Enum Role)
+        {
+            return addAuthorizedRouteRole(routeName, Role.To<long>());
+        }
         public async Task<DynamicController> addAuthorizedRouteRole(string routeName, long RoleID)
         {
             await Routes.First(route => route.Name == routeName).addAuthorizedRole(RoleID);
             return this;
         }
+        public async Task<DynamicController> addAuthorizedRouteRoles(params Enum[] roles)
+        {
+            DynamicRoute route = Routes.Last();
+            foreach (var role in roles)
+                await route.addAuthorizedRole(role.To<long>());
+            return this;
+        }
+        public Task<DynamicController> addAuthorizedProprietyRole(string ProprietyName, Enum Role, bool CanModify)
+        {
+            return addAuthorizedProprietyRole(ProprietyName, Role.To<long>(), CanModify);
+        }
         public async Task<DynamicController> addAuthorizedProprietyRole(string ProprietyName, long RoleID, bool CanModify)
         {
             await Proprieties.First(propriety => propriety.Name == ProprietyName).addAuthorizedRole(RoleID, CanModify);
+            return this;
+        }
+        public async Task<DynamicController> addAuthorizedProprietyRole(params KeyValuePair<Enum, bool>[] roles)
+        {
+            DynamicPropriety propriety = Proprieties.Last();
+            foreach (var role in roles)
+                await propriety.addAuthorizedRole(role.Key.To<long>(), role.Value);
             return this;
         }
         #endregion
