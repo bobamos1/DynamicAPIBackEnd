@@ -17,7 +17,7 @@ namespace APIDynamic
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
-            controllers["Clients"].addRouteAPI(RouteTypes.POST, "Connection",
+            controllers["Clients"].addRouteAPI("Connection",
                 async (queries, bodyData) =>
                 {
                     string username = "bob";
@@ -34,7 +34,7 @@ namespace APIDynamic
                     //return Results.Ok(await executorData.SelectQuery(queries[0]));
                 }, false
             );
-            controllers["Commandes"].addRouteAPI(RouteTypes.POST, "GetClientCommandes",
+            controllers["Commandes"].addRouteAPI("GetClientCommandes",
                 async (queries, bodyData) =>
                 {
                     var dictionary = (Dictionary<string, object>)bodyData["conds"];

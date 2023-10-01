@@ -1,4 +1,5 @@
 ﻿using DynamicSQLFetcher;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace DynamicStructureObjects
 {
@@ -38,8 +39,12 @@ namespace DynamicStructureObjects
                     );
             mapperGenerator.baseParameters = parameters.Where(param => param.IsStatic).ToDictionary(item => item.AssociatedVarName, item => item.Value);
             mapperGenerator.parametersToLink = parameters.Where(param => !param.IsStatic).ToDictionary(item => item.AssociatedVarName, item => ParserLib.Parser.to<string>(item.Value));
-            mapperGenerator.Mapper = new DynamicMapper(mapperGenerator.ProprietyName, mapperGenerator.parametersToLink, mapperGenerator.baseParameters);
+            mapperGenerator.makeMapper();
             return mapperGenerator;
+        }
+        internal void makeMapper()
+        {
+            Mapper = new DynamicMapper(ProprietyName, parametersToLink, baseParameters);
         }
         internal DynamicMapper updateMapper(params string[] authorizedColumns)
         {
@@ -63,8 +68,13 @@ namespace DynamicStructureObjects
             );
             foreach (var linker in linkers)
                 await mapperGenerator.addParamInitializer(linker.AssociatedVarName, linker.Value, linker.CSharpType);
-            await init(mapperGenerator);
+            //await init(mapperGenerator);
+            mapperGenerator.makeMapper();
             return mapperGenerator;
+        }
+        internal async static Task<DynamicMapperGenerator> addMapperGenerator(string ControllerName, long ProprietyID, string key, params ParamLinker[] linkers)
+        {
+            return await (await addMapperGenerator(ControllerName, ProprietyID, linkers)).addParamInitializer(SQLExecutor.KEY_FOR_CBO, key, CSharpTypes.REFERENCE);
         }
         internal async Task<DynamicMapperGenerator> addParamInitializer(string AssociatedVarName, string Value, CSharpTypes CSharpType)
         {

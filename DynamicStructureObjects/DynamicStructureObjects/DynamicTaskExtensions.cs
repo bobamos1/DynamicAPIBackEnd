@@ -1,6 +1,7 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace DynamicStructureObjects
 {
@@ -44,9 +45,9 @@ namespace DynamicStructureObjects
             await task[controllerName].addRoute(baseRoute);
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addRoute(this Dictionary<string, DynamicController> task, string controllerName, string Name)
+        public async static Task<Dictionary<string, DynamicController>> addRoute(this Dictionary<string, DynamicController> task, string controllerName, string Name, RouteTypes routeType)
         {
-            await task[controllerName].addRoute(Name);
+            await task[controllerName].addRoute(Name, routeType);
             return task;
         }
         public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Dictionary<string, DynamicController> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
@@ -105,9 +106,9 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRoute(controllerName, baseRoute);
         }
-        public async static Task<Dictionary<string, DynamicController>> addRoute(this Task<Dictionary<string, DynamicController>> task, string controllerName, string Name)
+        public async static Task<Dictionary<string, DynamicController>> addRoute(this Task<Dictionary<string, DynamicController>> task, string controllerName, string Name, RouteTypes routeType)
         {
-            return await (await task).addRoute(controllerName, Name);
+            return await (await task).addRoute(controllerName, Name, routeType);
         }
         public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
         {
@@ -153,9 +154,9 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRoute(baseRoute);
         }
-        public async static Task<DynamicController> addRoute(this Task<DynamicController> task, string Name)
+        public async static Task<DynamicController> addRoute(this Task<DynamicController> task, string Name, RouteTypes routeType)
         {
-            return await (await task).addRoute(Name);
+            return await (await task).addRoute(Name, routeType);
         }
         public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
         {
@@ -200,6 +201,18 @@ namespace DynamicStructureObjects
         public async static Task<DynamicController> addMapperGenerator(this Task<DynamicController> task, string ProprietyName, string ControllerName, params ParamLinker[] linkers)
         {
             return await (await task).addMapperGenerator(ProprietyName, ControllerName, linkers);
+        }
+        public async static Task<DynamicController> addCBOInfo(this Task<DynamicController> task, string ProprietyName, string ControllerName, string key, params ParamLinker[] linkers)
+        {
+            return await (await task).addCBOInfo(ProprietyName, ControllerName, key, linkers);
+        }
+        public async static Task<DynamicController> addMapperGenerator(this Task<DynamicController> task, string ControllerName, params ParamLinker[] linkers)
+        {
+            return await (await task).addMapperGenerator(ControllerName, linkers);
+        }
+        public async static Task<DynamicController> addCBOInfo(this Task<DynamicController> task, string ControllerName, string key, params ParamLinker[] linkers)
+        {
+            return await (await task).addCBOInfo(ControllerName, key, linkers);
         }
         public async static Task<DynamicController> addAuthorizedRouteRole(this Task<DynamicController> task, string routeName, long RoleID)
         {

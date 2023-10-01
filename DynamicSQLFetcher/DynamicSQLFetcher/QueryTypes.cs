@@ -8,6 +8,7 @@
         VALUE = 4,
         ROW = 5,
         CBO = 6,
-        INSERT = 7
+        INSERT = 7,
+        DELETE = 8,
     }
 }
