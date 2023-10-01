@@ -4,11 +4,13 @@
     {
         [Value("Reference")]
         Ref = 1,
+        [Value("CBO")]
+        CBO = 2,
         [Value("String")]
-        STRING = 2,
+        STRING = 3,
         [Value("Int")]
-        INT = 3,
+        INT = 4,
         [Value("Float")]
-        FLOAT = 4
+        FLOAT = 5
     }
 }

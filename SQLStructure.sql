@@ -60,6 +60,10 @@ CREATE TABLE QueryTypes (
     id BIGINT IDENTITY(1,1),
     name VARCHAR(100)
 )
+CREATE TABLE RouteTypes (
+    id BIGINT IDENTITY(1,1),
+    name VARCHAR(100)
+)
 CREATE TABLE BaseRoutes (
     id BIGINT IDENTITY(1,1),
     name VARCHAR(100)
@@ -68,7 +72,8 @@ CREATE TABLE URLRoutes (
     id BIGINT IDENTITY(1,1),
     name VARCHAR(100),
     id_baseRoute BIGINT,
-    id_controller BIGINT
+    id_controller BIGINT,
+    id_routeType BIGINT
 )
 CREATE TABLE RouteQueries (
     id BIGINT IDENTITY(1,1),
@@ -169,6 +174,10 @@ ADD CONSTRAINT PK_ListVars PRIMARY KEY (id);
 -- QueryType Table
 ALTER TABLE QueryTypes
 ADD CONSTRAINT PK_QueryType PRIMARY KEY (id);
+
+-- RouteTypes Table
+ALTER TABLE RouteTypes
+ADD CONSTRAINT PK_RouteTypes PRIMARY KEY (id);
 
 -- BaseRoutes Table
 ALTER TABLE BaseRoutes
@@ -273,6 +282,10 @@ FOREIGN KEY (id_baseRoute) REFERENCES BaseRoutes(id);
 ALTER TABLE URLRoutes
 ADD CONSTRAINT FK_Routes_Controller
 FOREIGN KEY (id_controller) REFERENCES Controllers(id);
+
+ALTER TABLE URLRoutes
+ADD CONSTRAINT FK_Routes_RouteTypes
+FOREIGN KEY (id_routeType) REFERENCES RouteTypes(id);
 
 -- RouteQueries Table
 ALTER TABLE RouteQueries
@@ -602,23 +615,27 @@ VALUES
 GO
 INSERT BaseRoutes (name) 
 VALUES 
-(NULL), ('GetAll'), ('Get'), ('INSERT'), ('UPDATE')
+(NULL), ('GetAll'), ('Get'), ('INSERT'), ('UPDATE'), ('GetAllDetailed'), ('GetDetailed'), ('CBO'), ('DELETE')
 GO
 INSERT CSharpTypes (name) 
 VALUES 
 ('Reference'), ('String'), ('Int')
 GO
+INSERT RouteTypes (name) 
+VALUES 
+('GET'), ('POST'), ('PUT'), ('DELETE')
+GO
 INSERT ShowTypes (name) 
 VALUES 
-('Reference'), ('String'), ('Int'), ('Float')
+('Reference'), ('CBO'), ('String'), ('Int'), ('Float')
 GO
 INSERT ValidatorTypes (name) 
 VALUES 
-('Required')
+('Required'), ('Max'), ('Min')
 GO
 INSERT QueryTypes (name) 
 VALUES 
-('UPDATE'), ('SELECT'), ('ARRAY'), ('VALUE'), ('ROW'), ('CBO'), ('INSERT')
+('UPDATE'), ('SELECT'), ('ARRAY'), ('VALUE'), ('ROW'), ('CBO'), ('INSERT'), ('DELETE')
 GO
 INSERT Controllers (name, isMain)
 VALUES 

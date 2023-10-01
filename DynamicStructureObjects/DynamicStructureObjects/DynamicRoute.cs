@@ -9,17 +9,19 @@ namespace DynamicStructureObjects
     {
         public long id { get; internal set; }
         public string Name { get; internal set; }
+        public RouteTypes RouteType { get; internal set; }
         public List<DynamicQueryForRoute> Queries { get; internal set; }
         public List<long> Roles { get; internal set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id FROM PermissionRoutes INNER JOIN Roles ON id = id_role WHERE id_route = @RouteID", true, true);
         internal static readonly Query getQueries = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, SQLString AS queryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, completeAuth AS CompleteAuth FROM RouteQueries WHERE id_route = @RouteID ORDER BY ind", true, true);
-        internal static readonly Query insertRoute = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO URLRoutes (name, id_baseRoute, id_controller) VALUES (@Name, @BaseRouteID, @ControllerID)", true, true);
+        internal static readonly Query insertRoute = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO URLRoutes (name, id_baseRoute, id_controller, id_routeType) VALUES (@Name, @BaseRouteID, @ControllerID, @RouteTypeID)", true, true);
         internal static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionProprieties(id_propriety, id_role) VALUES(@BaseRouteID, @RoleID)", true, true);
         internal static readonly Query getBaseRouteName = Query.fromQueryString(QueryTypes.VALUE, "SELECT Name FROM BaseRoutes WHERE id = @BaseRouteID", true, true);
-        internal DynamicRoute(long id, string Name)
+        internal DynamicRoute(long id, string Name, long RouteTypeID)
         {
             this.id = id;
             this.Name = Name;
+            this.RouteType = (RouteTypes)RouteTypeID;
             this.Queries = new List<DynamicQueryForRoute>();
             this.Roles = new List<long>();
         }
@@ -35,13 +37,13 @@ namespace DynamicStructureObjects
         }
         public static Task<DynamicRoute> addRoute(long idController, BaseRoutes baseRoute)
         {
-            return addRoute(idController, null, baseRoute);
+            return addRoute(idController, null, baseRoute, baseRoute.Type());
         }
-        public static Task<DynamicRoute> addRoute(long idController, string Name)
+        public static Task<DynamicRoute> addRoute(long idController, string Name, RouteTypes routeType)
         {
-            return addRoute(idController, Name, BaseRoutes.NONE);
+            return addRoute(idController, Name, BaseRoutes.NONE, routeType);
         }
-        public async static Task<DynamicRoute> addRoute(long idController, string Name, BaseRoutes baseRoute)
+        public async static Task<DynamicRoute> addRoute(long idController, string Name, BaseRoutes baseRoute, RouteTypes routeType)
         {
             return new DynamicRoute(
                 await DynamicController.executor.ExecuteInsertWithLastID(
@@ -49,8 +51,10 @@ namespace DynamicStructureObjects
                         .setParam("Name", Name)
                         .setParam("BaseRouteID", (long)baseRoute)
                         .setParam("ControllerID", idController)
+                        .setParam("RouteTypeID", (long)routeType)
                     )
                 , Name is not null ? Name : baseRoute.Value()
+                , (long)routeType
             );
         }
         public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
