@@ -46,6 +46,10 @@ namespace DynamicStructureObjects
             this.Routes = new List<DynamicRoute>();
             this.Proprieties = new List<DynamicPropriety>();
         }
+        public Query GetGetAllRoute()
+        {
+            return Routes.FirstOrDefault(route => route.Name == BaseRoutes.GETALL.Value())?.Queries.First().query;
+        }
         private static async Task<DynamicController> init(DynamicController controller)
         {
 

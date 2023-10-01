@@ -7,18 +7,18 @@ namespace APIDynamic
 {
     public static class BDInit
     {
+        public static string insertRoleString = "INSERT INTO Roles (id, name) VALUES ({0}, {1})";
         public static Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Roles (name) VALUES (@Name)", true, true);
         public async static Task InitDB(SQLExecutor executor, bool resetRoles)
         {
             await DynamicController.resetStructureData(executor);
             if (resetRoles)
             {
-                await executor.ExecuteQueryWithTransaction("DELETE Roles", "DBCC CHECKIDENT ('Roles', RESEED, 0)");
+                List<string> queries = new List<string>() { "DELETE Roles", "DBCC CHECKIDENT ('Roles', RESEED, 0)", "SET IDENTITY_INSERT Roles ON" };
                 foreach (Roles role in Enum.GetValues(typeof(Roles)))
-                    await executor.ExecuteInsertWithLastID(
-                        insertRole
-                            .setParam("Name", role.Value())
-                    );
+                    queries.Add(string.Format(insertRoleString, (long)role, role.Value()));
+                queries.Add("SET IDENTITY_INSERT Roles OFF");
+                await executor.ExecuteQueryWithTransaction(queries.ToArray());
             }
             await InitDB(new Dictionary<string, DynamicController>());
         }
