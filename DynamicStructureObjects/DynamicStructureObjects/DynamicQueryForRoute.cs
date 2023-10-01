@@ -1,5 +1,7 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Http;
+using System;
 
 namespace DynamicStructureObjects
 {
@@ -13,6 +15,7 @@ namespace DynamicStructureObjects
         internal static readonly Query getFilters = Query.fromQueryString(QueryTypes.SELECT, "SELECT Filters.id AS id, name AS Name, SQLParamInfos.varAffected AS VarAffected FROM Filters INNER JOIN SQLParamInfos ON SQLParamInfos.id = id_SQLParamInfo WHERE id_RouteQuery = @routeQueryID ORDER BY name, ind", true, true);
         internal static readonly Query getSQLParamInfos = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, varAffected AS VarAffected, id_Propriety AS ProprietyID FROM SQLParamInfos WHERE id_RouteQuery = @RouteQueryID", true, true);
         internal static readonly Query insertRouteQuery = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO RouteQueries (ind, SQLString, id_queryType, id_route, completeCheck, completeAuth) VALUES (@Index, @SQLString, @QueryTypeID, @RouteID, @CompleteCheck, @CompleteAuth)", true, true);
+        internal static readonly Query updateSQLParamInfo = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE SQLParamInfos SET id_Propriety = @ProprietyID WHERE varAffected = @VarAffected AND id_RouteQuery = @RouteQueryID", true, true);
         private string lastSQLParamAdded;
         internal DynamicQueryForRoute(long id, string queryString, long QueryTypeID, bool CompleteCheck, bool CompleteAuth)
         {
@@ -43,7 +46,7 @@ namespace DynamicStructureObjects
         }
         public async static Task<DynamicQueryForRoute> addRouteQuery(int index, string queryString, QueryTypes QueryType, long RouteID, bool CompleteAuth, bool CompleteCheck)
         {
-            return new DynamicQueryForRoute(
+            var dynamicQueryForRoute = new DynamicQueryForRoute(
                 await DynamicController.executor.ExecuteInsertWithLastID(
                     insertRouteQuery
                         .setParam("Index", index)
@@ -58,13 +61,14 @@ namespace DynamicStructureObjects
                 , CompleteCheck
                 , CompleteAuth
             );
-            /*
+            
             foreach (var variable in dynamicQueryForRoute.query.variablesInQuery)
             {
                 dynamicQueryForRoute.ParamsInfos.Add(variable.Key, await DynamicSQLParamInfo.addSQLParamInfo(variable.Key, 1, dynamicQueryForRoute.id));
                 await dynamicQueryForRoute.ParamsInfos[variable.Key].addValidator((variable.Value ? 0 : 1).ToString(), ValidatorTypes.REQUIRED);
             }
-            */
+            return dynamicQueryForRoute;
+            
         }
         public async Task<DynamicQueryForRoute> addFilter(string name, ShowTypes showType, string VarAffected)
         {
@@ -86,11 +90,29 @@ namespace DynamicStructureObjects
             await ParamsInfos[VarAffected].addValidator(Value, ValidatorType);
             return this;
         }
+        public async Task<DynamicQueryForRoute> addValidator(string VarAffected, params ValidatorBundle[] validatorBundles)
+        {
+            await ParamsInfos[VarAffected].addValidator(validatorBundles);
+            return this;
+        }
         public Task<DynamicQueryForRoute> addValidator(string Value, ValidatorTypes ValidatorType)
         {
             if (lastSQLParamAdded is null)
                 throw new Exception();
             return addValidator(lastSQLParamAdded, Value, ValidatorType);
+        }
+        public async Task<DynamicQueryForRoute> setValidator(string VarAffected, long ProprietyID, params ValidatorBundle[] ValidatorBundles)
+        {
+            await DynamicController.executor.ExecuteQueryWithTransaction(
+                updateSQLParamInfo
+                    .setParam("ProprietyID", ProprietyID)
+                    .setParam("VarAffected", VarAffected)
+                    .setParam("RouteQueryID", id)
+            );
+            foreach (var bundle in ValidatorBundles)
+                await ParamsInfos[VarAffected].addValidator(bundle);
+            lastSQLParamAdded = VarAffected;
+            return this;
         }
         internal bool validateParams(Dictionary<string, object> bodyData)
         {

@@ -5,7 +5,9 @@ namespace APIDynamic
     public enum Roles
     {
         [Value("Client")]
-        Client = 1
+        Client = 1,
+        [Value("Admin")]
+        Admin = 2
     }
 
     public static class RoleHelper

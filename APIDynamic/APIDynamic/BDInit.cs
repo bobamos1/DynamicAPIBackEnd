@@ -7,18 +7,18 @@ namespace APIDynamic
 {
     public static class BDInit
     {
+        public static string insertRoleString = "INSERT INTO Roles (id, name) VALUES ({0}, '{1}')";
         public static Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Roles (name) VALUES (@Name)", true, true);
         public async static Task InitDB(SQLExecutor executor, bool resetRoles)
         {
             await DynamicController.resetStructureData(executor);
             if (resetRoles)
             {
-                await executor.ExecuteQueryWithTransaction("DELETE Roles", "DBCC CHECKIDENT ('Roles', RESEED, 0)");
+                List<string> queries = new List<string>() { "DELETE Roles", "DBCC CHECKIDENT ('Roles', RESEED, 0)", "SET IDENTITY_INSERT Roles ON" };
                 foreach (Roles role in Enum.GetValues(typeof(Roles)))
-                    await executor.ExecuteInsertWithLastID(
-                        insertRole
-                            .setParam("Name", role.Value())
-                    );
+                    queries.Add(string.Format(insertRoleString, (long)role, role.Value()));
+                queries.Add("SET IDENTITY_INSERT Roles OFF");
+                await executor.ExecuteQueryWithTransaction(queries.ToArray());
             }
             await InitDB(new Dictionary<string, DynamicController>());
         }
@@ -128,20 +128,20 @@ namespace APIDynamic
                     .addRouteQuery("SELECT numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe FROM commandes", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
                     .addRouteQuery("SELECT numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe FROM commandes WHERE id = @id", QueryTypes.SELECT, true, true)
-                        .addSQLParamInfo("id")
+                        //.addSQLParamInfo("id")
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO commandes (numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (@numero_facture, @montant_brut, @no_civique_livraison, @rue_livraison, @id_client, @id_etat_commande, @id_ville, @id_employe)", QueryTypes.INSERT, true, true)
-                        .addSQLParamInfo("numero_facture")
+                        /*.addSQLParamInfo("numero_facture")
                         .addSQLParamInfo("montant_brut")
                         .addSQLParamInfo("no_civique_livraison")
                         .addSQLParamInfo("rue_livraison")
                         .addSQLParamInfo("id_client")
                         .addSQLParamInfo("id_etat_commande")
                         .addSQLParamInfo("id_ville")
-                        .addSQLParamInfo("id_employe")
+                        .addSQLParamInfo("id_employe")*/
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE commandes SET numero_facture = @_numero_facture, montant_brut = @_montant_brut, no_civique_livraison = @_no_civique_livraison, rue_livraison = @_rue_livraison, id_client = @_id_client, id_etat_commande = @_id_etat_commande, id_ville = @_id_ville, id_employe = @_id_employe WHERE id = @id", QueryTypes.UPDATE, true, true)
-                        .addSQLParamInfo("id")
+                        /*.addSQLParamInfo("id")
                         .addSQLParamInfo("numero_facture")
                         .addSQLParamInfo("montant_brut")
                         .addSQLParamInfo("no_civique_livraison")
@@ -149,20 +149,20 @@ namespace APIDynamic
                         .addSQLParamInfo("id_client")
                         .addSQLParamInfo("id_etat_commande")
                         .addSQLParamInfo("id_ville")
-                        .addSQLParamInfo("id_employe")
+                        .addSQLParamInfo("id_employe")*/
                 .addRoute("GetClientCommandes", RouteTypes.GET)
                     .addRouteQuery("UPDATE commandes SET numero_facture = @_numero_facture, montant_brut = @_montant_brut, no_civique_livraison = @_no_civique_livraison, rue_livraison = @_rue_livraison, id_client = @_id_client, id_etat_commande = @_id_etat_commande, id_ville = @_id_ville, id_employe = @_id_employe WHERE id_client = @id_client", QueryTypes.UPDATE, true, true)
-                        .addSQLParamInfo("numero_facture")
+                        /*.addSQLParamInfo("numero_facture")
                         .addSQLParamInfo("montant_brut")
                         .addSQLParamInfo("no_civique_livraison")
                         .addSQLParamInfo("rue_livraison")
                         .addSQLParamInfo("id_client")
                         .addSQLParamInfo("id_etat_commande")
                         .addSQLParamInfo("id_ville")
-                        .addSQLParamInfo("id_employe")
+                        .addSQLParamInfo("id_employe")*/
                 .addRoute("CommandeCheckout", RouteTypes.PUT)
                     .addRouteQuery("UPDATE commandes SET id_etat_commande = 2 WHERE id = @id", QueryTypes.UPDATE, true, true)
-                        .addSQLParamInfo("id")
+                        //.addSQLParamInfo("id")
                 ;
             //await controllers["produits_par_commande"]
             //    .addPropriety("id", true, true, ShowTypes.INT)
@@ -235,10 +235,10 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id, nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif FROM clients", QueryTypes.SELECT, true, true)
                 .addRoute(BaseRoutes.GET)
                     .addRouteQuery("SELECT id, nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif FROM clients WHERE p.id = @id", QueryTypes.SELECT, true, true)
-                        .addSQLParamInfo("id")
+                        //.addSQLParamInfo("id")
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@id, @nom, @prenom, @date_naissance, @adresse_courriel, @mdp, @token, @sel, @actif)", QueryTypes.INSERT, true, true)
-                        .addSQLParamInfo("id")
+                        /*.addSQLParamInfo("id")
                         .addSQLParamInfo("nom")
                         .addSQLParamInfo("prenom")
                         .addSQLParamInfo("date_naissance")
@@ -246,10 +246,10 @@ namespace APIDynamic
                         .addSQLParamInfo("mdp")
                         .addSQLParamInfo("token")
                         .addSQLParamInfo("sel")
-                        .addSQLParamInfo("actif")
+                        .addSQLParamInfo("actif")*/
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE clients SET nom = @_nom, prenom = @_prenom, date_naissance = @_date_naissance, adresse_courriel = @_adresse_courriel, mdp = @_mdp, token = @_token, sel = @_sel, actif = @_actif WHERE id = @id", QueryTypes.UPDATE, true, true)
-                        .addSQLParamInfo("id")
+                        /*.addSQLParamInfo("id")
                         .addSQLParamInfo("nom")
                         .addSQLParamInfo("prenom")
                         .addSQLParamInfo("date_naissance")
@@ -257,12 +257,12 @@ namespace APIDynamic
                         .addSQLParamInfo("mdp")
                         .addSQLParamInfo("token")
                         .addSQLParamInfo("sel")
-                        .addSQLParamInfo("actif")
+                        .addSQLParamInfo("actif")*/
                 .addRoute("Connection", RouteTypes.POST)
                     .addRouteQuery("SELECT adresse_courriel FROM client WHERE adresse_courriel = @adresse_courriel", QueryTypes.VALUE, true, true)
-                        .addSQLParamInfo("adresse_courriel")
+                        //.addSQLParamInfo("adresse_courriel")
                     .addRouteQuery("SELECT mdp FROM clients WHERE mdp = @mdp", QueryTypes.VALUE, true, true)
-                        .addSQLParamInfo("mdp")
+                        //.addSQLParamInfo("mdp")
                 ;
             //await controllers["Collaborateurs"]
             //    .addPropriety("id", true, true, ShowTypes.INT)

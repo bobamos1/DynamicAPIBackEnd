@@ -46,6 +46,10 @@ namespace DynamicStructureObjects
             this.Routes = new List<DynamicRoute>();
             this.Proprieties = new List<DynamicPropriety>();
         }
+        public Query GetGetAllRoute()
+        {
+            return Routes.FirstOrDefault(route => route.Name == BaseRoutes.GETALL.Value())?.Queries.First().query;
+        }
         private static async Task<DynamicController> init(DynamicController controller)
         {
 
@@ -161,6 +165,24 @@ namespace DynamicStructureObjects
         public async Task<DynamicController> addValidatorForSQLParam(string Value, ValidatorTypes ValidatorType)
         {
             await Routes.Last().addValidator(Value, ValidatorType);
+            return this;
+        }
+        public async Task<DynamicController> addParam(string ParamName, params ValidatorBundle[] ValidatorBundles)
+        {
+            await Routes.Last().addSQLParamInfo(ParamName, 1).addValidator(ParamName, ValidatorBundles);
+            return this;
+        }
+        public async Task<DynamicController> setSQLParam(string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
+        {
+            long proprietyID = 1;
+            if (ProprietyName is not null)
+                proprietyID = Proprieties.First(propriety => propriety.Name == ProprietyName).id;
+            await Routes.Last().setValidator(VarAffected, proprietyID, ValidatorBundles);
+            return this;
+        }
+        public async Task<DynamicController> setSQLParam(string VarAffected, params ValidatorBundle[] ValidatorBundles)
+        {
+            await Routes.Last().setValidator(VarAffected, ValidatorBundles);
             return this;
         }
         public async Task<DynamicController> addFilter(string routeName, int index, string name, ShowTypes showType, string VarAffected)

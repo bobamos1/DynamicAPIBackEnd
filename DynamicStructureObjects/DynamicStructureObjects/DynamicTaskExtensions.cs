@@ -1,7 +1,9 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace DynamicStructureObjects
 {
@@ -195,6 +197,18 @@ namespace DynamicStructureObjects
         {
             return await (await task).addValidatorForSQLParam(Value, ValidatorType);
         }
+        public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
+        {
+            return await (await task).setSQLParam(VarAffected, ProprietyName, ValidatorBundles);
+        }
+        public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
+        {
+            return await (await task).setSQLParam(VarAffected, ValidatorBundles);
+        }
+        public async static Task<DynamicController> addParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
+        {
+            return await (await task).addParam(VarAffected, ValidatorBundles);
+        }
         public async static Task<DynamicController> addFilter(this Task<DynamicController> task, string routeName, int index, string name, ShowTypes showType, string VarAffected)
         {
             return await (await task).addFilter(routeName, index, name, showType, VarAffected);
@@ -269,6 +283,10 @@ namespace DynamicStructureObjects
         public async static Task<DynamicRoute> addValidator(this Task<DynamicRoute> task, int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
             return await (await task).addValidator(indexQuery, VarAffected, Value, ValidatorType);
+        }
+        public async static Task<DynamicRoute> addValidator(this Task<DynamicRoute> task, string varAffected, params ValidatorBundle[] validatorBundle)
+        {
+            return await (await task).addValidator(varAffected, validatorBundle);
         }
         public async static Task<DynamicRoute> addFilter(this Task<DynamicRoute> task, int index, string name, ShowTypes showType, string VarAffected)
         {
