@@ -41,7 +41,7 @@ namespace DynamicStructureObjects
                 throw new Exception($"There are variables in Query not in ParamInfo for query {query.id}");
             return query;
         }
-        public async static Task<DynamicQueryForRoute> addRouteQuery(int index, string queryString, QueryTypes QueryType, long RouteID, bool CompleteCheck, bool CompleteAuth)
+        public async static Task<DynamicQueryForRoute> addRouteQuery(int index, string queryString, QueryTypes QueryType, long RouteID, bool CompleteAuth, bool CompleteCheck)
         {
             return new DynamicQueryForRoute(
                 await DynamicController.executor.ExecuteInsertWithLastID(

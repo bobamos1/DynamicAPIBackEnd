@@ -17,6 +17,7 @@ namespace APIDynamic
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
+            //Query qquery = controllers["Commande"].Routes.First().Queries.First().query;
             controllers["Clients"].addRouteAPI("Connection",
                 async (queries, bodyData) =>
                 {
@@ -44,7 +45,7 @@ namespace APIDynamic
             );
             //Ajoute les routes de l'API ici
             //Get Liste de souhaits selon le id du client
-            controllers["commande"].addRouteAPI(RouteTypes.POST, "GetListeSouhait",
+            controllers["Panier"].addRouteAPI("GetListeSouhait",
                 async (queries, bodyData) =>
                 {
 
@@ -52,7 +53,7 @@ namespace APIDynamic
                 }, true, true
             );
             //Get Le panier selon le id du client
-            controllers["commande"].addRouteAPI(RouteTypes.POST, "GetPanier",
+            controllers["Panier"].addRouteAPI("GetPanier",
                 async (queries, bodyData) =>
                 {
 
@@ -60,7 +61,7 @@ namespace APIDynamic
                 }, true, true
             );
             /*
-            controllers["Commandes"].addRouteAPI(RouteTypes.POST, "CommandeCheckout",
+            controllers["Commandes"].addRouteAPI("CommandeCheckout",
                 async (queries, body) => {
                     try
                     {

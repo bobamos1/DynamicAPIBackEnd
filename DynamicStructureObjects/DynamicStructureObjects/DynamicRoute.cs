@@ -57,9 +57,9 @@ namespace DynamicStructureObjects
                 , (long)routeType
             );
         }
-        public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
         {
-            Queries.Add(await DynamicQueryForRoute.addRouteQuery(Queries.Count + 1, queryString, QueryType, id, CompleteCheck, CompleteAuth));
+            Queries.Add(await DynamicQueryForRoute.addRouteQuery(Queries.Count + 1, queryString, QueryType, id, CompleteAuth, CompleteCheck));
             return this;
         }
         public Task<DynamicRoute> addSQLParamInfo(int indexQuery, string varAffected)

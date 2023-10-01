@@ -123,14 +123,14 @@ namespace DynamicStructureObjects
             Routes.Add(await DynamicRoute.addRoute(id, Name, routeType));
             return this;
         }
-        public async Task<DynamicController> addRouteQuery(string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        public async Task<DynamicController> addRouteQuery(string routeName, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
         {
-            await Routes.First(route => route.Name == routeName).addRouteQuery(queryString, QueryType, CompleteCheck, CompleteAuth);
+            await Routes.First(route => route.Name == routeName).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
             return this;
         }
-        public async Task<DynamicController> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        public async Task<DynamicController> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
         {
-            await Routes.Last().addRouteQuery(queryString, QueryType, CompleteCheck, CompleteAuth);
+            await Routes.Last().addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
             return this;
         }
         public async Task<DynamicController> addSQLParamInfo(string routeName, int index, string varAffected, string ProprietyName)
