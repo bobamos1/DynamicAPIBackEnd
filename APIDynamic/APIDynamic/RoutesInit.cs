@@ -43,7 +43,22 @@ namespace APIDynamic
                 }, true, true
             );
             //Ajoute les routes de l'API ici
+            //Get Liste de souhaits selon le id du client
+            controllers["commande"].addRouteAPI(RouteTypes.POST, "GetListeSouhait",
+                async (queries, bodyData) =>
+                {
 
+                    return Results.Ok(bodyData);
+                }, true, true
+            );
+            //Get Le panier selon le id du client
+            controllers["commande"].addRouteAPI(RouteTypes.POST, "GetPanier",
+                async (queries, bodyData) =>
+                {
+
+                    return Results.Ok(bodyData);
+                }, true, true
+            );
             /*
             controllers["Commandes"].addRouteAPI(RouteTypes.POST, "CommandeCheckout",
                 async (queries, body) => {
