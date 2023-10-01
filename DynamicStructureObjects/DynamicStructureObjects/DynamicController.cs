@@ -59,6 +59,20 @@ namespace DynamicStructureObjects
                 await DynamicRoute.init(route);
             foreach (var propriety in controller.Proprieties)
                 await DynamicPropriety.init(propriety);
+
+            var getAllRoute = controller.Routes.FirstOrDefault(route => route.Name == BaseRoutes.GETALL.Value());
+            if (getAllRoute is not null)
+            {
+                if (!controller.hasRoute(BaseRoutes.GETALLDETAILED.Value()))
+                    controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETALLDETAILED));
+                if (getAllRoute.Queries.First().ParamsInfos.ContainsKey("id"))
+                {
+                    if (!controller.hasRoute(BaseRoutes.GET.Value()))
+                        controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GET));
+                    if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
+                        controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED));
+                }
+            }
             return controller;
         }
         public static async Task<Dictionary<string, DynamicController>> initControllers(SQLExecutor executor, string apiKey)
