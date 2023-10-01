@@ -24,7 +24,7 @@ namespace APIDynamic
         }
         public async static Task InitDB(Dictionary<string, DynamicController> controllers)
         {
-            //await DynamicController.resetStructureData();
+            await DynamicController.resetStructureData();
             await controllers
                 .addController("Produits", true)
                 .addController("Categories", true)
@@ -48,12 +48,13 @@ namespace APIDynamic
 
             await controllers["Produits"]
                 .addPropriety("id", true, true, ShowTypes.INT)
-                    .addValidatorForSQLParam("true", ValidatorTypes.REQUIRED)
+                    .addValidatorForPropriety("id", "true", ValidatorTypes.REQUIRED)
                 .addPropriety("nom", true, true, ShowTypes.STRING)
-                    //.addValidatorForSQLParam("true", ValidatorTypes.REQUIRED)
+                    .addValidatorForPropriety("nom", "true", ValidatorTypes.REQUIRED)
                 .addPropriety("descriptions", true, true, ShowTypes.STRING)
-                    //.addValidatorForSQLParam("true", ValidatorTypes.REQUIRED)
+                    .addValidatorForPropriety("descriptions", "true", ValidatorTypes.REQUIRED)
                 .addPropriety("prix", true, true, ShowTypes.FLOAT)
+                    .addValidatorForPropriety("prix", "true", ValidatorTypes.REQUIRED)
                 .addPropriety("id_categorie", true, true, ShowTypes.STRING)
                 .addPropriety("nom_categorie", true, true, ShowTypes.STRING)
                 .addPropriety("id_etat_produit", true, true, ShowTypes.STRING)
@@ -89,11 +90,10 @@ namespace APIDynamic
                             .addValidatorForSQLParam("false", ValidatorTypes.REQUIRED)
                         .addSQLParamInfo("id_etat_produit")
                             .addValidatorForSQLParam("false", ValidatorTypes.REQUIRED)
-
-
                 ;
+
             await controllers["Categories"]
-                .addPropriety("id", true, true , ShowTypes.INT)
+                .addPropriety("id", true, true, ShowTypes.INT)
                 .addPropriety("nom", true, true, ShowTypes.STRING)
                 .addPropriety("descriptions", true, true, ShowTypes.INT)
                 .addPropriety("id_categorie_mere", true, true, ShowTypes.STRING)
@@ -186,11 +186,14 @@ namespace APIDynamic
                         .addSQLParamInfo("id")
                 */
                 .addRoute(BaseRoutes.UPDATE)
-                    .addRouteQuery("UPADATE produits_par_commande SET id_produit = @_id_produit, id_commande = @_id_commande, quantite = @_quantite, prix_unitaire = @_prix_unitaire", QueryTypes.UPDATE, true, true)
+                    .addRouteQuery("UPDATE produits_par_commande SET id_produit = @_id_produit, id_commande = @_id_commande, quantite = @_quantite, prix_unitaire = @_prix_unitaire", QueryTypes.UPDATE, true, true)
                         .addSQLParamInfo("id_produit")
                         .addSQLParamInfo("id_commande")
                         .addSQLParamInfo("quantite")
                         .addSQLParamInfo("prix_unitaire")
+                .addRoute("GetProduitsPanier")
+                    .addRouteQuery("SELECT id, id_produit, id_commande, quantite, prix_unitaire FROM produits_par_commande WHERE id_commande = @id_commande", QueryTypes.SELECT, true, true)
+                        .addSQLParamInfo("id_commande")
                 ;
             await controllers["Clients"]
                 .addPropriety("id", true, true, ShowTypes.INT)
@@ -360,7 +363,7 @@ namespace APIDynamic
             await controllers["TypesPreferencesGraphique"]
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id, nom, code_html FROM types_preferences_graphique", QueryTypes.SELECT, true, true)
-                .addRoute(BaseRoutes .GET)
+                .addRoute(BaseRoutes.GET)
                     .addRouteQuery("SELECT id, nom, code_html FROM types_preferences_graphique WHERE id = @id", QueryTypes.SELECT, true, true)
                         .addSQLParamInfo("id")
                 .addRoute(BaseRoutes.INSERT)
@@ -451,6 +454,7 @@ namespace APIDynamic
                         .addSQLParamInfo("nom")
 
                 ;
+
         }
     }
 }
