@@ -7,7 +7,7 @@ namespace APIDynamic
 {
     public static class BDInit
     {
-        public static string insertRoleString = "INSERT INTO Roles (id, name) VALUES ({0}, {1})";
+        public static string insertRoleString = "INSERT INTO Roles (id, name) VALUES ({0}, '{1}')";
         public static Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Roles (name) VALUES (@Name)", true, true);
         public async static Task InitDB(SQLExecutor executor, bool resetRoles)
         {
