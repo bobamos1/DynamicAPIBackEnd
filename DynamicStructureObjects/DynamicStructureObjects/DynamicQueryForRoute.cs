@@ -14,13 +14,13 @@ namespace DynamicStructureObjects
         public List<DynamicFilter> Filters { get; internal set; }
         internal static readonly Query getFilters = Query.fromQueryString(QueryTypes.SELECT, "SELECT Filters.id AS id, name AS Name, SQLParamInfos.varAffected AS VarAffected FROM Filters INNER JOIN SQLParamInfos ON SQLParamInfos.id = id_SQLParamInfo WHERE id_RouteQuery = @routeQueryID ORDER BY name, ind", true, true);
         internal static readonly Query getSQLParamInfos = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, varAffected AS VarAffected, id_Propriety AS ProprietyID FROM SQLParamInfos WHERE id_RouteQuery = @RouteQueryID", true, true);
-        internal static readonly Query insertRouteQuery = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO RouteQueries (ind, SQLString, id_queryType, id_route, completeCheck, completeAuth) VALUES (@Index, @SQLString, @QueryTypeID, @RouteID, @CompleteCheck, @CompleteAuth)", true, true);
+        internal static readonly Query insertRouteQuery = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO RouteQueries (ind, SQLString, id_queryType, id_route, CompleteAuth, CompleteCheck) VALUES (@Index, @SQLString, @QueryTypeID, @RouteID, @CompleteCheck, @CompleteAuth)", true, true);
         internal static readonly Query updateSQLParamInfo = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE SQLParamInfos SET id_Propriety = @ProprietyID WHERE varAffected = @VarAffected AND id_RouteQuery = @RouteQueryID", true, true);
         private string lastSQLParamAdded;
-        internal DynamicQueryForRoute(long id, string queryString, long QueryTypeID, bool CompleteCheck, bool CompleteAuth)
+        internal DynamicQueryForRoute(long id, string queryString, long QueryTypeID, bool CompleteAuth, bool CompleteCheck)
         {
             this.id = id;
-            this.query = Query.fromQueryString((QueryTypes)QueryTypeID, queryString, CompleteCheck, CompleteAuth);
+            this.query = Query.fromQueryString((QueryTypes)QueryTypeID, queryString, CompleteAuth, CompleteCheck);
             this.ParamsInfos = new Dictionary<string, DynamicSQLParamInfo>();
             this.CompleteAuth = CompleteAuth;
             this.Filters = new List<DynamicFilter>();
@@ -44,7 +44,7 @@ namespace DynamicStructureObjects
                 throw new Exception($"There are variables in Query not in ParamInfo for query {query.id}");
             return query;
         }
-        public async static Task<DynamicQueryForRoute> addRouteQuery(int index, string queryString, QueryTypes QueryType, long RouteID, bool CompleteCheck, bool CompleteAuth)
+        public async static Task<DynamicQueryForRoute> addRouteQuery(int index, string queryString, QueryTypes QueryType, long RouteID, bool CompleteAuth, bool CompleteCheck)
         {
             var dynamicQueryForRoute = new DynamicQueryForRoute(
                 await DynamicController.executor.ExecuteInsertWithLastID(

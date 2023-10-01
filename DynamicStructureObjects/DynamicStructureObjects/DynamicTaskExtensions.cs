@@ -52,9 +52,9 @@ namespace DynamicStructureObjects
             await task[controllerName].addRoute(Name, routeType);
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Dictionary<string, DynamicController> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Dictionary<string, DynamicController> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
         {
-            await task[controllerName].addRouteQuery(routeName, queryString, QueryType, CompleteCheck, CompleteAuth);
+            await task[controllerName].addRouteQuery(routeName, queryString, QueryType, CompleteAuth, CompleteCheck);
             return task;
         }
         public async static Task<Dictionary<string, DynamicController>> addFilter(this Dictionary<string, DynamicController> task, string controllerName, string routeName, int index, string name, ShowTypes showType, string VarAffected)
@@ -112,9 +112,9 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRoute(controllerName, Name, routeType);
         }
-        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
         {
-            return await (await task).addRouteQuery(controllerName, routeName, queryString, QueryType, CompleteCheck, CompleteAuth);
+            return await (await task).addRouteQuery(controllerName, routeName, queryString, QueryType, CompleteAuth, CompleteCheck);
         }
         public async static Task<Dictionary<string, DynamicController>> addFilter(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, int index, string name, ShowTypes showType, string VarAffected)
         {
@@ -160,13 +160,13 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRoute(Name, routeType);
         }
-        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string routeName, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string routeName, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
         {
-            return await (await task).addRouteQuery(routeName, queryString, QueryType, CompleteCheck, CompleteAuth);
+            return await (await task).addRouteQuery(routeName, queryString, QueryType, CompleteAuth, CompleteCheck);
         }
-        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
         {
-            return await (await task).addRouteQuery(queryString, QueryType, CompleteCheck, CompleteAuth);
+            return await (await task).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
         }
         public async static Task<DynamicController> addSQLParamInfo(this Task<DynamicController> task, string routeName, int index, string varAffected, string ProprietyName)
         {
@@ -247,9 +247,9 @@ namespace DynamicStructureObjects
 
 
 
-        public async static Task<DynamicRoute> addRouteQuery(this Task<DynamicRoute> task, string queryString, QueryTypes QueryType, bool CompleteCheck, bool CompleteAuth)
+        public async static Task<DynamicRoute> addRouteQuery(this Task<DynamicRoute> task, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
         {
-            return await (await task).addRouteQuery(queryString, QueryType, CompleteCheck, CompleteAuth);
+            return await (await task).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
         }
         public async static Task<DynamicRoute> addSQLParamInfo(this Task<DynamicRoute> task, int index, string varAffected)
         {
