@@ -19,17 +19,21 @@ namespace DynamicStructureObjects
         {
             return validator;
         }
-        internal async static Task<DynamicValidator> addValidator(string Value, long ParentID, ValidatorTypes ValidatorType, bool forPropriety)
+        internal static Task<DynamicValidator> addValidator(string Value, long ParentID, ValidatorTypes ValidatorType, bool forPropriety)
+        {
+            return addValidator(new ValidatorBundle(ValidatorType, Value, ""), ParentID, forPropriety);
+        }
+        internal async static Task<DynamicValidator> addValidator(ValidatorBundle bundle, long ParentID, bool forPropriety)
         {
             await DynamicController.executor.ExecuteInsertWithLastID(
                 (forPropriety ? insertProprietyValidators : insertSQLParamInfoValidators)
-                    .setParam("Value", Value)
+                    .setParam("Value", bundle.value)
                     .setParam("ParentID", ParentID)
-                    .setParam("ValidatorTypeID", (long)ValidatorType)
+                    .setParam("ValidatorTypeID", (long)bundle.validatorType)
             );
             return new DynamicValidator(
-                  Value
-                , (long)ValidatorType
+                  bundle.value
+                , (long)bundle.validatorType
             );
         }
         internal object parseValue(string value)

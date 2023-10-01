@@ -23,19 +23,19 @@ namespace DynamicStructureObjects
             this.IsStatic = true;
             return value;
         }
-        internal async static Task<DynamicParamInitializer> addParamInitializer(string AssociatedVarName, string Value, CSharpTypes CSharpType, long linkID)
+        internal async static Task<DynamicParamInitializer> addParamInitializer(ParamLinker paramLinker, long linkID)
         {
             await DynamicController.executor.ExecuteInsertWithLastID(
                 insertParamInitializer
-                    .setParam("Name", AssociatedVarName)
-                    .setParam("Value", Value)
-                    .setParam("CSharpTypeID", (long)CSharpType)
+                    .setParam("Name", paramLinker.associatedVarName)
+                    .setParam("Value", paramLinker.value)
+                    .setParam("CSharpTypeID", (long)paramLinker.cSharpType)
                     .setParam("LinkID", linkID)
             );
             return new DynamicParamInitializer(
-                  AssociatedVarName
-                , Value
-                , (long)CSharpType
+                  paramLinker.associatedVarName
+                , paramLinker.value
+                , (long)paramLinker.cSharpType
             );
         }
     }

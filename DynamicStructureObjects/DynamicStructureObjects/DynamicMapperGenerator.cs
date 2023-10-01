@@ -67,7 +67,7 @@ namespace DynamicStructureObjects
                 .setParam("ControllerID", ControllerID)
             );
             foreach (var linker in linkers)
-                await mapperGenerator.addParamInitializer(linker.AssociatedVarName, linker.Value, linker.CSharpType);
+                await mapperGenerator.addParamInitializer(linker);
             //await init(mapperGenerator);
             mapperGenerator.makeMapper();
             return mapperGenerator;
@@ -76,13 +76,17 @@ namespace DynamicStructureObjects
         {
             return await (await addMapperGenerator(ControllerName, ProprietyID, linkers)).addParamInitializer(SQLExecutor.KEY_FOR_CBO, key, CSharpTypes.REFERENCE);
         }
-        internal async Task<DynamicMapperGenerator> addParamInitializer(string AssociatedVarName, string Value, CSharpTypes CSharpType)
+        internal Task<DynamicMapperGenerator> addParamInitializer(string AssociatedVarName, string Value, CSharpTypes CSharpType)
         {
-            DynamicParamInitializer initializer = await DynamicParamInitializer.addParamInitializer(AssociatedVarName, Value, CSharpType, id);
+            return addParamInitializer(new ParamLinker(AssociatedVarName, Value, CSharpType));
+        }
+        internal async Task<DynamicMapperGenerator> addParamInitializer(ParamLinker paramLinker)
+        {
+            DynamicParamInitializer initializer = await DynamicParamInitializer.addParamInitializer(paramLinker, id);
             if (initializer.IsStatic)
                 baseParameters.Add(initializer.AssociatedVarName, initializer.Value);
             else
-                parametersToLink.Add(initializer.AssociatedVarName, Value);
+                parametersToLink.Add(initializer.AssociatedVarName, paramLinker.value);
             return this;
         }
     }

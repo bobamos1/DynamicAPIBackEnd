@@ -55,6 +55,12 @@ namespace DynamicStructureObjects
             Validators.Add(await DynamicValidator.addValidator(Value, id, ValidatorType, false));
             return this;
         }
+        public async Task<DynamicSQLParamInfo> addValidator(params ValidatorBundle[] bundles)
+        {
+            foreach (var bundle in bundles)
+                Validators.Add(await DynamicValidator.addValidator(bundle, id, false));
+            return this;
+        }
         internal bool validateParam(object value)
         {
             return Validators.All(validator => validator.validateParam(value));

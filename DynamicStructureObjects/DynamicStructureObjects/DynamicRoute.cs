@@ -80,6 +80,17 @@ namespace DynamicStructureObjects
             await Queries.Last().addSQLParamInfo(varAffected, ProprietyID);
             return this;
         }
+
+        public async Task<DynamicRoute> setValidator(string VarAffected, long ProprietyID, params ValidatorBundle[] ValidatorBundles)
+        {
+            await Queries.Last().setValidator(VarAffected, ProprietyID, ValidatorBundles);
+            return this;
+        }
+        public async Task<DynamicRoute> setValidator(string VarAffected, params ValidatorBundle[] ValidatorBundles)
+        {
+            await Queries.Last().setValidator(VarAffected, 1, ValidatorBundles);
+            return this;
+        }
         public async Task<DynamicRoute> addValidator(int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
             await Queries[indexQuery].addValidator(VarAffected, Value, ValidatorType);
@@ -88,6 +99,11 @@ namespace DynamicStructureObjects
         public async Task<DynamicRoute> addValidator(string Value, ValidatorTypes ValidatorType)
         {
             await Queries.Last().addValidator(Value, ValidatorType);
+            return this;
+        }
+        public async Task<DynamicRoute> addValidator(string varAffected, params ValidatorBundle[] validatorBundles)
+        {
+            await Queries.Last().addValidator(varAffected, validatorBundles);
             return this;
         }
         public async Task<DynamicRoute> addFilter(int indexQuery, string name, ShowTypes showType, string VarAffected)
