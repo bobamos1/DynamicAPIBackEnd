@@ -207,14 +207,14 @@ namespace APIDynamic
 
                 .addRoute("GetListeSouhait", RouteTypes.POST)
                     .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 1 AND c.id_client = @id_client", QueryTypes.SELECT, true)
-                        .addSQLParamInfo("id_client")
+                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 1 AND c.id_client = @id_client", QueryTypes.SELECT, true, true)
+                        .setSQLParam("id_client", ValidatorTypes.REQUIRED.SetValue("id_client", "Pas de ID passe dans la route"))
                 //1 est liste de souhaits
                 .addRoute("GetPanier", RouteTypes.POST)
                     .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 2 AND c.id_client = @id_client", QueryTypes.SELECT, true)
-                        .addSQLParamInfo("id_client")
-                //2 est Panier
+                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 2 AND c.id_client = @id_client", QueryTypes.SELECT, true, true)
+                        .setSQLParam("id_client", ValidatorTypes.REQUIRED.SetValue("id_client", "Pas de ID passe dans la route"))
+            //2 est Panier
             ;
 
             //await controllers["livraison"]
