@@ -60,6 +60,20 @@ namespace APIDynamic
                     return Results.Ok(bodyData);
                 }, true, true
             );
+            //Delete un produit du panier
+            controllers["Panier"].addRouteAPI("DeleteProduitPanier",
+                async (queries, bodyData) =>
+                {
+                    return Results.Ok("Le produit fut supprimé de votre panier.");
+                }
+                );
+            //Delete un produit de la liste de souhait
+            controllers["Panier"].addRouteAPI("DeleteProduitListeSouhait",
+                async (queries, bodyData) =>
+                {
+                    return Results.Ok("Le produit fut supprimé de votre liste de souhait.");
+                }
+                );
             /*
             controllers["Commandes"].addRouteAPI("CommandeCheckout",
                 async (queries, body) => {

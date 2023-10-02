@@ -202,7 +202,6 @@ namespace APIDynamic
                 .addPropriety("QuantiteInventaire", true, false, ShowTypes.INT)
                 .addPropriety("PrixProduit", true, false, ShowTypes.FLOAT)
                 .addPropriety("ImageProduitURL", true, false, ShowTypes.STRING)
-
                 .addRoute("GetListeSouhait", RouteTypes.POST)
                     .addAuthorizedRouteRoles(Roles.Client.ID())
                     .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 5 AND c.id_client = @id_client", QueryTypes.SELECT, true, true)
@@ -215,9 +214,14 @@ namespace APIDynamic
                  //4 est Panier
                  .addRoute("DeleteProduitPanier", RouteTypes.DELETE)
                     .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("DELETE FROM commandes", QueryTypes.SELECT, true, true)
-                        .setSQLParam("id_client", ValidatorTypes.REQUIRED.SetValue("id_client", "Pas de ID passe dans la route"))
-                //Delete produit du panier (devrait-il être dans le controlleur de la table produits par commande?
+                    .addRouteQuery("DELETE FROM produits_commandes WHERE id = @id", QueryTypes.SELECT, true, true)
+                        .setSQLParam("id", ValidatorTypes.REQUIRED.SetValue("id", "Pas de ID passe dans la route"))
+                 .addRoute("DeleteProduitListeSouhait", RouteTypes.DELETE)
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                    .addRouteQuery("DELETE FROM produits_commandes WHERE id_produit = @id_produit", QueryTypes.SELECT, true, true)
+                        .setSQLParam("id", ValidatorTypes.REQUIRED.SetValue("id", "Pas de ID passe dans la route"))
+
+
             ;
 
             //await controllers["livraison"]
