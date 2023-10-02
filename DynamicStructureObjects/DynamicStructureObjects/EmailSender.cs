@@ -1,47 +1,26 @@
 ﻿using System.Net;
 using System.Net.Mail;
 
-namespace sendEmail
+namespace DynamicStructureObjects
 {
     public class EmailSender
     {
 
-        private string _from;
-        private string _smtpUsername;
-        private string _smtpPassword;
-        private int _host = 587;
+        private string from { get; set; }
+        private string smtpUsername { get; set; }
+        private string smtpPassword { get; set; }
+        private string Host { get; set; }
+        private int Port { get; set; }
         private Dictionary<string, string> bodiesSubjects = new Dictionary<string, string>();
-
-        public string from
+        public EmailSender(string fromEmail, string smtpUsername, string smtpPassword, string host, int port)
         {
-            get { return _from; }
-            set { _from = value; }
+            from = fromEmail;
+            this.smtpUsername = smtpUsername;
+            this.smtpPassword = smtpPassword;
+            this.Host = host;
+            this.Port = port;
         }
-
-        public string smtpUsername
-        {
-            get { return _smtpUsername; }
-            set { _smtpUsername = value; }
-        }
-
-        public string smtpPassword
-        {
-            get { return _smtpPassword; }
-            set { _smtpPassword = value; }
-        }
-        public int host
-        {
-            get { return _host; }
-            set { _host = value; }
-        }
-
-        public EmailSender(string fromEmail, string smtpUsername, string smtpPassword)
-        {
-            _from = fromEmail;
-            _smtpUsername = smtpUsername;
-            _smtpPassword = smtpPassword;
-        }
-        public static void SendEmail(string fromEmail, List<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword)
+        public static bool SendEmail(string fromEmail, List<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, string host, int port)//"smtp.gmail.com" //587
         {
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = new MailAddress(fromEmail);
@@ -55,8 +34,8 @@ namespace sendEmail
             mailMessage.Body = body;
 
             SmtpClient smtpClient = new SmtpClient();
-            smtpClient.Host = "smtp.gmail.com";
-            smtpClient.Port = 587;
+            smtpClient.Host = host;
+            smtpClient.Port = port;
             smtpClient.UseDefaultCredentials = false;
             smtpClient.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
             smtpClient.EnableSsl = true;
@@ -64,18 +43,18 @@ namespace sendEmail
             try
             {
                 smtpClient.Send(mailMessage);
-                Console.WriteLine("Email Sent Successfully.");
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error: " + ex.Message);
+                return false;
             }
         }
 
-        public void SendEmail(IEnumerable<string> toEmails, string subject, string body)
+        public bool SendEmail(IEnumerable<string> toEmails, string subject, string body)
         {
             MailMessage mailMessage = new MailMessage();
-            mailMessage.From = new MailAddress(_from);
+            mailMessage.From = new MailAddress(from);
 
             foreach (var toEmail in toEmails)
             {
@@ -86,20 +65,20 @@ namespace sendEmail
             mailMessage.Body = body;
 
             SmtpClient smtpClient = new SmtpClient();
-            smtpClient.Host = "smtp.gmail.com";
-            smtpClient.Port = 587;
+            smtpClient.Host = Host;
+            smtpClient.Port = Port;
             smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
+            smtpClient.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
             smtpClient.EnableSsl = true;
 
             try
             {
                 smtpClient.Send(mailMessage);
-                Console.WriteLine("Email Sent Successfully.");
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error: " + ex.Message);
+                return false;
             }
         }
         public void SendEmail(string toEmail, string subject, string body)

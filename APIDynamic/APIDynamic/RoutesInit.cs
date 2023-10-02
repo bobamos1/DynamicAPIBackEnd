@@ -18,21 +18,54 @@ namespace APIDynamic
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
             //Query qquery = controllers["Commande"].Routes.First().Queries.First().query;
-            controllers["Clients"].addRouteAPI("Connection",
+            controllers["Clients"].addRouteAPI("ConnectionFirstFactor",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeConnection2Factor(bodyData.Get<string>("Email"), bodyData.Get<string>("Password"), queries[0], queries[1]);
+                }, false
+            );
+            controllers["Clients"].addRouteAPI("ConnectionTwoFactor",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeConnection(bodyData.Get<string>("TwoFactor"), queries[0], Roles.Client.ID());
+                }, false
+            );
+            controllers["Clients"].addRouteAPI("CreateUser",
                 async (queries, bodyData) =>
                 {
-                    string username = "bob";
-                    string email = "bob@gmail.com";
-                    long userID = 1;
-                    /*ressortir les données si dessus au lieu qu'ils soient hard codé
-                     create token
-                    hard code le role client pour le client
-                    ou
-                    Ressortir le rôle du client*/
-                    string token = DynamicConnection.CreateToken(username, email, userID, (long)Roles.Client);
-                    return Results.Ok(token);
-                    //return Results.Ok(bodyData);
-                    //return Results.Ok(await executorData.SelectQuery(queries[0]));
+                    var userInfo = DynamicConnection.CreatePasswordHash(bodyData.Get<string>("Username"), bodyData.Get<string>("Email"), bodyData.Get<string>("Password"));
+                    var userID = await executorData.ExecuteInsertWithLastID(
+                        queries[0]
+                            .setParam("Username", userInfo.username)
+                            .setParam("Email", userInfo.Email)
+                            .setParam("PasswordHash", userInfo.passwordHash)
+                            .setParam("PasswordSalt", userInfo.passwordSalt)
+                   );
+                    return Results.Ok(DynamicConnection.CreateToken(userID, userInfo, Roles.Client.ID()));
+                }, false
+            );
+            controllers["Clients"].addRouteAPI("RecoverPasswordStepOne",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.sendRecoveryEmail(bodyData.Get<string>("Email"), queries[0]);
+                }, false
+            );
+            controllers["Clients"].addRouteAPI("RecoverPasswordStepTwo",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.recoverPassword(bodyData.Get<string>("TwoFactor"), bodyData.Get<string>("Password"), queries[0]);
+                }, false
+            );
+            controllers["Employers"].addRouteAPI("ConnectionFirstFactor",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeConnection2Factor(bodyData.Get<string>("Email"), bodyData.Get<string>("Password"), queries[0], queries[1]);
+                }, false
+            );
+            controllers["Employers"].addRouteAPI("ConnectionTwoFactor",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeConnection(bodyData.Get<string>("TwoFactor"), queries[0], queries[1]);
                 }, false
             );
             controllers["Commandes"].addRouteAPI("GetClientCommandes",

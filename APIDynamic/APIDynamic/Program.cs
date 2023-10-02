@@ -10,7 +10,7 @@ using Swashbuckle.AspNetCore.Filters;
 var builder = WebApplication.CreateBuilder(args);
 
 Dictionary<string, string> connectionStrings = RoutesInit.LoadConnectionStrings(builder.Configuration);
-
+//DynamicConnection.setEmailSender(builder.Configuration["Email:EmailHost"], builder.Configuration["Email:UsernameHost"], builder.Configuration["Email:PasswordHost"], "smtp.gmail.com", 587);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

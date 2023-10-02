@@ -25,6 +25,14 @@ namespace DynamicStructureObjects
             this.CompleteAuth = CompleteAuth;
             this.Filters = new List<DynamicFilter>();
         }
+        private DynamicQueryForRoute()
+        {
+            this.id = -1;
+            this.query = new Query();
+            this.ParamsInfos = new Dictionary<string, DynamicSQLParamInfo>();
+            this.CompleteAuth = true;
+            this.Filters = new List<DynamicFilter>();
+        }
         internal static async Task<DynamicQueryForRoute> init(DynamicQueryForRoute query)
         {
             foreach (var paramInfo in await DynamicController.executor.SelectQuery<DynamicSQLParamInfo>(
@@ -43,6 +51,10 @@ namespace DynamicStructureObjects
             if (!query.query.variablesInQuery.All(variable => query.ParamsInfos.ContainsKey(variable.Key)))
                 throw new Exception($"There are variables in Query not in ParamInfo for query {query.id}");
             return query;
+        }
+        public static DynamicQueryForRoute addEmptyQuery()
+        {
+            return new DynamicQueryForRoute();
         }
         public async static Task<DynamicQueryForRoute> addRouteQuery(int index, string queryString, QueryTypes QueryType, long RouteID, bool CompleteAuth, bool CompleteCheck)
         {
