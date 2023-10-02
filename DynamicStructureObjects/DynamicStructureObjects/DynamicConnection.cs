@@ -1,6 +1,7 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.IdentityModel.Tokens;
 using ParserLib;
@@ -18,8 +19,17 @@ namespace DynamicStructureObjects
     public record UserInfo(long userID, string username, string Email, byte[] passwordHash, byte[] passwordSalt);
     public static class DynamicConnection
     {
+        public static readonly string CourrielTokenBody = "Votre identifiant a 2 facteur est {0}";
+        public static readonly string CourrielTokenSubject = "Votre identifiant a 2 facteur est {0}";
+        public static readonly string CourrielTokenBodyRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
+        public static readonly string CourrielTokenSubjectRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
         internal static string apiKey { get; set; }
+        internal static EmailSender emailSender { get; set; }
         internal static TimeSpan TokenLifetime = TimeSpan.FromHours(2);
+        public static void setEmailSender(string hostEmail, string hostUsername, string hostPassword, string host, int port)
+        {
+            emailSender = new EmailSender(hostEmail, hostUsername, hostPassword, host, port);
+        }
         private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512())
@@ -28,7 +38,12 @@ namespace DynamicStructureObjects
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
         }
-        private static UserInfo CreatePasswordHash(string username, string Email, string password)
+        private static UserInfo CreatePasswordHash(string password)
+        {
+            using (var hmac = new HMACSHA512())
+                return new UserInfo(-1, "", "", hmac.Key, hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)));
+        }
+        public static UserInfo CreatePasswordHash(string username, string Email, string password)
         {
             using (var hmac = new HMACSHA512())
                 return new UserInfo(-1, username, Email, hmac.Key, hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)));
@@ -89,19 +104,51 @@ namespace DynamicStructureObjects
             return CreateToken(oldToken.Claims);
 
         }
-        public static IEnumerable<Claim> getClaims(UserInfo userInfo, params long[] roles)
+        internal static IEnumerable<Claim> getClaims(long userID, UserInfo userInfo, params long[] roles)
         {
             return new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userInfo.username),
                 new Claim(ClaimTypes.Email, userInfo.Email),
-                new Claim(ClaimTypes.UserData, userInfo.userID.ToString()),
+                new Claim(ClaimTypes.UserData, userID == -1 ? userInfo.userID.ToString() : userID.ToString()),
                 new Claim(ClaimTypes.Role, string.Join(',', roles))
             };
         }
+        public static string GetRandom()
+        {
+            return new Random().Next(100000, 999999).ToString();
+        }
+        public static async Task<IResult> sendRecoveryEmail(string Email, Query getUserInfoQuery)
+        {
+            var userInfo = await DynamicController.executor.SelectValue<UserInfo>(getUserInfoQuery.setParam("Email", Email));
+
+            var randomToken = GetRandom();
+            string subject = string.Format(CourrielTokenSubject, randomToken);
+            string message = string.Format(CourrielTokenBody, randomToken);
+            emailSender.SendEmail(userInfo.Email, subject, message);
+
+            return Results.Ok();
+        }
+        public static async Task<IResult> recoverPassword(string twoFactor, string password, Query setRecoveryPasswordTokenQuery)
+        {
+            var hasedPassword = CreatePasswordHash(password);
+            var result = await DynamicController.executor.ExecuteQueryWithTransaction(
+                setRecoveryPasswordTokenQuery
+                    .setParam("TwoFactor", twoFactor)
+                    .setParam("PasswordHash", hasedPassword.passwordHash)
+                    .setParam("PasswordSalt", hasedPassword.passwordSalt)
+            );
+            if (result == 0)
+                return Results.Forbid();
+            return Results.Ok();
+        }
         public static string CreateToken(UserInfo userInfo, params long[] roles)
         {
-            return CreateToken(getClaims(userInfo, roles));
+            return CreateToken(getClaims(-1, userInfo, roles));
+        }
+        public static string CreateToken(long userID, UserInfo userInfo, params long[] roles)
+        {
+            return CreateToken(getClaims(userID, userInfo, roles));
         }
         public static string CreateToken(IEnumerable<Claim> claims)
         {
@@ -136,13 +183,23 @@ namespace DynamicStructureObjects
                 roles = await getRoles(getRolesQuery, userInfo.userID);
             return Results.Ok(CreateToken(userInfo, roles));
         }
-        public static async Task<IResult> makeConnection(string twoFactor, Query readUserInfoQuery, Query getRolesQuery = null, long defaultRole = -1)
+        public static Task<IResult> makeConnection(string twoFactor, Query readUserInfoQuery, long defaultRole)
         {
-            var userInfo = await DynamicController.executor.SelectValue<UserInfo>(readUserInfoQuery.setParam("TowFactor", twoFactor));
+            return makeConnection(twoFactor, readUserInfoQuery, null, defaultRole);
+        }
+        public static Task<IResult> makeConnection(string twoFactor, Query readUserInfoQuery, Query getRolesQuery)
+        {
+            return makeConnection(twoFactor, readUserInfoQuery, getRolesQuery, -1);
+        }
+        private static async Task<IResult> makeConnection(string twoFactor, Query readUserInfoQuery, Query getRolesQuery, long defaultRole)
+        {
+            var userInfo = await DynamicController.executor.SelectValue<UserInfo>(readUserInfoQuery.setParam("TwoFactor", twoFactor));
             if (userInfo is null)
                 return Results.Forbid();
-            var roles = new long[] { defaultRole };
-            if (getRolesQuery is not null)
+            long[] roles;
+            if (getRolesQuery is null)
+                roles = new long[] { defaultRole };
+            else
                 roles = await getRoles(getRolesQuery, userInfo.userID);
             return Results.Ok(CreateToken(userInfo, roles));
         }
@@ -151,7 +208,11 @@ namespace DynamicStructureObjects
             var userInfo = await checkUserInfo(Email, password, readUserInfoQuery);
             if (userInfo is null)
                 return Results.Forbid();
-            await DynamicController.executor.ExecuteQueryWithTransaction(write2Factor.setParam("twoFactor", new Random().Next(100000, 999999).ToString()));
+            var randomToken = GetRandom();
+            string subject = string.Format(CourrielTokenSubject, randomToken);
+            string message = string.Format(CourrielTokenBody, randomToken);
+            emailSender.SendEmail(userInfo.Email, subject, message);
+            await DynamicController.executor.ExecuteQueryWithTransaction(write2Factor.setParam("TwoFactor", randomToken));
             return Results.Ok();
         }
     }

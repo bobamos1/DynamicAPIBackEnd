@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DynamicStructureObjects
 {
-    internal static class NewExtensions
+    public static class NewExtensions
     {
         public static RouteHandlerBuilder MapRoute(this WebApplication app, RouteTypes routeType, string routePath, Func<dynamic, string, Task<IResult>> delegateMethod)
         {
