@@ -24,13 +24,14 @@ namespace APIDynamic
         }
         public async static Task InitDB(Dictionary<string, DynamicController> controllers)
         {
-            await DynamicController.resetStructureData();
             await controllers
                 .addController("Produits", true)
                 .addController("Categories", true)
                 .addController("Commandes", true)
                 .addController("produits_par_commande", true)
                 .addController("Panier", true)
+                .addController("Formats", true)
+                .addController("Taxes", true)
                 .addController("Clients", true)
                 .addController("Collaborateurs", true)
                 .addController("Compagnies", true)
@@ -202,32 +203,45 @@ namespace APIDynamic
                 .addPropriety("QuantiteInventaire", true, false, ShowTypes.INT)
                 .addPropriety("PrixProduit", true, false, ShowTypes.FLOAT)
                 .addPropriety("ImageProduitURL", true, false, ShowTypes.STRING)
-                .addRoute("GetListeSouhait", RouteTypes.POST)
+                .addPropriety("id_client", true, false, ShowTypes.INT)
+                
+                .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 5 AND c.id_client = @id_client", QueryTypes.SELECT, true, true)
-                        .setSQLParam("id_client", ValidatorTypes.REQUIRED.SetValue("id_client", "Pas de ID passe dans la route"))
-                //5 est liste de souhaits
-                .addRoute("GetPanier", RouteTypes.POST)
-                    .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 4 AND c.id_client = @id_client", QueryTypes.SELECT, true, true)
-                        .setSQLParam("id_client", ValidatorTypes.REQUIRED.SetValue("id_client", "Pas de ID passe dans la route"))
-                 //4 est Panier
-                 .addRoute("DeleteProduitPanier", RouteTypes.DELETE)
-                    .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("DELETE FROM produits_commandes WHERE id = @id", QueryTypes.SELECT, true, true)
-                        .setSQLParam("id", ValidatorTypes.REQUIRED.SetValue("id", "Pas de ID passe dans la route"))
-                 .addRoute("DeleteProduitListeSouhait", RouteTypes.DELETE)
-                    .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("DELETE FROM produits_commandes WHERE id_produit = @id_produit", QueryTypes.SELECT, true, true)
-                        .setSQLParam("id", ValidatorTypes.REQUIRED.SetValue("id", "Pas de ID passe dans la route"))
+                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = @_etat_commande AND c.id_client = @_id_client", QueryTypes.SELECT, true, true)
+                        .setSQLParam("id_client", "id_client")
+                        .addMapperGenerator("Format")
 
+                .addRoute("GetListeSouhait", RouteTypes.GET)    //5 est liste de souhaits
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                //.addSQLParam("id_client", "id_client", ValidatorTypes.REQUIRED.setValue("true", "Message d'erreur"))
+                //.addSQLParam("etat_commande", "etat_commande", ValidatorTypes.REQUIRED.setValue("true", "Message d'erreur"))
 
+                
+                .addRoute("GetPanier", RouteTypes.GET)     //4 est Panier
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                 //.addSQLParam("id_client", "id_client", ValidatorTypes.REQUIRED.setValue("true", "Message d'erreur"))
+                 //.addSQLParam("etat_commande", "etat_commande", ValidatorTypes.REQUIRED.setValue("true", "Message d'erreur"))
+
+              
+                 .addRoute("DeleteProduitPanier", RouteTypes.DELETE)    //Delete produit du panier
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                    .addRouteQuery("DELETE FROM produits_commande WHERE id_produit = @id_produit AND id_client = @id_client AND id_commande = @id_commande", QueryTypes.SELECT, true, true)
+                        .setSQLParam("id_produit", "ProduitID")
+                        .setSQLParam("id_client", "id_client")
+                        .setSQLParam("id_commande", "CommandeID")
+                 
+            ;
+            
+            await controllers["Formats"]
+                 .addPropriety("Format", true, true, ShowTypes.STRING)
+
+                 .addRoute(BaseRoutes.CBO)
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                    .addRouteQuery("", QueryTypes.CBO, true, false)
+                        
             ;
 
-            //await controllers["livraison"]
-            //    .addPropriety("SELECT FROM")
-
-            //;
+            //await controllers["Taxes"]
             await controllers["Clients"]
                 .addPropriety("id", true, true, ShowTypes.INT)
                 .addPropriety("nom", true, true, ShowTypes.STRING)

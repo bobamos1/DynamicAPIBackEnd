@@ -39,17 +39,25 @@ namespace APIDynamic
                 async (queries, bodyData) =>
                 {
                     var dictionary = (Dictionary<string, object>)bodyData["conds"];
-                    object da = dictionary["id_User"];
+                    object da = dictionary["CurrentUserID"];
                     return Results.Ok(da);
                 }, true, true
             );
             //Ajoute les routes de l'API ici
             //Get Liste de souhaits selon le id du client
+            var panierGetAll = controllers["Panier"].GetGetAllRoute();
             controllers["Panier"].addRouteAPI("GetListeSouhait",
                 async (queries, bodyData) =>
                 {
-
-                    return Results.Ok(bodyData);
+                    return Results.Ok(
+                        await executorData.SelectQuery(
+                        panierGetAll
+                            .clearParams()
+                            .setParam("etat_commande", 4)
+                            .setParam("id_client", bodyData["CurrentUserID"])
+                        , (string[])bodyData["AuthorizedProprieties"]
+                        )
+                    );
                 }, true, true
             );
             //Get Le panier selon le id du client
@@ -57,7 +65,15 @@ namespace APIDynamic
                 async (queries, bodyData) =>
                 {
 
-                    return Results.Ok(bodyData);
+                    return Results.Ok(
+                        await executorData.SelectQuery(
+                        panierGetAll
+                            .clearParams()
+                            .setParam("etat_commande", 5)
+                            .setParam("id_client", bodyData["CurrentUserID"])
+                        , (string[])bodyData["AuthorizedProprieties"]
+                        )
+                    );
                 }, true, true
             );
             //Delete un produit du panier
