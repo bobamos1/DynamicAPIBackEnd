@@ -209,7 +209,7 @@ namespace APIDynamic
                     .addAuthorizedRouteRoles(Roles.Client.ID())
                     .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = @_etat_commande AND c.id_client = @_id_client", QueryTypes.SELECT, true, true)
                         .setSQLParam("id_client", "id_client")
-                        .addMapperGenerator("Format")
+                        .addMapperGenerator("Formats", new ParamLinker("ProduitID", "ProduitID", CSharpTypes.REFERENCE))
 
                 .addRoute("GetListeSouhait", RouteTypes.GET)    //5 est liste de souhaits
                     .addAuthorizedRouteRoles(Roles.Client.ID())
@@ -231,17 +231,23 @@ namespace APIDynamic
                         .setSQLParam("id_commande", "CommandeID")
                  
             ;
-            
             await controllers["Formats"]
-                 .addPropriety("Format", true, true, ShowTypes.STRING)
+                .addPropriety("ProduitID", true, false, ShowTypes.INT)
+                .addPropriety("ProduitNom", true, false, ShowTypes.STRING)
+                .addPropriety("FormatID", true, false, ShowTypes.INT)
+                .addPropriety("FormatNom", true, true, ShowTypes.STRING)
+                .addCBOInfo("Format", "")
 
-                 .addRoute(BaseRoutes.CBO)
+                .addRoute("FormatDispoProduits", RouteTypes.GET)    //Doit être un cbo
                     .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("", QueryTypes.CBO, true, false)
-                        
+                    .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS ProduitNom, fp.nom AS FormatNom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit INNER JOIN formats_produit_produits AS fpp ON fpp.id_format_produit = fp.id INNER JOIN produits AS p ON p.id = fpp.id_produit", QueryTypes.CBO, true, false)       
             ;
+            await controllers["Taxes"]
+                .addRoute(BaseRoutes.CBO)
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                    .addRouteQuery("SELECT app.id_produit AS ProduitID, ap.nom AS TypeAffectation, app.montant AS Montant FROM affectation_prix_produits AS app INNER JOIN affectation_prix AS ap ON ap.id = app.id_affectation_prix", QueryTypes.CBO, true, false)
 
-            //await controllers["Taxes"]
+            ;
             await controllers["Clients"]
                 .addPropriety("id", true, true, ShowTypes.INT)
                 .addPropriety("nom", true, true, ShowTypes.STRING)
