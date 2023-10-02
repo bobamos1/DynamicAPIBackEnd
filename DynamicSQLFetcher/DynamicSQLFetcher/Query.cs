@@ -27,6 +27,15 @@ namespace DynamicSQLFetcher
             paramsUsed = new Dictionary<string, object>();
             completeCheck = false;
         }
+        public Query()
+        {
+            this.queryType = QueryTypes.NONE;
+            varsInfoList = new List<SQLVariableInfo>();
+            variablesInQuery = new Dictionary<string, bool>();
+            selectColumns = new Dictionary<string, string>();
+            paramsUsed = new Dictionary<string, object>();
+            completeCheck = false;
+        }
         public Query setCompleteCheck(bool completeCheck)
         {
             this.completeCheck = completeCheck;
@@ -63,7 +72,8 @@ namespace DynamicSQLFetcher
             foreach (var variable in variablesInQuery)
             {
                 if (paramsUsed.TryGetValue(variable.Key, out currentVar))
-                    this.paramsUsed[variable.Key] = currentVar;
+                    if (currentVar is not null)
+                        this.paramsUsed[variable.Key] = currentVar;
             }
             return this;
         }

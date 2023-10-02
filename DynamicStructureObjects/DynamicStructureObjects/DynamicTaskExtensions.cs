@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -10,27 +11,6 @@ namespace DynamicStructureObjects
     public static class DynamicTaskExtensions
     {
 
-        public static RouteHandlerBuilder MapRoute(this WebApplication app, RouteTypes routeType, string routePath, Func<dynamic, string, Task<IResult>> delegateMethod)
-        {
-            switch (routeType)
-            {
-                case RouteTypes.GET:
-                    return app.MapGet(routePath, delegateMethod);
-                case RouteTypes.POST:
-                    return app.MapPost(routePath, delegateMethod);
-                case RouteTypes.PUT:
-                    return app.MapPut(routePath, delegateMethod);
-                case RouteTypes.DELETE:
-                    return app.MapDelete(routePath, delegateMethod);
-                default:
-                    throw new ArgumentException("Invalid routeType");
-            }
-        }
-        public static List<KeyValuePair<TK, TV>> Add<TK, TV>(this List<KeyValuePair<TK, TV>> dict, TK key, TV value)
-        {
-            dict.Add(new KeyValuePair<TK, TV>(key, value));
-            return dict;
-        }
 
 
 
@@ -160,6 +140,10 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRoute(Name, routeType);
         }
+        public async static Task<DynamicController> addEmptyQuery(this Task<DynamicController> task)
+        {
+            return (await task).addEmptyQuery();
+        }
         public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string routeName, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
         {
             return await (await task).addRouteQuery(routeName, queryString, QueryType, CompleteAuth, CompleteCheck);
@@ -197,6 +181,10 @@ namespace DynamicStructureObjects
             return await (await task).setSQLParam(VarAffected, ValidatorBundles);
         }
         public async static Task<DynamicController> addParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
+        {
+            return await (await task).addParam(VarAffected, ValidatorBundles);
+        }
+        public async static Task<DynamicController> addSQLParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
             return await (await task).addParam(VarAffected, ValidatorBundles);
         }

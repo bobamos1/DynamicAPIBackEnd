@@ -2,6 +2,7 @@
 {
     public enum QueryTypes
     {
+        NONE = -1,
         UPDATE = 1,
         SELECT = 2,
         ARRAY = 3,

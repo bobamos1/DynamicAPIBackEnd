@@ -70,6 +70,12 @@ namespace DynamicStructureObjects
             Queries.Add(await DynamicQueryForRoute.addRouteQuery(Queries.Count + 1, queryString, QueryType, id, CompleteAuth, CompleteCheck));
             return this;
         }
+        public DynamicRoute addEmptyQuery()
+        {
+            Queries.Add(DynamicQueryForRoute.addEmptyQuery());
+            return this;
+        }
+        
         public Task<DynamicRoute> addSQLParamInfo(int indexQuery, string varAffected)
         {
             return addSQLParamInfo(indexQuery, varAffected, 1);
