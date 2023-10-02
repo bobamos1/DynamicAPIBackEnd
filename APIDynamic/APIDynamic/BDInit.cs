@@ -49,13 +49,11 @@ namespace APIDynamic
 
             //await controllers["Produits"]
             //    .addPropriety("ProduitID", true, false, ShowTypes.INT)
-            //        .addValidatorForPropriety("ProduitID", "true", ValidatorTypes.REQUIRED)
             //    .addPropriety("ProduitNom", true, false, ShowTypes.STRING)
-            //        .addValidatorForPropriety("ProduitNom", "true", ValidatorTypes.REQUIRED)
             //    .addPropriety("ProduitDescriptions", true, false, ShowTypes.STRING)
-            //        .addValidatorForPropriety("ProduitDescriptions", "true", ValidatorTypes.REQUIRED)
+            //    .addPropriety("ProduitIngrediants", true, false, ShowTypes.STRING)
             //    .addPropriety("ProduitPrix", true, false, ShowTypes.FLOAT)
-            //        .addValidatorForPropriety("true", ValidatorTypes.REQUIRED)
+            //    .addPropriety("ProduitQuantiteInventaire", true, false, ShowTypes.INT)
             //    .addPropriety("CategorieID", true, false, ShowTypes.INT)
             //    .addPropriety("CategorieNom", true, true, ShowTypes.STRING)
             //        //.addCBOInfo("Categorie", "id_categorie")
@@ -63,21 +61,21 @@ namespace APIDynamic
             //    .addPropriety("EtatProduit", true, true, ShowTypes.STRING)
             //    .addRoute(BaseRoutes.GETALL)
             //        .addAuthorizedRouteRoles(Roles.Client.ID())
-            //        .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS ProduitNom, p.descriptions AS ProduitDescription, prix AS ProduitPrix, p.id_categorie AS CategorieID, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID ep.nom AS EtatProduit FROM produits p INNER JOIN categories c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id", QueryTypes.SELECT, true, true)
+            //        .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS ProduitNom, p.descriptions AS ProduitDescription, p.ingrediants AS ProduitIngrediants, p.prix AS ProduitPrix, p.quantite_inventaire AS ProduitQuantiteInventaire, p.id_categorie AS ProduitCategorie, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatProduitNom FROM produits AS p INNER JOIN categories c ON c.id = p.id_categorie INNER JOIN etats_produit ep ON ep.id = p.id_etat_produit", QueryTypes.SELECT, true, true)
             //    .addRoute(BaseRoutes.GET)
             //        .addAuthorizedRouteRoles(Roles.Client.ID())
-            //        .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS ProduitNom, p.descriptions AS ProduitDescription, prix AS ProduitPrix, p.id_categorie AS CategorieID, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID ep.nom AS EtatProduit FROM produits p INNER JOIN categories c ON p.id_categorie = c.id INNER JOIN etats_produit ep ON p.id_etat_produit = ep.id WHERE p.id = @_id", QueryTypes.SELECT, true, true)
-            //            .addSQLParamInfo("id", "ProduitID")
+            //        .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS ProduitNom, p.descriptions AS ProduitDescription, p.ingrediants AS ProduitIngrediants, p.prix AS ProduitPrix, p.quantite_inventaire AS ProduitQuantiteInventaire, p.id_categorie AS ProduitCategorie, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatProduitNom FROM produits AS p INNER JOIN categories c ON c.id = p.id_categorie INNER JOIN etats_produit ep ON ep.id = p.id_etat_produit WHERE p.id = @id_produit", QueryTypes.SELECT, true, true)
+            //            .setSQLParam("ProduitID", ValidatorTypes.REQUIRED.SetValue("id_produit", "Pas de ID passe dans la route"))
             //    .addRoute(BaseRoutes.INSERT)
             //        .addAuthorizedRouteRoles(Roles.Client.ID())
-            //        .addRouteQuery("INSERT INTO produits (nom, descriptions, prix, id_categorie, id_etat_produit) VALUES (@nom, @descriptions, @prix, @id_categorie, @id_etat_produit", QueryTypes.INSERT, true, true)
+            //        .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@nom, @descriptions, @prix, @id_categorie, @id_etat_produit", QueryTypes.INSERT, true, true)
             //            .addSQLParamInfo("nom", "nom")
             //            .addSQLParamInfo("descriptions", "descriptions")
             //            .addSQLParamInfo("prix", "prix")
             //            .addSQLParamInfo("id_categorie", "id_categorie")
             //            .addSQLParamInfo("id_etat_produit", "id_etat_produit")
             //    .addRoute(BaseRoutes.UPDATE)
-            //        .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, prix = @_prix, id_categorie = @_id_categorie, id_etat_produit = @_id_etat_produit WHERE id = @id", QueryTypes.UPDATE, true, true)
+            //        .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, ingrediants = @_ingrediants, quantite_inventaire = @_quantite_inventaire, prix = @_prix, id_categorie = @_id_categorie, id_etat_produit = @_id_etat_produit WHERE id = @id", QueryTypes.UPDATE, true, true)
             //            .addSQLParamInfo("id", "id")
             //            .addSQLParamInfo("nom", "nom")
             //            .addSQLParamInfo("descriptions", "descriptions")
@@ -207,14 +205,19 @@ namespace APIDynamic
 
                 .addRoute("GetListeSouhait", RouteTypes.POST)
                     .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 1 AND c.id_client = @id_client", QueryTypes.SELECT, true, true)
+                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 5 AND c.id_client = @id_client", QueryTypes.SELECT, true, true)
                         .setSQLParam("id_client", ValidatorTypes.REQUIRED.SetValue("id_client", "Pas de ID passe dans la route"))
-                //1 est liste de souhaits
+                //5 est liste de souhaits
                 .addRoute("GetPanier", RouteTypes.POST)
                     .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 2 AND c.id_client = @id_client", QueryTypes.SELECT, true, true)
+                    .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = 4 AND c.id_client = @id_client", QueryTypes.SELECT, true, true)
                         .setSQLParam("id_client", ValidatorTypes.REQUIRED.SetValue("id_client", "Pas de ID passe dans la route"))
-            //2 est Panier
+                 //4 est Panier
+                 .addRoute("DeleteProduitPanier", RouteTypes.DELETE)
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                    .addRouteQuery("DELETE FROM commandes", QueryTypes.SELECT, true, true)
+                        .setSQLParam("id_client", ValidatorTypes.REQUIRED.SetValue("id_client", "Pas de ID passe dans la route"))
+                //Delete produit du panier (devrait-il être dans le controlleur de la table produits par commande?
             ;
 
             //await controllers["livraison"]
