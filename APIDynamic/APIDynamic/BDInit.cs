@@ -231,14 +231,17 @@ namespace APIDynamic
                         .setSQLParam("id_commande", "CommandeID")
                  
             ;
-            /*
+            
             await controllers["Formats"]
                  .addPropriety("Format", true, true, ShowTypes.STRING)
 
-                 .addRoute(BaseRoutes.CBO, RouteTypes.GET)
-            ;*/
+                 .addRoute(BaseRoutes.CBO)
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                    .addRouteQuery("", QueryTypes.CBO, true, false)
+                        
+            ;
 
-            await controllers["Taxes"]
+            //await controllers["Taxes"]
             await controllers["Clients"]
                 .addPropriety("id", true, true, ShowTypes.INT)
                 .addPropriety("nom", true, true, ShowTypes.STRING)
