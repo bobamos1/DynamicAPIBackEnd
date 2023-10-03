@@ -100,7 +100,7 @@ namespace APIDynamic
                         , bodyData.AuthProprieties()
                         )
                     );
-                }, true, true
+                }//, true, true
             );
             //Delete un produit du panier
             controllers["Panier"].addRouteAPI("DeleteProduitPanier",
