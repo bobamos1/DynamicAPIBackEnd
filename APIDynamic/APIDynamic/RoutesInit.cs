@@ -87,8 +87,8 @@ namespace APIDynamic
                         panierGetAll
                             .clearParams()
                             .setParam("etat_commande", 4)
-                            .setParam("id_client", bodyData["CurrentUserID"])
-                        , (string[])bodyData["AuthorizedProprieties"]
+                            .setParam("id_client", bodyData.UserID())
+                        , bodyData.AuthProprieties()
                         )
                     );
                 }, true, true
@@ -103,8 +103,8 @@ namespace APIDynamic
                         panierGetAll
                             .clearParams()
                             .setParam("etat_commande", 5)
-                            .setParam("id_client", bodyData["CurrentUserID"])
-                        , (string[])bodyData["AuthorizedProprieties"]
+                            .setParam("id_client", bodyData.UserID())
+                        , bodyData.AuthProprieties()
                         )
                     );
                 }, true, true

@@ -48,42 +48,46 @@ namespace APIDynamic
                 .addController("EtatsProduits", true)
                 ;
 
-            //await controllers["Produits"]
-            //    .addPropriety("ProduitID", true, false, ShowTypes.INT)
-            //    .addPropriety("ProduitNom", true, false, ShowTypes.STRING)
-            //    .addPropriety("ProduitDescriptions", true, false, ShowTypes.STRING)
-            //    .addPropriety("ProduitIngrediants", true, false, ShowTypes.STRING)
-            //    .addPropriety("ProduitPrix", true, false, ShowTypes.FLOAT)
-            //    .addPropriety("ProduitQuantiteInventaire", true, false, ShowTypes.INT)
-            //    .addPropriety("CategorieID", true, false, ShowTypes.INT)
-            //    .addPropriety("CategorieNom", true, true, ShowTypes.STRING)
-            //        //.addCBOInfo("Categorie", "id_categorie")
-            //    .addPropriety("EtatProduitID", true, false, ShowTypes.INT)
-            //    .addPropriety("EtatProduit", true, true, ShowTypes.STRING)
-            //    .addRoute(BaseRoutes.GETALL)
-            //        .addAuthorizedRouteRoles(Roles.Client.ID())
-            //        .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS ProduitNom, p.descriptions AS ProduitDescription, p.ingrediants AS ProduitIngrediants, p.prix AS ProduitPrix, p.quantite_inventaire AS ProduitQuantiteInventaire, p.id_categorie AS ProduitCategorie, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatProduitNom FROM produits AS p INNER JOIN categories c ON c.id = p.id_categorie INNER JOIN etats_produit ep ON ep.id = p.id_etat_produit", QueryTypes.SELECT, true, true)
-            //    .addRoute(BaseRoutes.GET)
-            //        .addAuthorizedRouteRoles(Roles.Client.ID())
-            //        .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS ProduitNom, p.descriptions AS ProduitDescription, p.ingrediants AS ProduitIngrediants, p.prix AS ProduitPrix, p.quantite_inventaire AS ProduitQuantiteInventaire, p.id_categorie AS ProduitCategorie, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatProduitNom FROM produits AS p INNER JOIN categories c ON c.id = p.id_categorie INNER JOIN etats_produit ep ON ep.id = p.id_etat_produit WHERE p.id = @id_produit", QueryTypes.SELECT, true, true)
-            //            .setSQLParam("ProduitID", ValidatorTypes.REQUIRED.SetValue("id_produit", "Pas de ID passe dans la route"))
-            //    .addRoute(BaseRoutes.INSERT)
-            //        .addAuthorizedRouteRoles(Roles.Client.ID())
-            //        .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@nom, @descriptions, @prix, @id_categorie, @id_etat_produit", QueryTypes.INSERT, true, true)
-            //            .addSQLParamInfo("nom", "nom")
-            //            .addSQLParamInfo("descriptions", "descriptions")
-            //            .addSQLParamInfo("prix", "prix")
-            //            .addSQLParamInfo("id_categorie", "id_categorie")
-            //            .addSQLParamInfo("id_etat_produit", "id_etat_produit")
-            //    .addRoute(BaseRoutes.UPDATE)
-            //        .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, ingrediants = @_ingrediants, quantite_inventaire = @_quantite_inventaire, prix = @_prix, id_categorie = @_id_categorie, id_etat_produit = @_id_etat_produit WHERE id = @id", QueryTypes.UPDATE, true, true)
-            //            .addSQLParamInfo("id", "id")
-            //            .addSQLParamInfo("nom", "nom")
-            //            .addSQLParamInfo("descriptions", "descriptions")
-            //            .addSQLParamInfo("prix", "prix")
-            //            .addSQLParamInfo("id_categorie", "id_categorie")
-            //            .addSQLParamInfo("id_etat_produit", "id_etat_produit")
-            //    ;
+            await controllers["Produits"]
+                .addPropriety("ID", true, false, ShowTypes.INT)
+                .addPropriety("ProduitNom", true, false, ShowTypes.STRING)
+                .addPropriety("ProduitDescriptions", true, false, ShowTypes.STRING)
+                .addPropriety("ProduitIngrediants", true, false, ShowTypes.STRING)
+                .addPropriety("ProduitPrix", true, false, ShowTypes.FLOAT)
+                .addPropriety("ProduitQuantiteInventaire", true, false, ShowTypes.INT)
+                .addPropriety("CategorieNom", true, true, ShowTypes.STRING)
+                    .addCBOInfo("Categorie", "ProduitCategorie")
+                .addPropriety("EtatProduitID", true, false, ShowTypes.INT)
+                .addPropriety("EtatProduit", true, true, ShowTypes.STRING)
+                .addRoute(BaseRoutes.GETALL)
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                    .addRouteQuery("SELECT p.id AS ID, p.nom AS ProduitNom, p.descriptions AS ProduitDescription, p.ingrediants AS ProduitIngrediants, p.prix AS ProduitPrix, p.quantite_inventaire AS ProduitQuantiteInventaire, p.id_categorie AS ProduitCategorie, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatProduitNom FROM produits AS p INNER JOIN categories c ON c.id = p.id_categorie INNER JOIN etats_produit ep ON ep.id = p.id_etat_produit", QueryTypes.SELECT, true, true)
+                .addRoute(BaseRoutes.GET)
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                    .addRouteQuery("SELECT p.id AS ID, p.nom AS ProduitNom, p.descriptions AS ProduitDescription, p.ingrediants AS ProduitIngrediants, p.prix AS ProduitPrix, p.quantite_inventaire AS ProduitQuantiteInventaire, p.id_categorie AS ProduitCategorie, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatProduitNom FROM produits AS p INNER JOIN categories c ON c.id = p.id_categorie INNER JOIN etats_produit ep ON ep.id = p.id_etat_produit WHERE p.id = @id_produit", QueryTypes.SELECT, true, true)
+                        .setSQLParam("ProduitID", ValidatorTypes.REQUIRED.SetValue("id_produit", "Pas de ID passe dans la route"))
+                .addRoute(BaseRoutes.INSERT)
+                    .addAuthorizedRouteRoles(Roles.Client.ID())
+                    .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@nom, @descriptions, @prix, @id_categorie, @id_etat_produit", QueryTypes.INSERT, true, true)
+                        .setSQLParam("nom", "nom")
+                        .setSQLParam("descriptions", "descriptions")
+                        .setSQLParam("prix", "prix")
+                        .setSQLParam("id_categorie", "id_categorie")
+                        .setSQLParam("id_etat_produit", "id_etat_produit")
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, ingrediants = @_ingrediants, quantite_inventaire = @_quantite_inventaire, prix = @_prix, id_categorie = @_id_categorie, id_etat_produit = @_id_etat_produit WHERE id = @id", QueryTypes.UPDATE, true, true)
+                        .setSQLParam("id", "id")
+                        .setSQLParam("nom", "nom")
+                        .setSQLParam("descriptions", "descriptions")
+                        .setSQLParam("prix", "prix")
+                        .setSQLParam("id_categorie", "id_categorie")
+                        .setSQLParam("id_etat_produit", "id_etat_produit")
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id, nom FROM produits", QueryTypes.CBO, false, true)
+                    //Peut ajouter WHERE au besoin
+
+                ;
 
             //await controllers["Categories"]
             //    .addPropriety("id", true, true, ShowTypes.INT)
@@ -195,34 +199,29 @@ namespace APIDynamic
             //            .addSQLParamInfo("id_commande")
             //    ;
             await controllers["Panier"]
-                .addPropriety("CommandeID", true, false, ShowTypes.INT)
+                .addPropriety("ID", true, false, ShowTypes.INT)
                 .addPropriety("ProduitCommandeID", true, false, ShowTypes.INT)
-                .addPropriety("ProduitID", true, false, ShowTypes.INT)
-                .addPropriety("NomProduit", true, false, ShowTypes.STRING)
+                .addPropriety("NomProduit", true, false, ShowTypes.CBO)
+                    .addCBOInfo("Produits", "ProduitID")     //Paramètre de nom de produit
                 .addPropriety("DescriptionProduit", true, false, ShowTypes.STRING)
                 .addPropriety("QuantiteInventaire", true, false, ShowTypes.INT)
                 .addPropriety("PrixProduit", true, false, ShowTypes.FLOAT)
                 .addPropriety("ImageProduitURL", true, false, ShowTypes.STRING)
                 .addPropriety("id_client", true, false, ShowTypes.INT)
-                
+                .addPropriety("Formats", false, false, ShowTypes.Ref)
+                    .addMapperGenerator("Formats", new ParamLinker("produit_id", "ProduitID", CSharpTypes.REFERENCE))
+
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID())
                     .addRouteQuery("SELECT c.id AS CommandeID, pc.id AS ProduitCommandeID, pc.id_produit AS ProduitID, p.nom AS NomProduit, p.descriptions AS DescriptionProduit, p.quantite_inventaire AS QuantiteInventaire, p.prix AS PrixProduit, ip.url AS ImageProduitURL FROM commandes c INNER JOIN produits_par_commande AS pc ON pc.id_commande = c.id INNER JOIN produits AS p ON p.id = pc.id_produit INNER JOIN images_produit_produits AS ipp ON ipp.id_produit = p.id INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE c.id_etat_commande = @_etat_commande AND c.id_client = @_id_client", QueryTypes.SELECT, true, true)
                         .setSQLParam("id_client", "id_client")
-                        .addMapperGenerator("Formats", new ParamLinker("ProduitID", "ProduitID", CSharpTypes.REFERENCE))
 
                 .addRoute("GetListeSouhait", RouteTypes.GET)    //5 est liste de souhaits
                     .addAuthorizedRouteRoles(Roles.Client.ID())
-                //.addSQLParam("id_client", "id_client", ValidatorTypes.REQUIRED.setValue("true", "Message d'erreur"))
-                //.addSQLParam("etat_commande", "etat_commande", ValidatorTypes.REQUIRED.setValue("true", "Message d'erreur"))
 
-                
                 .addRoute("GetPanier", RouteTypes.GET)     //4 est Panier
                     .addAuthorizedRouteRoles(Roles.Client.ID())
-                 //.addSQLParam("id_client", "id_client", ValidatorTypes.REQUIRED.setValue("true", "Message d'erreur"))
-                 //.addSQLParam("etat_commande", "etat_commande", ValidatorTypes.REQUIRED.setValue("true", "Message d'erreur"))
-
-              
+                        //Add queryempty c'est pour ajouter des params pas comme le id client puisqu'iles tnjsafdhik              
                  .addRoute("DeleteProduitPanier", RouteTypes.DELETE)    //Delete produit du panier
                     .addAuthorizedRouteRoles(Roles.Client.ID())
                     .addRouteQuery("DELETE FROM produits_commande WHERE id_produit = @id_produit AND id_client = @id_client AND id_commande = @id_commande", QueryTypes.SELECT, true, true)
@@ -232,15 +231,14 @@ namespace APIDynamic
                  
             ;
             await controllers["Formats"]
-                .addPropriety("ProduitID", true, false, ShowTypes.INT)
                 .addPropriety("ProduitNom", true, false, ShowTypes.STRING)
-                .addPropriety("FormatID", true, false, ShowTypes.INT)
-                .addPropriety("FormatNom", true, true, ShowTypes.STRING)
-                .addCBOInfo("Format", "")
+                    .addCBOInfo("Produits", "ProduitID")
+                .addPropriety("ID", true, false, ShowTypes.INT)
+                .addPropriety("Nom", true, true, ShowTypes.STRING)
 
-                .addRoute("FormatDispoProduits", RouteTypes.GET)    //Doit être un cbo
+                .addRoute("FormatDispoProduits", RouteTypes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID())
-                    .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS ProduitNom, fp.nom AS FormatNom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit INNER JOIN formats_produit_produits AS fpp ON fpp.id_format_produit = fp.id INNER JOIN produits AS p ON p.id = fpp.id_produit", QueryTypes.CBO, true, false)       
+                    .addRouteQuery("SELECT p.id AS ProduitID, fp.nom AS Nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit INNER JOIN formats_produit_produits AS fpp ON fpp.id_format_produit = fp.id INNER JOIN produits AS p ON p.id = fpp.id_produit WHERE id_produit = @_produit_id", QueryTypes.SELECT, true, false)       
             ;
             await controllers["Taxes"]
                 .addRoute(BaseRoutes.CBO)
