@@ -22,14 +22,14 @@ namespace APIDynamic
                 (queries, bodyData) =>
                 {
                     return DynamicConnection.makeConnection2Factor(bodyData.Get<string>("Email"), bodyData.Get<string>("Password"), queries[0], queries[1]);
-                }, false
-            );
+                }
+            );//, false
             controllers["Clients"].addRouteAPI("ConnectionTwoFactor",
                 (queries, bodyData) =>
                 {
                     return DynamicConnection.makeConnection(bodyData.Get<string>("TwoFactor"), queries[0], Roles.Client.ID());
-                }, false
-            );
+                }
+            );//, false
             controllers["Clients"].addRouteAPI("CreateUser",
                 async (queries, bodyData) =>
                 {
@@ -42,40 +42,40 @@ namespace APIDynamic
                             .setParam("PasswordSalt", userInfo.passwordSalt)
                    );
                     return Results.Ok(DynamicConnection.CreateToken(userID, userInfo, Roles.Client.ID()));
-                }, false
-            );
+                }
+            );//, false
             controllers["Clients"].addRouteAPI("RecoverPasswordStepOne",
                 (queries, bodyData) =>
                 {
                     return DynamicConnection.sendRecoveryEmail(bodyData.Get<string>("Email"), queries[0]);
-                }, false
-            );
+                }
+            );//, false
             controllers["Clients"].addRouteAPI("RecoverPasswordStepTwo",
                 (queries, bodyData) =>
                 {
                     return DynamicConnection.recoverPassword(bodyData.Get<string>("TwoFactor"), bodyData.Get<string>("Password"), queries[0]);
-                }, false
-            );
+                }
+            );//, false
             controllers["Employers"].addRouteAPI("ConnectionFirstFactor",
                 (queries, bodyData) =>
                 {
                     return DynamicConnection.makeConnection2Factor(bodyData.Get<string>("Email"), bodyData.Get<string>("Password"), queries[0], queries[1]);
-                }, false
-            );
+                }
+            );//, false
             controllers["Employers"].addRouteAPI("ConnectionTwoFactor",
                 (queries, bodyData) =>
                 {
                     return DynamicConnection.makeConnection(bodyData.Get<string>("TwoFactor"), queries[0], queries[1]);
-                }, false
-            );
+                }
+            );//, false
             controllers["Commandes"].addRouteAPI("GetClientCommandes",
                 async (queries, bodyData) =>
                 {
                     var dictionary = (Dictionary<string, object>)bodyData["conds"];
                     object da = dictionary["id_User"];
                     return Results.Ok(da);
-                }, true, true
-            );
+                }
+            );//, true, true
             //Ajoute les routes de l'API ici
             //Get Liste de souhaits selon le id du client
             controllers["Panier"].addRouteAPI("GetListeSouhait",
@@ -83,16 +83,16 @@ namespace APIDynamic
                 {
 
                     return Results.Ok(bodyData);
-                }, true, true
-            );
+                }
+            );//, true, true
             //Get Le panier selon le id du client
             controllers["Panier"].addRouteAPI("GetPanier",
                 async (queries, bodyData) =>
                 {
 
                     return Results.Ok(bodyData);
-                }, true, true
-            );
+                }
+            );//, true, true
             /*
             controllers["Commandes"].addRouteAPI("CommandeCheckout",
                 async (queries, body) => {
