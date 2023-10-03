@@ -73,7 +73,10 @@ CREATE TABLE URLRoutes (
     name VARCHAR(100),
     id_baseRoute BIGINT,
     id_controller BIGINT,
-    id_routeType BIGINT
+    id_routeType BIGINT,
+    requireAuthorization BIT,
+    getAuthorizedCols BIT,
+    onlyModify BIT
 )
 CREATE TABLE RouteQueries (
     id BIGINT IDENTITY(1,1),
@@ -125,11 +128,13 @@ CREATE TABLE ValidatorTypes (
 CREATE TABLE ValidatorSQLParamInfoValues (
     id_SQLParamInfo BIGINT NOT NULL,
     id_ValidatorType BIGINT NOT NULL,
+    message VARCHAR(MAX),
     value VARCHAR(MAX)
 )
 CREATE TABLE ValidatorProprietyValues (
     id_Propriety BIGINT NOT NULL,
     id_ValidatorType BIGINT NOT NULL,
+    message VARCHAR(MAX),
     value VARCHAR(MAX)
 )
 GO

@@ -10,20 +10,26 @@ namespace DynamicStructureObjects
         public long id { get; internal set; }
         public string Name { get; internal set; }
         public RouteTypes RouteType { get; internal set; }
+        public bool requireAuthorization { get; internal set; }
+        public bool getAuthorizedCols { get; internal set; }
+        public bool onlyModify { get; internal set; }
         public List<DynamicQueryForRoute> Queries { get; internal set; }
         public List<long> Roles { get; internal set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id FROM PermissionRoutes INNER JOIN Roles ON id = id_role WHERE id_route = @RouteID", true, true);
         internal static readonly Query getQueries = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, SQLString AS queryString, id_queryType AS QueryTypeID, completeCheck AS CompleteAuth, CompleteCheck AS CompleteAuth FROM RouteQueries WHERE id_route = @RouteID ORDER BY ind", true, true);
-        internal static readonly Query insertRoute = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO URLRoutes (name, id_baseRoute, id_controller, id_routeType) VALUES (@Name, @BaseRouteID, @ControllerID, @RouteTypeID)", true, true);
+        internal static readonly Query insertRoute = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO URLRoutes (name, id_baseRoute, id_controller, id_routeType, requireAuthorization, getAuthorizedCols, onlyModify) VALUES (@Name, @BaseRouteID, @ControllerID, @RouteTypeID, @requireAuthorization, @getAuthorizedCols, @onlyModify)", true, true);
         internal static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionProprieties(id_propriety, id_role) VALUES(@BaseRouteID, @RoleID)", true, true);
         internal static readonly Query getBaseRouteName = Query.fromQueryString(QueryTypes.VALUE, "SELECT Name FROM BaseRoutes WHERE id = @BaseRouteID", true, true);
-        internal DynamicRoute(long id, string Name, long RouteTypeID)
+        internal DynamicRoute(long id, string Name, long RouteTypeID, bool requireAuthorization, bool getAuthorizedCols, bool onlyModify)
         {
             this.id = id;
             this.Name = Name;
             this.RouteType = (RouteTypes)RouteTypeID;
             this.Queries = new List<DynamicQueryForRoute>();
             this.Roles = new List<long>();
+            this.requireAuthorization = requireAuthorization;
+            this.getAuthorizedCols = getAuthorizedCols;
+            this.onlyModify = onlyModify;
         }
         internal DynamicRoute(DynamicRoute dynamicRoute, BaseRoutes baseRoute)
         {
@@ -43,15 +49,15 @@ namespace DynamicStructureObjects
                 await DynamicQueryForRoute.init(query);
             return route;
         }
-        public static Task<DynamicRoute> addRoute(long idController, BaseRoutes baseRoute)
+        public static Task<DynamicRoute> addRoute(long idController, BaseRoutes baseRoute, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
         {
-            return addRoute(idController, null, baseRoute, baseRoute.Type());
+            return addRoute(idController, null, baseRoute, baseRoute.Type(), requireAuthorization, getAuthorizedCols, onlyModify);
         }
-        public static Task<DynamicRoute> addRoute(long idController, string Name, RouteTypes routeType)
+        public static Task<DynamicRoute> addRoute(long idController, string Name, RouteTypes routeType, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
         {
-            return addRoute(idController, Name, BaseRoutes.NONE, routeType);
+            return addRoute(idController, Name, BaseRoutes.NONE, routeType, requireAuthorization, getAuthorizedCols, onlyModify);
         }
-        public async static Task<DynamicRoute> addRoute(long idController, string Name, BaseRoutes baseRoute, RouteTypes routeType)
+        public async static Task<DynamicRoute> addRoute(long idController, string Name, BaseRoutes baseRoute, RouteTypes routeType, bool requireAuthorization, bool getAuthorizedCols, bool onlyModify)
         {
             return new DynamicRoute(
                 await DynamicController.executor.ExecuteInsertWithLastID(
@@ -60,9 +66,15 @@ namespace DynamicStructureObjects
                         .setParam("BaseRouteID", (long)baseRoute)
                         .setParam("ControllerID", idController)
                         .setParam("RouteTypeID", (long)routeType)
+                        .setParam("requireAuthorization", requireAuthorization)
+                        .setParam("getAuthorizedCols", getAuthorizedCols)
+                        .setParam("onlyModify", onlyModify)
                     )
                 , Name is not null ? Name : baseRoute.Value()
                 , (long)routeType
+                , requireAuthorization
+                , getAuthorizedCols
+                , onlyModify
             );
         }
         public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
