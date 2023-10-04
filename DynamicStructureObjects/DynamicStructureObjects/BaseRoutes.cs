@@ -51,5 +51,20 @@
         {
             return GetRouteType(baseRoute);
         }
+        public static BaseRoutes[] requireAuthorizationRoutes = new BaseRoutes[] { BaseRoutes.INSERT, BaseRoutes.UPDATE };
+        public static bool requireAuthorization(this BaseRoutes baseRoute)
+        {
+            return requireAuthorizationRoutes.Contains(baseRoute);
+        }
+        public static BaseRoutes[] notgetAuthorizedColsRoutes = new BaseRoutes[] { BaseRoutes.CBO, BaseRoutes.INSERT };
+        public static bool getAuthorizedCols(this BaseRoutes baseRoute)
+        {
+            return !notgetAuthorizedColsRoutes.Contains(baseRoute);
+        }
+        public static BaseRoutes[] onlyModifyRoutes = new BaseRoutes[] { BaseRoutes.UPDATE };
+        public static bool onlyModify(this BaseRoutes baseRoute)
+        {
+            return onlyModifyRoutes.Contains(baseRoute);
+        }
     }
 }

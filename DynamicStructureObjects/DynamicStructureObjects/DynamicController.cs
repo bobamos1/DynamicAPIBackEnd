@@ -134,9 +134,9 @@ namespace DynamicStructureObjects
                 , IsMain
             );
         }
-        public async Task<DynamicController> addRoute(BaseRoutes baseRoute, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
+        public async Task<DynamicController> addRoute(BaseRoutes baseRoute)
         {
-            Routes.Add(await DynamicRoute.addRoute(id, baseRoute, requireAuthorization, getAuthorizedCols, onlyModify));
+            Routes.Add(await DynamicRoute.addRoute(id, baseRoute));
             return this;
         }
         public async Task<DynamicController> addRoute(string Name, RouteTypes routeType, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
@@ -364,7 +364,7 @@ namespace DynamicStructureObjects
             if (route is null)
                 throw new Exception();
             List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();
-            Func<dynamic, string, Task<IResult>> delegateMethod = async ([FromBody] dynamic request, [FromHeader(Name = "Authorization")] string JWT) =>
+            Func<dynamic, string, Task<IResult>> delegateMethod = async ([FromBody] dynamic request, [FromHeader(Name = "Authorization")] string? JWT) =>
             {
                 Dictionary<string, object> bodyData = JObjectToDictionary(JObject.Parse(request.ToString()));
                 if (!fillBodyData(bodyData, DynamicConnection.ParseClaim(JWT), route))
@@ -463,9 +463,9 @@ namespace DynamicStructureObjects
                         foreach (var query in queries)
                             query.setParams(bodyData);
                         int nbAffected = await executorData.ExecuteQueryWithTransaction(queries.ToArray());
-                        if (nbAffected > 0)
-                            return Results.Ok(nbAffected);
-                        return Results.Problem();
+                        if (nbAffected <= 0)
+                            return Results.Problem();
+                        return Results.Ok(nbAffected);
                     });//, true, true, false
                 if (controller.Value.hasRoute(BaseRoutes.UPDATE.Value()))
                     controller.Value.addRouteAPI(BaseRoutes.UPDATE, async (queries, bodyData) =>
@@ -473,9 +473,9 @@ namespace DynamicStructureObjects
                         foreach (var query in queries)
                             query.setParams(bodyData);
                         int nbAffected = await executorData.ExecuteQueryWithTransaction(bodyData.AuthProprieties(), queries.ToArray());
-                        if (nbAffected > 0)
-                            return Results.Ok(nbAffected);
-                        return Results.Problem();
+                        if (nbAffected <= 0)
+                            return Results.Problem();
+                        return Results.Ok(nbAffected);
                     });//, true, true, true
                 if (controller.Value.hasRoute(BaseRoutes.GETALLDETAILED.Value()))
                     controller.Value.addRouteAPI(BaseRoutes.GETALLDETAILED, async (queries, bodyData) =>
