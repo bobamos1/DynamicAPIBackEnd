@@ -16,9 +16,10 @@ namespace APIDynamic
         {
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
 
+            /*
             var userInfo = DynamicConnection.CreatePasswordHash("Adam", "Adanhihi@gmail.com", "test123");
             Query qquery = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE clients SET mdp = @Hash, sel = @Salt WHERE id = 1", true, true, true);
-            executorData.ExecuteQueryWithTransaction(qquery.setParam("Hash", userInfo.passwordHash).setParam("Salt", userInfo.passwordSalt));
+            executorData.ExecuteQueryWithTransaction(qquery.setParam("Hash", userInfo.passwordHash).setParam("Salt", userInfo.passwordSalt));*/
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
             controllers["Clients"].addRouteAPI("ConnexionStepOne",
