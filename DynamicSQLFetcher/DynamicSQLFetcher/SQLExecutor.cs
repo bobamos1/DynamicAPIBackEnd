@@ -9,7 +9,7 @@ namespace DynamicSQLFetcher
 {
     public class SQLExecutor
     {
-        public static readonly string KEY_FOR_CBO = "KEY_FOR_CBO";
+        public static readonly string VALUE_FOR_CBO = "VALUE_FOR_CBO";
         private static IConfiguration _configuration;
         private string _connectionString;
         internal class SingleValueItem

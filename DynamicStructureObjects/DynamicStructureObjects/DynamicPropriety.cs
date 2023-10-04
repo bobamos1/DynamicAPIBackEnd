@@ -12,7 +12,6 @@ namespace DynamicStructureObjects
         public ShowTypes ShowType { get; internal set; }
         public DynamicMapperGenerator MapperGenerator { get; internal set; }
         public Dictionary<long, bool> roles { get; internal set; }
-        internal string getCBOIdName() => ShowType == ShowTypes.CBO ? MapperGenerator.parametersToLink[SQLExecutor.KEY_FOR_CBO] : null;
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT id, canModify FROM PermissionProprieties INNER JOIN Roles ON id = id_role WHERE id_propriety = @ProprietyID", true, true);
         internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true, true);
         internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT lnk.id AS id, c.id AS controllerID, c.Name AS controllerName, urlR.id AS RouteID, SQLString AS queryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, p.name AS ProprietyName FROM LinkProprietiesControllers lnk INNER JOIN Controllers c ON c.id = lnk.id_controller INNER JOIN URLRoutes urlR ON urlR.id_controller = c.id INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = lnk.id_propriety WHERE urlR.id_baseRoute = @BaseRouteID AND rq.ind = 1 AND lnk.id_propriety = @ProprietyID", true, true);
@@ -85,11 +84,11 @@ namespace DynamicStructureObjects
             MapperGenerator = await DynamicMapperGenerator.addMapperGenerator(ControllerName, id, false, linkers);
             return this;
         }
-        public async Task<DynamicPropriety> addCBOInfo(string ControllerName, string key, params ParamLinker[] linkers)
+        public async Task<DynamicPropriety> addCBOInfo(string ControllerName, string value, params ParamLinker[] linkers)
         {
             if (ShowType != ShowTypes.CBO)
                 throw new Exception("cannot add cboInfo on not cbo proprety");
-            MapperGenerator = await DynamicMapperGenerator.addMapperGenerator(ControllerName, id, key, linkers);
+            MapperGenerator = await DynamicMapperGenerator.addMapperGenerator(ControllerName, id, value, linkers);
             return this;
         }
         public async Task<DynamicPropriety> addValidator(string Value, ValidatorTypes ValidatorType)
