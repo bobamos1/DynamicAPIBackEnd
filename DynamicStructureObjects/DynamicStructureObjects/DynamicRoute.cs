@@ -48,9 +48,9 @@ namespace DynamicStructureObjects
                 await DynamicQueryForRoute.init(query);
             return route;
         }
-        public static Task<DynamicRoute> addRoute(long idController, BaseRoutes baseRoute, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
+        public static Task<DynamicRoute> addRoute(long idController, BaseRoutes baseRoute)
         {
-            return addRoute(idController, null, baseRoute, baseRoute.Type(), requireAuthorization, getAuthorizedCols, onlyModify);
+            return addRoute(idController, null, baseRoute, baseRoute.Type(), baseRoute.requireAuthorization(), baseRoute.getAuthorizedCols(), baseRoute.onlyModify());
         }
         public static Task<DynamicRoute> addRoute(long idController, string Name, RouteTypes routeType, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
         {
@@ -158,6 +158,11 @@ namespace DynamicStructureObjects
         internal bool validateParams(Dictionary<string, object> bodyData)
         {
             return Queries.All(query => query.validateParams(bodyData));
+        }
+
+        internal static Task<DynamicRoute> addRoute(long id, BaseRoutes baseRoute, bool v, object value1, object value2)
+        {
+            throw new NotImplementedException();
         }
     }
 }

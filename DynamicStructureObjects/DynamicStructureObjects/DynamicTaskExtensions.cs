@@ -23,9 +23,9 @@ namespace DynamicStructureObjects
             task.Add(Name, await DynamicController.addController(Name, IsMain));
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addRoute(this Dictionary<string, DynamicController> task, string controllerName, BaseRoutes baseRoute, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
+        public async static Task<Dictionary<string, DynamicController>> addRoute(this Dictionary<string, DynamicController> task, string controllerName, BaseRoutes baseRoute)
         {
-            await task[controllerName].addRoute(baseRoute, requireAuthorization, getAuthorizedCols, onlyModify);
+            await task[controllerName].addRoute(baseRoute);
             return task;
         }
         public async static Task<Dictionary<string, DynamicController>> addRoute(this Dictionary<string, DynamicController> task, string controllerName, string Name, RouteTypes routeType, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
@@ -90,9 +90,9 @@ namespace DynamicStructureObjects
         {
             return await (await task).addController(Name, IsMain);
         }
-        public async static Task<Dictionary<string, DynamicController>> addRoute(this Task<Dictionary<string, DynamicController>> task, string controllerName, BaseRoutes baseRoute, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
+        public async static Task<Dictionary<string, DynamicController>> addRoute(this Task<Dictionary<string, DynamicController>> task, string controllerName, BaseRoutes baseRoute)
         {
-            return await (await task).addRoute(controllerName, baseRoute, requireAuthorization, getAuthorizedCols, onlyModify);
+            return await (await task).addRoute(controllerName, baseRoute);
         }
         public async static Task<Dictionary<string, DynamicController>> addRoute(this Task<Dictionary<string, DynamicController>> task, string controllerName, string Name, RouteTypes routeType, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
         {
@@ -142,9 +142,9 @@ namespace DynamicStructureObjects
 
 
 
-        public async static Task<DynamicController> addRoute(this Task<DynamicController> task, BaseRoutes baseRoute, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
+        public async static Task<DynamicController> addRoute(this Task<DynamicController> task, BaseRoutes baseRoute)
         {
-            return await (await task).addRoute(baseRoute, requireAuthorization , getAuthorizedCols, onlyModify);
+            return await (await task).addRoute(baseRoute);
         }
         public async static Task<DynamicController> addRoute(this Task<DynamicController> task, string Name, RouteTypes routeType, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
         {
