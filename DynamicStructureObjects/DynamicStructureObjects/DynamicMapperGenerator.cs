@@ -15,8 +15,8 @@ namespace DynamicStructureObjects
         public Dictionary<string, object> baseParameters { get; set; }
         public Dictionary<string, string> parametersToLink { get; set; }
         internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT name AS AssociatedVarName, value AS Value, id_CSharpType AS CSharpType FROM ListVars WHERE id_link = @link", true, true);
-        internal static readonly Query insertMapperGenerator = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO LinkProprietiesControllers (id_propriety, id_controller) VALUES (@PropretyID, @ControllerID)", true, true);
-        internal static readonly Query getMapperGeneratorSingleInfo = Query.fromQueryString(QueryTypes.ROW, "SELECT TOP (1) @LinkID AS id, @ControllerID AS controllerID, c.Name AS controllerName, urlR.id AS RouteID, SQLString AS queryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, p.name AS ProprietyName FROM URLRoutes urlR INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = @PropertyID INNER JOIN Controllers c ON c.id = @ControllerID WHERE urlR.id_baseRoute = 1 AND rq.ind = 1 AND urlR.id_controller = @ControllerID", true, true);
+        internal static readonly Query insertMapperGenerator = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO LinkProprietiesControllers (id_propriety, id_controller) VALUES (@ProprietyID, @ControllerID)", true, true);
+        internal static readonly Query getMapperGeneratorSingleInfo = Query.fromQueryString(QueryTypes.ROW, "SELECT TOP (1) @LinkID AS id, c.id AS controllerID, c.Name AS controllerName, urlR.id AS routeID, SQLString AS queryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, completeAuth AS CompleteAuth, p.name AS ProprietyName FROM URLRoutes urlR INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = @ProprietyID INNER JOIN Controllers c ON c.id = @ControllerID WHERE urlR.id_baseRoute = @BaseRoute AND rq.ind = 1 AND urlR.id_controller = @ControllerID", true, true);
         internal static readonly Query getControllerID = Query.fromQueryString(QueryTypes.VALUE, "SELECT id FROM Controllers WHERE name = @ControllerName", true, true);
         internal DynamicMapperGenerator(long id, long controllerID, string controllerName, long routeID, string queryString, long QueryTypeID, bool CompleteCheck, bool CompleteAuth, string ProprietyName)
         {
@@ -50,7 +50,7 @@ namespace DynamicStructureObjects
         {
             return this.Mapper.updateQuery(query.Parse(authorizedColumns));
         }
-        internal async static Task<DynamicMapperGenerator> addMapperGenerator(string ControllerName, long ProprietyID, params ParamLinker[] linkers)
+        internal async static Task<DynamicMapperGenerator> addMapperGenerator(string ControllerName, long ProprietyID, bool ForCBO, params ParamLinker[] linkers)
         {
             long ControllerID = await DynamicController.executor.SelectValue<long>(
                 getControllerID
@@ -58,13 +58,15 @@ namespace DynamicStructureObjects
             );
             long id = await DynamicController.executor.ExecuteInsertWithLastID(
                 insertMapperGenerator
-                    .setParam("PropretyID", ProprietyID)
+                    .setParam("ProprietyID", ProprietyID)
                     .setParam("ControllerID", ControllerID)
             );
             DynamicMapperGenerator mapperGenerator =  await DynamicController.executor.SelectSingle<DynamicMapperGenerator>(
                 getMapperGeneratorSingleInfo
                 .setParam("LinkID", id)
                 .setParam("ControllerID", ControllerID)
+                .setParam("ProprietyID", ProprietyID)
+                .setParam("BaseRoute", ForCBO ? (long)BaseRoutes.CBO : (long)BaseRoutes.GETALL)
             );
             foreach (var linker in linkers)
                 await mapperGenerator.addParamInitializer(linker);
@@ -74,7 +76,7 @@ namespace DynamicStructureObjects
         }
         internal async static Task<DynamicMapperGenerator> addMapperGenerator(string ControllerName, long ProprietyID, string key, params ParamLinker[] linkers)
         {
-            return await (await addMapperGenerator(ControllerName, ProprietyID, linkers)).addParamInitializer(SQLExecutor.KEY_FOR_CBO, key, CSharpTypes.REFERENCE);
+            return await (await addMapperGenerator(ControllerName, ProprietyID, true, linkers)).addParamInitializer(SQLExecutor.KEY_FOR_CBO, key, CSharpTypes.REFERENCE);
         }
         internal Task<DynamicMapperGenerator> addParamInitializer(string AssociatedVarName, string Value, CSharpTypes CSharpType)
         {

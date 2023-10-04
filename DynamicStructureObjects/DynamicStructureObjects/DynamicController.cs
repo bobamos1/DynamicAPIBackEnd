@@ -68,7 +68,7 @@ namespace DynamicStructureObjects
             {
                 if (!controller.hasRoute(BaseRoutes.GETALLDETAILED.Value()))
                     controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETALLDETAILED));
-                if (getAllRoute.Queries.First().ParamsInfos.ContainsKey("id"))
+                if (getAllRoute.Queries.First().ParamsInfos.ContainsKey("ID"))
                 {
                     if (!controller.hasRoute(BaseRoutes.GET.Value()))
                         controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GET));
@@ -212,9 +212,9 @@ namespace DynamicStructureObjects
             await Routes.First(route => route.Name == routeName).addFilter(index, name, showType, VarAffected);
             return this;
         }
-        public async Task<DynamicController> addPropriety(string Name, bool IsMain, bool IsReadOnly, ShowTypes showType)
+        public async Task<DynamicController> addPropriety(string Name, bool IsMain, bool IsReadOnly, ShowTypes showType, params ValidatorBundle[] validatorBundle)
         {
-            Proprieties.Add(await DynamicPropriety.addPropriety(Name, IsMain, IsReadOnly, showType, id));
+            Proprieties.Add(await DynamicPropriety.addPropriety(Name, IsMain, IsReadOnly, showType, id, validatorBundle));
             return this;
         }
         public async Task<DynamicController> addValidatorForPropriety(string ProprietyName, string Value, ValidatorTypes ValidatorType)
@@ -367,7 +367,7 @@ namespace DynamicStructureObjects
             Func<dynamic, string, Task<IResult>> delegateMethod = async ([FromBody] dynamic request, [FromHeader(Name = "Authorization")] string JWT) =>
             {
                 Dictionary<string, object> bodyData = JObjectToDictionary(JObject.Parse(request.ToString()));
-                if (fillBodyData(bodyData, DynamicConnection.ParseClaim(JWT), route))
+                if (!fillBodyData(bodyData, DynamicConnection.ParseClaim(JWT), route))
                     return Results.Forbid();
                 if (!route.validateParams(bodyData))
                     return Results.Forbid();

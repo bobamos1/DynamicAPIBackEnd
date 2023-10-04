@@ -202,9 +202,9 @@ namespace DynamicStructureObjects
         {
             return await (await task).addFilter(routeName, index, name, showType, VarAffected);
         }
-        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsReadOnly, ShowTypes showType)
+        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsReadOnly,ShowTypes showType, params ValidatorBundle[] validatorBundles)
         {
-            return await (await task).addPropriety(Name, IsMain, IsReadOnly, showType);
+            return await (await task).addPropriety(Name, IsMain, IsReadOnly, showType, validatorBundles);
         }
         public async static Task<DynamicController> addValidatorForPropriety(this Task<DynamicController> task, string ProprietyName, string Value, ValidatorTypes ValidatorType)
         {

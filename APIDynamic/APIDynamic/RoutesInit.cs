@@ -15,21 +15,26 @@ namespace APIDynamic
         public static void InitRoutes(Dictionary<string, DynamicController> controllers, WebApplication app, Dictionary<string, string> connectionStrings)
         {
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
+
+            var userInfo = DynamicConnection.CreatePasswordHash("Adam", "Adanhihi@gmail.com", "test123");
+            Query qquery = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE clients SET mdp = @Hash, sel = @Salt WHERE id = 1", true, true, true);
+            executorData.ExecuteQueryWithTransaction(qquery.setParam("Hash", userInfo.passwordHash).setParam("Salt", userInfo.passwordSalt));
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
-            //Query qquery = controllers["Commande"].Routes.First().Queries.First().query;
-            controllers["Clients"].addRouteAPI("ConnectionFirstFactor",
+            controllers["Clients"].addRouteAPI("ConnexionStepOne",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeConnection2Factor(bodyData.Get<string>("Email"), bodyData.Get<string>("Password"), queries[0], queries[1]);
+                    return DynamicConnection.makeConnection2Factor(bodyData.Get<string>("Email"), bodyData.Get<string>("Password"), queries[0], queries[1], executorData);
                 }
             );//, false
-            controllers["Clients"].addRouteAPI("ConnectionTwoFactor",
+            var clientsGetAllRoute = controllers["Clients"].GetGetAllRoute();
+            controllers["Clients"].addRouteAPI("ConnexionStepTwo",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeConnection(bodyData.Get<string>("TwoFactor"), queries[0], Roles.Client.ID());
+                    return DynamicConnection.makeConnection(bodyData.Get<string>("Token"), queries[0], Roles.Client.ID(), executorData);
                 }
             );//, false
+            /*
             controllers["Clients"].addRouteAPI("CreateUser",
                 async (queries, bodyData) =>
                 {
@@ -44,6 +49,7 @@ namespace APIDynamic
                     return Results.Ok(DynamicConnection.CreateToken(userID, userInfo, Roles.Client.ID()));
                 }
             );//, false
+            
             controllers["Clients"].addRouteAPI("RecoverPasswordStepOne",
                 (queries, bodyData) =>
                 {

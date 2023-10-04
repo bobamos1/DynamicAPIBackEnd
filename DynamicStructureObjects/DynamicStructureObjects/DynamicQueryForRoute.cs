@@ -14,7 +14,7 @@ namespace DynamicStructureObjects
         public List<DynamicFilter> Filters { get; internal set; }
         internal static readonly Query getFilters = Query.fromQueryString(QueryTypes.SELECT, "SELECT Filters.id AS id, name AS Name, SQLParamInfos.varAffected AS VarAffected FROM Filters INNER JOIN SQLParamInfos ON SQLParamInfos.id = id_SQLParamInfo WHERE id_RouteQuery = @routeQueryID ORDER BY name, ind", true, true);
         internal static readonly Query getSQLParamInfos = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, varAffected AS VarAffected, id_Propriety AS ProprietyID FROM SQLParamInfos WHERE id_RouteQuery = @RouteQueryID", true, true);
-        internal static readonly Query insertRouteQuery = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO RouteQueries (ind, SQLString, id_queryType, id_route, CompleteAuth, CompleteCheck) VALUES (@Index, @SQLString, @QueryTypeID, @RouteID, @CompleteCheck, @CompleteAuth)", true, true);
+        internal static readonly Query insertRouteQuery = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO RouteQueries (ind, SQLString, id_queryType, id_route, CompleteAuth, CompleteCheck) VALUES (@Index, @SQLString, @QueryTypeID, @RouteID, @CompleteAuth, @CompleteCheck)", true, true);
         internal static readonly Query updateSQLParamInfo = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE SQLParamInfos SET id_Propriety = @ProprietyID WHERE varAffected = @VarAffected AND id_RouteQuery = @RouteQueryID", true, true);
         private string lastSQLParamAdded;
         internal DynamicQueryForRoute(long id, string queryString, long QueryTypeID, bool CompleteAuth, bool CompleteCheck)
@@ -65,13 +65,14 @@ namespace DynamicStructureObjects
                         .setParam("SQLString", queryString)
                         .setParam("QueryTypeID", (long)QueryType)
                         .setParam("RouteID", RouteID)
-                        .setParam("CompleteCheck", CompleteCheck)
                         .setParam("CompleteAuth", CompleteAuth)
+                        .setParam("CompleteCheck", CompleteCheck)
+
                     )
                 , queryString
                 , (long)QueryType
-                , CompleteCheck
                 , CompleteAuth
+                , CompleteCheck
             );
             
             foreach (var variable in dynamicQueryForRoute.query.variablesInQuery)

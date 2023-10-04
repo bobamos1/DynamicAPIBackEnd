@@ -55,9 +55,9 @@ namespace DynamicStructureObjects
                 );
             return propriety;
         }
-        public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsReadOnly, ShowTypes showType, long ControllerID)
+        public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsReadOnly, ShowTypes showType, long ControllerID, params ValidatorBundle[] validatorBundle)
         {
-            return new DynamicPropriety(
+            var dynamicPropriety = new DynamicPropriety(
                 await DynamicController.executor.ExecuteInsertWithLastID(
                     insertPropriety
                         .setParam("Name", Name)
@@ -71,12 +71,18 @@ namespace DynamicStructureObjects
                 , IsReadOnly
                 , (long)showType
             );
+
+            foreach (var validator in validatorBundle)
+            {
+                dynamicPropriety.Validators.Add(await DynamicValidator.addValidator(validator, dynamicPropriety.id, true));
+            }
+            return dynamicPropriety;
         }
         public async Task<DynamicPropriety> addMapperGenerator(string ControllerName, params ParamLinker[] linkers)
         {
             if (ShowType != ShowTypes.Ref)
                 throw new Exception("cannot add mapper on not ref proprety");
-            MapperGenerator = await DynamicMapperGenerator.addMapperGenerator(ControllerName, id, linkers);
+            MapperGenerator = await DynamicMapperGenerator.addMapperGenerator(ControllerName, id, false, linkers);
             return this;
         }
         public async Task<DynamicPropriety> addCBOInfo(string ControllerName, string key, params ParamLinker[] linkers)

@@ -26,59 +26,83 @@ namespace APIDynamic
         {
             await controllers
                 .addController("Categories", true)
+                .addController("EtatsProduit", false)
                 .addController("Produits", true)
                 .addController("Commandes", true)
                 .addController("produits_par_commande", true)
                 .addController("Panier", true)
-                .addController("Formats", true)
-                .addController("Taxes", true)
+                .addController("Formats", false)
+                .addController("Taxes", false)
                 .addController("Clients", true)
                 .addController("Collaborateurs", true)
                 .addController("Compagnies", true)
-                .addController("Villes", true)
-                .addController("Provinces", true)
+                .addController("Villes", false)
+                .addController("Provinces", false)
                 .addController("Employes", true)
-                .addController("EtatsCommandes", true)
-                .addController("TypesPreferencesGraphique", true)
-                .addController("Couleurs", true)
-                .addController("PreferencesGraphiques", true)
-                .addController("TypesMedia", true)
-                .addController("Media", true)
-                .addController("ReseauxSociaux", true)
-                .addController("EtatsProduits", true)
+                .addController("EtatsCommandes", false)
+                .addController("TypesPreferencesGraphique", false)
+                .addController("Couleurs", false)
+                .addController("PreferencesGraphiques", false)
+                .addController("TypesMedia", false)
+                .addController("Media", false)
+                .addController("ReseauxSociaux", false)
+                .addController("EtatsProduits", false)
                 ;
-
+            //CHECK pour l'instant
+            /*
             await controllers["Categories"]
-                //.addPropriety("ID", true, true, ShowTypes.INT)
-                //.addPropriety("Nom", true, true, ShowTypes.STRING)
-                //.addPropriety("Descriptions", true, true, ShowTypes.INT)
-                //.addPropriety("CategorieMere", true, true, ShowTypes.CBO)
-                //    .addCBOInfo("Categorie", "id", new ParamLinker("id", "CategorieMere", CSharpTypes.STRING))
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom FROM categories", QueryTypes.CBO, false, false)
+
+                .addPropriety("ID", true, true, ShowTypes.INT)
+                .addPropriety("Nom", true, true, ShowTypes.STRING)
+                .addPropriety("Descriptions", true, true, ShowTypes.INT)
+                .addPropriety("CategorieMere", true, true, ShowTypes.CBO)
+                    .addCBOInfo("Categories", "CategorieMereID")
 
 
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a INNER JOIN categories b ON a.id_categorie_mere = b.id WHERE a.id = @_id_cat AND b.id = @_id_cat_mere", QueryTypes.SELECT, true, true)
-                .addRoute(BaseRoutes.GET)
-                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-
+                    .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a INNER JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_id_cat_mere AND a.id = @_ID", QueryTypes.SELECT, true, true)
+                        .setSQLParam("ID", "ID")
 
                 .addRoute(BaseRoutes.INSERT)
                     .addAuthorizedRouteRoles(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO categories (nom, descriptions, id_categorie_mere) VALUES (@nom, @descriptions, @id_categorie_mere)", QueryTypes.INSERT, true, true)
-                        .setSQLParam("Nom", "nom")
-                        .setSQLParam("Descriptions", "descriptions")
+                        .setSQLParam("nom", "Nom")
+                        .setSQLParam("descriptions", "Descriptions")
                         .setSQLParam("id_categorie_mere", "CategorieMere")
                 .addRoute(BaseRoutes.UPDATE)
                     .addAuthorizedRouteRoles(Roles.Admin.ID())
                     .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, id_categorie_mere = @_id_categorie_mere WHERE id = @id", QueryTypes.UPDATE, true, false)
-                        .setSQLParam("id", "id")
-                        .setSQLParam("nom", "nom")
-                        .setSQLParam("descriptions", "descriptions")
-                        .setSQLParam("id_categorie_mere", "id_categorie_mere")
-                .addRoute(BaseRoutes.CBO)
-                    .addRouteQuery("SELECT id AS ID, nom AS Nom FROM categories", QueryTypes.CBO, false, false)
+                        .setSQLParam("id", "ID")
+                        .setSQLParam("nom", "Nom")
+                        .setSQLParam("descriptions", "Descriptions")
+                        .setSQLParam("id_categorie_mere", "CategorieMere")
+                ;
 
+            await controllers["EtatsProduit"]
+                .addPropriety("ID", true, true, ShowTypes.INT)
+                .addPropriety("Nom", true, true, ShowTypes.STRING)
+                .addPropriety("Descriptions", true, true, ShowTypes.STRING)
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Descriptions FROM etats_produit WHERE id = @_ID", QueryTypes.SELECT, false, true)
+                        .setSQLParam("ID", "ID")
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom FROM etats_produit", QueryTypes.CBO, false, false)
+                ;
+            await controllers["EtatsCommandes"]
+                .addPropriety("ID", true, true, ShowTypes.INT)
+                .addPropriety("Nom", true, true, ShowTypes.STRING)
+                .addPropriety("Descriptions", true, true, ShowTypes.STRING)
+
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Descriptions FROM etats_commandes WHERE id = @_ID", QueryTypes.SELECT, false, true)
+                        .setSQLParam("ID", "ID")
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom FROM etats_commandes", QueryTypes.CBO, false, false)
                 ;
 
             await controllers["Produits"]
@@ -88,17 +112,15 @@ namespace APIDynamic
                 .addPropriety("Ingrediants", true, false, ShowTypes.STRING)
                 .addPropriety("Prix", true, false, ShowTypes.FLOAT)
                 .addPropriety("QuantiteInventaire", true, false, ShowTypes.INT)
-                .addPropriety("CategorieNom", true, true, ShowTypes.CBO)
-                    .addCBOInfo("Categorie", "id")
+                .addPropriety("Categorie", true, true, ShowTypes.CBO)
+                    .addCBOInfo("Categories", "CategorieID")
                 .addPropriety("EtatProduit", true, true, ShowTypes.CBO)
-                    .addCBOInfo("EtatProduit", "EtatProduit")
+                    .addCBOInfo("EtatsProduit", "EtatProduitID")
 
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS ProduitCategorie, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatProduitNom FROM produits AS p INNER JOIN categories c ON c.id = p.id_categorie INNER JOIN etats_produit ep ON ep.id = p.id_etat_produit WHERE p.id = @id_produit", QueryTypes.SELECT, true, true)
-                .addRoute(BaseRoutes.GET)
-                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                     //Est-ce que je set des sqlparams ici?
+                    .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, c.id AS CategorieID, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatProduitNom FROM produits AS p INNER JOIN categories c ON c.id = p.id_categorie INNER JOIN etats_produit ep ON ep.id = p.id_etat_produit WHERE p.id = @_ID", QueryTypes.SELECT, true, true)
+                        .setSQLParam("ID", "ID")
                 .addRoute(BaseRoutes.INSERT)
                     .addAuthorizedRouteRoles(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@nom, @descriptions, @prix, @id_categorie, @id_etat_produit", QueryTypes.INSERT, true, true)
@@ -110,12 +132,12 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.UPDATE)
                     .addAuthorizedRouteRoles(Roles.Admin.ID())
                     .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, ingrediants = @_ingrediants, quantite_inventaire = @_quantite_inventaire, prix = @_prix, id_categorie = @_id_categorie, id_etat_produit = @_id_etat_produit WHERE id = @id", QueryTypes.UPDATE, true, true)
-                        .setSQLParam("id", "id")
-                        .setSQLParam("nom", "nom")
-                        .setSQLParam("descriptions", "descriptions")
-                        .setSQLParam("prix", "prix")
-                        .setSQLParam("id_categorie", "id_categorie")
-                        .setSQLParam("id_etat_produit", "id_etat_produit")
+                        .setSQLParam("id", "ID")
+                        .setSQLParam("nom", "Nom")
+                        .setSQLParam("descriptions", "Descriptions")
+                        .setSQLParam("prix", "Prix")
+                        .setSQLParam("id_categorie", "Categorie")
+                        .setSQLParam("id_etat_produit", "EtatProduit")
 
                 .addRoute(BaseRoutes.CBO)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
@@ -123,56 +145,65 @@ namespace APIDynamic
 
                 ;
 
-
             await controllers["Commandes"]
                 .addPropriety("ID", true, false, ShowTypes.INT)
-                .addPropriety("ProduitNom", false, false, ShowTypes.STRING)
-                .addPropriety("numero_facture", true, true, ShowTypes.INT)
-                .addPropriety("montant_brut", true, true, ShowTypes.FLOAT)
-                .addPropriety("no_civique_livraison", true, true, ShowTypes.STRING)
-                .addPropriety("rue_livraison", true, true, ShowTypes.STRING)
-                .addPropriety("id_client", true, true, ShowTypes.INT)
-                .addPropriety("id_etat_commande", true, true, ShowTypes.INT)
-                .addPropriety("id_ville", true, true, ShowTypes.INT)
-                .addPropriety("id_employe", true, true, ShowTypes.INT)
+                .addPropriety("Employe",false, true, ShowTypes.CBO)
+                    .addCBOInfo("Employes", "EmployeID")
+                 .addPropriety("Villes", false, true, ShowTypes.CBO)
+                    .addCBOInfo("Villes", "VilleID")
+                .addPropriety("Clients", false, true, ShowTypes.CBO)
+                    .addCBOInfo("Clients", "ClientID")
+                .addPropriety("EtatsCommandes", false, true, ShowTypes.CBO)
+                    .addCBOInfo("EtatsCommandes", "EtatsCommandesID")
+                .addPropriety("NumeroFacture", true, true, ShowTypes.INT)
+                .addPropriety("MontantBrut", true, true, ShowTypes.FLOAT)
+                .addPropriety("NumeroCiviqueLivraison", true, true, ShowTypes.STRING)
+                .addPropriety("RueLivraison", true, true, ShowTypes.STRING)
+                .addPropriety("Produits", false, false, ShowTypes.Ref)
+                    .addMapperGenerator("produits_par_commande", CSharpTypes.REFERENCE.Link("ID", "CommandeID"))
+
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT c.id AS ID, p.nom AS ProduitNom, c.date_heure_transaction AS DateTransaction, c.no_civique_livraison AS NumeroCivique, c.rue_livraison AS RueLivraison, c.id_ville AS VilleID, v.nom AS VilleNom, v.id_province AS ProvinceID, prov.nom AS ProvinceNom FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS prov ON prov.id = v.id_province LEFT JOIN produits_par_commande AS pc ON pc.id_commande = c.id LEFT JOIN produits AS p ON p.id = pc.id_produit WHERE c.id_etat_commande = @_id_etat_commande AND c.id_client = @_id_client AND c.id = @_id_commande", QueryTypes.SELECT, true, true)
-                .addRoute(BaseRoutes.GET)
-                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    //Est-ce que je set des SQLParams ici
+                    .addRouteQuery("SELECT c.id AS ID, c.numero_facture AS NumeroFacture, c.montant_brut AS MontantBrut, c.no_civique_livraison AS NumeroCiviqueLivraison, c.rue_livraison AS RueLivraison, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, c.id_etat_commande AS EtatsCommandesID, ec.nom AS EtatsCommandes, c.id_ville AS VilleID, v.nom AS Ville, pro.id AS ProvinceID, pro.nom AS Province, c.id_employe AS EmployeID, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_ID AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_NumeroCiviqueID AND c.id_etat_commande = @_EtatsCommandesID", QueryTypes.SELECT, true, true)
+                        .setSQLParam("ID", "ID")
+                        .setSQLParam("ClientID", "ClientsID")
+                        .setSQLParam("EmployeID", "EmployeID")
+                        .setSQLParam("NumeroCiviqueID", "NumeroCiviqueLivraison")
+                        .setSQLParam("EtatsCommandesID", "EtatsCommandesID")
+
                 .addRoute(BaseRoutes.INSERT)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO commandes (numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (@numero_facture, @montant_brut, @no_civique_livraison, @rue_livraison, @id_client, @id_etat_commande, @id_ville, @id_employe)", QueryTypes.INSERT, true, true)
-                        .setSQLParam("numero_facture")
-                        .setSQLParam("montant_brut")
-                        .setSQLParam("no_civique_livraison")
-                        .setSQLParam("rue_livraison")
-                        .setSQLParam("id_client")
-                        .setSQLParam("id_etat_commande")
-                        .setSQLParam("id_ville")
-                        .setSQLParam("id_employe")
+                        .setSQLParam("numero_facture", "NumeroFacture")
+                        .setSQLParam("montant_brut", "MontantBrut")
+                        .setSQLParam("no_civique_livraison", "NumeroCiviqueLivraison")
+                        .setSQLParam("rue_livraison", "RueLivraison")
+                        .setSQLParam("id_client", "Clients")
+                        .setSQLParam("id_etat_commande", "EtatsCommandes")
+                        .setSQLParam("id_ville", "Villes")
+                        .setSQLParam("id_employe", "Employes")
+
                 .addRoute(BaseRoutes.UPDATE)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("UPDATE commandes SET numero_facture = @_numero_facture, montant_brut = @_montant_brut, no_civique_livraison = @_no_civique_livraison, rue_livraison = @_rue_livraison, id_client = @_id_client, id_etat_commande = @_id_etat_commande, id_ville = @_id_ville, id_employe = @_id_employe WHERE id = @id", QueryTypes.UPDATE, true, true)
-                        .setSQLParam("id")
-                        .setSQLParam("numero_facture")
-                        .setSQLParam("montant_brut")
-                        .setSQLParam("no_civique_livraison")
-                        .setSQLParam("rue_livraison")
-                        .setSQLParam("id_client")
-                        .setSQLParam("id_etat_commande")
-                        .setSQLParam("id_ville")
-                        .setSQLParam("id_employe")
+                        .setSQLParam("ID", "ID")
+                        .setSQLParam("numero_facture", "NumeroFacture")
+                        .setSQLParam("montant_brut", "MontantBrut")
+                        .setSQLParam("no_civique_livraison", "NumeroCiviqueLivraison")
+                        .setSQLParam("rue_livraison", "RueLivraison")
+                        .setSQLParam("id_client", "Clients")
+                        .setSQLParam("id_etat_commande", "EtatsCommandes")
+                        .setSQLParam("id_ville", "Villes")
+                        .setSQLParam("id_employe", "Employes")
             ;
             //await controllers["produits_par_commande"]
-            //    .addPropriety("id", true, true, ShowTypes.INT)
+            //    .addPropriety("ID", true, true, ShowTypes.INT)
             //    .addPropriety("id_produit", true, true, ShowTypes.INT)
             //    .addPropriety("id_commande", true, true, ShowTypes.INT)
             //    .addPropriety("quantite", true, true, ShowTypes.INT)
             //    .addPropriety("prix_unitaire", true, true, ShowTypes.FLOAT)
             //    .addRoute(BaseRoutes.GETALL)
-            //        .addRouteQuery("SELECT id, id_produit, id_commande, quantite, prix_unitaire FROM produits_par_commande", QueryTypes.SELECT, true, true)
+            //        .addRouteQuery("SELECT id, id_produit, id_commande, quantite, prix_unitaire FROM produits_par_commande WHERE commande_id = @_CommandeID", QueryTypes.SELECT, true, true)
             //    .addRoute(BaseRoutes.GET)
             //        .addRouteQuery("SELECT id, id_produit, id_commande, quantite, prix_unitaire FROM produits_par_commande WHERE id = @id", QueryTypes.SELECT, true, true)
             //            .addSQLParamInfo("id")
@@ -196,11 +227,11 @@ namespace APIDynamic
             //        .addRouteQuery("SELECT id, id_produit, id_commande, quantite, prix_unitaire FROM produits_par_commande WHERE id_commande = @id_commande", QueryTypes.SELECT, true, false)
             //            .addSQLParamInfo("id_commande")
             //    ;
-
+            /*
             await controllers["Formats"]
                 .addPropriety("ID", true, false, ShowTypes.INT)
                 .addPropriety("Nom", true, true, ShowTypes.STRING)
-                .addPropriety("ProduitNom", true, false, ShowTypes.CBO)
+                .addPropriety("Produit", true, false, ShowTypes.CBO)
                     .addCBOInfo("Produits", "ProduitID")
 
                 .addRoute("FormatDispoProduits", RouteTypes.GET)
@@ -211,25 +242,26 @@ namespace APIDynamic
                 .addPropriety("ProduitID", true, true, ShowTypes.INT)
                 .addPropriety("TypeAffectation", true, true, ShowTypes.STRING)
                 .addPropriety("Montant", true, true, ShowTypes.STRING)
-                .addRoute(BaseRoutes.CBO)
+
+                .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT app.id_produit AS ProduitID, ap.nom AS TypeAffectation, app.montant AS Montant FROM affectation_prix_produits AS app INNER JOIN affectation_prix AS ap ON ap.id = app.id_affectation_prix", QueryTypes.CBO, true, false)
+                    .addRouteQuery("SELECT app.id_produit AS ProduitID, ap.nom AS TypeAffectation, app.montant AS Montant FROM affectation_prix_produits AS app INNER JOIN affectation_prix AS ap ON ap.id = app.id_affectation_prix WHERE ap.id = @_ID", QueryTypes.CBO, true, false)
 
             ;
             await controllers["Panier"]
                 .addPropriety("ID", true, false, ShowTypes.INT)
                 .addPropriety("ProduitCommandeID", true, false, ShowTypes.INT)
-                .addPropriety("NomProduit", true, false, ShowTypes.CBO)
-                    .addCBOInfo("Produits", "ProduitID")     //Paramètre de nom de produit
+                .addPropriety("Produits", true, false, ShowTypes.Ref)
+                    .addMapperGenerator("Produits", "ProduitID")
                 .addPropriety("DescriptionProduit", true, false, ShowTypes.STRING)
                 .addPropriety("QuantiteInventaire", true, false, ShowTypes.INT)
                 .addPropriety("PrixProduit", true, false, ShowTypes.FLOAT)
                 .addPropriety("ImageProduitURL", true, false, ShowTypes.STRING)
                 .addPropriety("id_client", true, false, ShowTypes.INT)
                 .addPropriety("Formats", false, false, ShowTypes.Ref)
-                    .addMapperGenerator("Formats", new ParamLinker("produit_id", "ProduitID", CSharpTypes.REFERENCE))
+                    .addMapperGenerator("Formats", new ParamLinker("ID", "Formats", CSharpTypes.REFERENCE))
                 .addPropriety("Taxes", false, false, ShowTypes.Ref)
-                    .addMapperGenerator("Taxes", new ParamLinker("produit_id", "Taxes", CSharpTypes.REFERENCE))
+                    .addMapperGenerator("Taxes", new ParamLinker("ID", "Taxes", CSharpTypes.REFERENCE))
 
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
@@ -250,9 +282,9 @@ namespace APIDynamic
                         .setSQLParam("id_commande", "CommandeID")
                  
             ;
-
+            */
             await controllers["Clients"]
-                .addPropriety("ID", true, true, ShowTypes.INT)
+                .addPropriety("ID", true, true, ShowTypes.INT, ValidatorTypes.MAX.SetValue("6", "Eille t'es trop haut"))
                 .addPropriety("Nom", true, false, ShowTypes.STRING)
                 .addPropriety("Prenom", true, false, ShowTypes.STRING)
                 .addPropriety("DateNaissance", true, false, ShowTypes.STRING)
@@ -261,12 +293,12 @@ namespace APIDynamic
                 .addPropriety("Token", true, false, ShowTypes.STRING)
                 .addPropriety("Sel", false, false, ShowTypes.STRING)
                 .addPropriety("Actif", true, false, ShowTypes.INT)
+
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT id AS ID, nom AS Nom, prenom AS Prenom, date_naissance AS DateNaissance, adresse_courriel AS AdresseCourriel, mdp AS MDP, token AS Token, sel AS Sel, actif AS Actif FROM clients WHERE p.id = @_id", QueryTypes.SELECT, true, true)
-                .addRoute(BaseRoutes.GET)
-                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    //.setSQLParam("id", "ID")
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom, prenom AS Prenom, date_naissance AS DateNaissance, adresse_courriel AS AdresseCourriel, mdp AS MDP, token AS Token, sel AS Sel, actif AS Actif FROM clients WHERE p.id = @_ID AND token = @_Token AND expiration_token = @_ExpirationToken", QueryTypes.SELECT, false, true)
+                        .setSQLParam("ID", "ID")
+                        /*
                 .addRoute(BaseRoutes.INSERT)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@id, @nom, @prenom, @date_naissance, @adresse_courriel, @mdp, @token, @sel, @actif)", QueryTypes.INSERT, true, true)
@@ -290,14 +322,17 @@ namespace APIDynamic
                         .setSQLParam("mdp", "MDP")
                         .setSQLParam("token", "Token")
                         .setSQLParam("sel", "Sel")
-                        .setSQLParam("actif", "Actif")
-                .addRoute("Connection", RouteTypes.POST)
-                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT adresse_courriel FROM client WHERE adresse_courriel = @adresse_courriel", QueryTypes.VALUE, true, true)
-                        .setSQLParam("adresse_courriel", "AdresseCourriel")
-                    .addRouteQuery("SELECT mdp FROM clients WHERE mdp = @mdp", QueryTypes.VALUE, true, true)
-                        .setSQLParam("mdp", "MDP")
-                
+                        .setSQLParam("actif", "Actif")*/
+
+
+                .addRoute("ConnexionStepOne", RouteTypes.POST, false)
+                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE adresse_courriel = @Email", QueryTypes.ROW, false, true)
+                        .setSQLParam("Email", "AdresseCourriel")
+                        .addSQLParam("Password", ValidatorTypes.REQUIRED.SetValue("true", "Password is missing from request."))
+                    .addRouteQuery("UPDATE clients SET token = @_Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @_ID", QueryTypes.UPDATE, false, true)
+                        .setSQLParam("ID", "ID")
+                .addRoute("ConnexionStepTwo", RouteTypes.POST, false)
+                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, false, true)
             ;
             //await controllers["Collaborateurs"]
             //    .addPropriety("id", true, true, ShowTypes.INT)
@@ -411,16 +446,7 @@ namespace APIDynamic
             //            .addSQLParamInfo("sel")
             //            .addSQLParamInfo("actif")
             //    ;
-            //await controllers["EtatsCommandes"]
-            //    .addPropriety("id", true, true, ShowTypes.INT)
-            //    .addPropriety("nom", true, true, ShowTypes.STRING)
-            //    .addPropriety("descriptions", true, true, ShowTypes.STRING)
-            //    .addRoute(BaseRoutes.GETALL)
-            //        .addRouteQuery("SELECT id, nom, descriptions FROM etats_commandes", QueryTypes.SELECT, true, true)
-            //    .addRoute(BaseRoutes.GET)
-            //        .addRouteQuery("SELECT id, nom, descriptions WHERE id = @id FROM etats_commandes", QueryTypes.SELECT, true, true)
-            //            .addSQLParamInfo("id")
-            //    ;
+
             //await controllers["TypesPreferencesGraphique"]
             //    .addRoute(BaseRoutes.GETALL)
             //        .addRouteQuery("SELECT id, nom, code_html FROM types_preferences_graphique", QueryTypes.SELECT, true, true)
