@@ -139,9 +139,9 @@ namespace DynamicStructureObjects
             Routes.Add(await DynamicRoute.addRoute(id, baseRoute));
             return this;
         }
-        public async Task<DynamicController> addRoute(string Name, RouteTypes routeType, bool requireAuthorization = true, bool getAuthorizedCols = false, bool onlyModify = false)
+        public async Task<DynamicController> addRoute(string Name, RouteTypes routeType, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = false)
         {
-            Routes.Add(await DynamicRoute.addRoute(id, Name, routeType, requireAuthorization, getAuthorizedCols, onlyModify));
+            Routes.Add(await DynamicRoute.addRoute(id, Name, routeType, getAuthorizedCols, onlyModify, requireAuthorization));
             return this;
         }
         public DynamicController addEmptyQuery()
@@ -254,9 +254,7 @@ namespace DynamicStructureObjects
         }
         public async Task<DynamicController> addAuthorizedRouteRoles(params long[] roles)
         {
-            DynamicRoute route = Routes.Last();
-            foreach (var role in roles)
-                await route.addAuthorizedRole(role);
+            await Routes.Last().addAuthorizedRoles(roles);
             return this;
         }
         public async Task<DynamicController> addAuthorizedProprietyRole(string ProprietyName, long RoleID, bool CanModify)
@@ -264,21 +262,19 @@ namespace DynamicStructureObjects
             await Proprieties.First(propriety => propriety.Name == ProprietyName).addAuthorizedRole(RoleID, CanModify);
             return this;
         }
-        public async Task<DynamicController> addAuthorizedRoleAnonymous(string ProprietyName)
+        public async Task<DynamicController> Anonymous(string ProprietyName)
         {
-            await Proprieties.First(propriety => propriety.Name == ProprietyName).addAuthorizedRoleAnonymous();
+            await Proprieties.First(propriety => propriety.Name == ProprietyName).Anonymous();
             return this;
         }
-        public async Task<DynamicController> addAuthorizedRoleAnonymous()
+        public async Task<DynamicController> Anonymous()
         {
-            await Proprieties.Last().addAuthorizedRoleAnonymous();
+            await Proprieties.Last().Anonymous();
             return this;
         }
         public async Task<DynamicController> addAuthorizedProprietyRoles(params KeyValuePair<long, bool>[] roles)
         {
-            DynamicPropriety propriety = Proprieties.Last();
-            foreach (var role in roles)
-                await propriety.addAuthorizedRole(role.Key, role.Value);
+            await Proprieties.Last().addAuthorizedRoles(roles);
             return this;
         }
         #endregion

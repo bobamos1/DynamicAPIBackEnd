@@ -41,7 +41,7 @@ namespace DynamicStructureObjects
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
         }
-        private static UserInfo CreatePasswordHash(string password)
+        public static UserInfo CreatePasswordHash(string password)
         {
             using (var hmac = new HMACSHA512())
                 return new UserInfo(-1, "", "", hmac.Key, hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)));

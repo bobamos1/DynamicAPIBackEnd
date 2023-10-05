@@ -24,7 +24,7 @@ namespace DynamicStructureObjects
             this.controllerID = controllerID;
             this.controllerName = controllerName;
             this.routeID = routeID; 
-            this.query = Query.fromQueryString((QueryTypes)QueryTypeID, QueryString, CompleteCheck, CompleteAuth);
+            this.query = Query.fromQueryString((QueryTypes)QueryTypeID, QueryString, CompleteAuth, CompleteCheck);
             this.ProprietyName = ProprietyName;
             this.Mapper = null;
             this.baseParameters = new Dictionary<string, object>();

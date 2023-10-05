@@ -98,9 +98,15 @@ namespace DynamicStructureObjects
             Validators.Add(await DynamicValidator.addValidator(Value, id, ValidatorType, true));
             return this;
         }
-        public Task<DynamicPropriety> addAuthorizedRoleAnonymous()
+        public Task<DynamicPropriety> Anonymous()
         {
             return addAuthorizedRole(AnonymousRoleID, false);
+        }
+        public async Task<DynamicPropriety> addAuthorizedRoles(params KeyValuePair<long, bool>[] RolesID)
+        {
+            foreach (var RoleID in RolesID)
+                await addAuthorizedRole(RoleID.Key, RoleID.Value);
+            return this;
         }
         public async Task<DynamicPropriety> addAuthorizedRole(long RoleID, bool CanModify)
         {

@@ -1,12 +1,7 @@
 ﻿using DynamicSQLFetcher;
 using DynamicStructureObjects;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Features;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using ParserLib;
-using System.ComponentModel;
+using Stripe;
+using System;
 
 namespace APIDynamic
 {
@@ -25,16 +20,37 @@ namespace APIDynamic
             controllers["Clients"].addRouteAPI("ConnexionStepOne",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeConnection2Factor(bodyData.Get<string>("Email"), bodyData.Get<string>("Password"), queries[0], queries[1], executorData);
+                    var password = bodyData.Get<string>("Password");
+                    return DynamicConnection.makeConnection2Factor(bodyData.Get<string>("Email"), password, queries[0].setParam("Password", password), queries[1], executorData);
                 }
-            );//, false
-            var clientsGetAllRoute = controllers["Clients"].GetGetAllRoute();
+            );
             controllers["Clients"].addRouteAPI("ConnexionStepTwo",
                 (queries, bodyData) =>
                 {
                     return DynamicConnection.makeConnection(bodyData.Get<string>("Token"), queries[0], Roles.Client.ID(), executorData);
                 }
-            );//, false
+            );
+            controllers["Clients"].addRouteAPI("InscriptionClient",
+                async (queries, bodyData) =>
+                {
+                    var nom = bodyData.Get<string>("Nom");
+                    var email = bodyData.Get<string>("Email");
+                    var userInfo = DynamicConnection.CreatePasswordHash(nom, email, bodyData.Get<string>("Password"));
+                    var id = await executorData.ExecuteInsertWithLastID(queries[0]
+                        .setParam("Nom", nom)
+                        .setParam("Prenom", bodyData.Get<string>("Prenom"))
+                        .setParam("DateNaissance", bodyData.Get<string>("DateNaissance"))
+                        .setParam("AdresseCourriel", email)
+                        .setParam("MDP", userInfo.passwordHash)
+                        .setParam("Token", "")
+                        .setParam("Sel", userInfo.passwordSalt)
+                        .setParam("Actif", bodyData.Get<bool>("Actif"))
+                        //.setParam("Password", bodyData.Get<bool>("Password"))
+                    );
+                    return Results.Ok(DynamicConnection.CreateToken(id, userInfo));
+                }
+            );
+
             /*
             controllers["Clients"].addRouteAPI("CreateUser",
                 async (queries, bodyData) =>

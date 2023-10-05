@@ -51,18 +51,14 @@ namespace APIDynamic
             
             await controllers["Categories"]
                 
-                .addPropriety("ID", true, true, ShowTypes.INT)
-                    .addAuthorizedProprietyRoles(Roles.Anonymous.CanNotModify())
-                .addPropriety("Nom", true, true, ShowTypes.STRING)
-                    .addAuthorizedProprietyRoles(Roles.Anonymous.CanNotModify())
-                .addPropriety("Descriptions", true, true, ShowTypes.INT)
-                    .addAuthorizedProprietyRoles(Roles.Anonymous.CanNotModify())
-                .addPropriety("CategorieMereID", true, true, ShowTypes.CBO)
-                    .addAuthorizedProprietyRoles(Roles.Anonymous.CanNotModify())
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Descriptions", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("CategorieMereID", true, true, ShowTypes.CBO).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a INNER JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_id_cat_mere AND a.id = @_ID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_id_cat_mere AND a.id = @_ID", QueryTypes.SELECT)
                         .setSQLParam("ID", "ID")
                 
                 .addRoute(BaseRoutes.INSERT)
@@ -305,17 +301,17 @@ namespace APIDynamic
                 ;
 
             await controllers["Commandes"]
-                .addPropriety("ID", true, true, ShowTypes.INT)
-                .addPropriety("EmployeID", false, true, ShowTypes.CBO)
-                .addPropriety("VilleID", false, true, ShowTypes.CBO)
-                .addPropriety("EtatsCommandesID", false, true, ShowTypes.CBO)
-                .addPropriety("NumeroFacture", true, true, ShowTypes.INT)
-                .addPropriety("MontantBrut", true, true, ShowTypes.FLOAT)
-                .addPropriety("NumeroCiviqueLivraison", true, true, ShowTypes.STRING)
-                .addPropriety("RueLivraison", true, true, ShowTypes.STRING)
-                .addPropriety("Produits", false, true, ShowTypes.Ref)
-                .addPropriety("ClientID", false, true, ShowTypes.CBO)
-                
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("EmployeID", false, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("VilleID", false, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("EtatsCommandesID", false, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("NumeroFacture", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("MontantBrut", true, true, ShowTypes.FLOAT)//.Anonymous()
+                .addPropriety("NumeroCiviqueLivraison", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("RueLivraison", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Produits", false, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("ClientID", false, true, ShowTypes.CBO).Anonymous()
+
              .addRoute(BaseRoutes.GETALL)
                  .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                  .addRouteQuery("SELECT c.id AS ID, c.numero_facture AS NumeroFacture, c.montant_brut AS MontantBrut, c.no_civique_livraison AS NumeroCiviqueLivraison, c.rue_livraison AS RueLivraison, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, c.id_etat_commande AS EtatsCommandesID, ec.nom AS EtatsCommandes, c.id_ville AS VilleID, v.nom AS Ville, pro.id AS ProvinceID, pro.nom AS Province, c.id_employe AS EmployeID, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_ID AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_NumeroCiviqueID AND c.id_etat_commande = @_EtatsCommandesID", QueryTypes.SELECT)
@@ -357,21 +353,21 @@ namespace APIDynamic
             ;
 
             await controllers["Clients"]
-                .addPropriety("ID", true, true, ShowTypes.INT)
-                .addPropriety("Nom", true, true, ShowTypes.STRING)
-                .addPropriety("Prenom", true, true, ShowTypes.STRING)
-                .addPropriety("DateNaissance", true, true, ShowTypes.STRING)
-                .addPropriety("AdresseCourriel", true, true, ShowTypes.STRING)
-                .addPropriety("MDP", true, true, ShowTypes.STRING)
-                .addPropriety("Token", true, true, ShowTypes.STRING)
-                .addPropriety("Sel", false, true, ShowTypes.STRING)
-                .addPropriety("Actif", true, true, ShowTypes.INT)
-                .addPropriety("ExpirationToken", true, true, ShowTypes.STRING)
-                .addPropriety("Commandes", true, true, ShowTypes.Ref)
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Prenom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("AdresseCourriel", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Token", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Sel", false, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Actif", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ExpirationToken", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Commandes", true, true, ShowTypes.Ref).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT cli.id AS ID, cli.nom AS Nom, cli.prenom AS Prenom, cli.date_naissance AS DateNaissance, cli.adresse_courriel AS AdresseCourriel, cli.mdp AS MDP, cli.token AS Token, cli.sel AS Sel, cli.actif AS Actif, c.id AS Commandes FROM clients AS cli INNER JOIN commandes AS c ON c.id_client = cli.id", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT cli.id AS ID, cli.nom AS Nom, cli.prenom AS Prenom, cli.date_naissance AS DateNaissance, cli.adresse_courriel AS AdresseCourriel, cli.mdp AS MDP, cli.token AS Token, cli.sel AS Sel, cli.actif AS Actif FROM clients AS cli", QueryTypes.SELECT)
                         .setSQLParam("ID", "ID")
                         
                 .addRoute(BaseRoutes.INSERT)
@@ -405,10 +401,12 @@ namespace APIDynamic
                     .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE adresse_courriel = @Email", QueryTypes.ROW, false)
                         .setSQLParam("Email", "AdresseCourriel")
                         .addSQLParam("Password", ValidatorTypes.REQUIRED.SetValue("true", "Password is missing from request."))
-                    .addRouteQuery("UPDATE clients SET token = @_Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @_ID", QueryTypes.UPDATE, false)
+                    .addRouteQuery("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE)
                         .setSQLParam("ID", "ID")
                 .addRoute("ConnexionStepTwo", RouteTypes.POST, false)
-                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, false)
+                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW)
+                .addRoute("InscriptionClient", RouteTypes.POST, false)
+                    .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @AdresseCourriel, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom) FROM clients", QueryTypes.CBO)

@@ -46,14 +46,14 @@ namespace DynamicStructureObjects
             object result;
             if (data.TryGetValue(DynamicController.ROLESKEY, out result))
                 return (long[])result;
-            return null;
+            return new long[0];
         }
         public static string[] AuthProprieties(this Dictionary<string, object> data)
         {
             object result;
             if (data.TryGetValue(DynamicController.PROPRETYKEY, out result))
                 return (string[])result;
-            return null;
+            return new string[0];
         }
         public static T Get<T>(this Dictionary<string, object> data, string key)
         {
