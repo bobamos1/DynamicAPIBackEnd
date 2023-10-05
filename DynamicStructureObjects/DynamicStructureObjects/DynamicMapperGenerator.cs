@@ -14,10 +14,10 @@ namespace DynamicStructureObjects
         public string ProprietyName { get; internal set; }
         public Dictionary<string, object> baseParameters { get; set; }
         public Dictionary<string, string> parametersToLink { get; set; }
-        internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT name AS AssociatedVarName, value AS Value, id_CSharpType AS CSharpType FROM ListVars WHERE id_link = @link", true, true);
-        internal static readonly Query insertMapperGenerator = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO LinkProprietiesControllers (id_propriety, id_controller) VALUES (@ProprietyID, @ControllerID)", true, true);
-        internal static readonly Query getMapperGeneratorSingleInfo = Query.fromQueryString(QueryTypes.ROW, "SELECT TOP (1) @LinkID AS id, c.id AS controllerID, c.Name AS controllerName, urlR.id AS routeID, SQLString AS QueryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, completeAuth AS CompleteAuth, p.name AS ProprietyName FROM URLRoutes urlR INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = @ProprietyID INNER JOIN Controllers c ON c.id = @ControllerID WHERE urlR.id_baseRoute = @BaseRoute AND rq.ind = 1 AND urlR.id_controller = @ControllerID", true, true);
-        internal static readonly Query getControllerID = Query.fromQueryString(QueryTypes.VALUE, "SELECT id FROM Controllers WHERE name = @ControllerName", true, true);
+        internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT name AS AssociatedVarName, value AS Value, id_CSharpType AS CSharpType FROM ListVars WHERE id_link = @link", true);
+        internal static readonly Query insertMapperGenerator = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO LinkProprietiesControllers (id_propriety, id_controller) VALUES (@ProprietyID, @ControllerID)", true);
+        internal static readonly Query getMapperGeneratorSingleInfo = Query.fromQueryString(QueryTypes.ROW, "SELECT TOP (1) @LinkID AS id, c.id AS controllerID, c.Name AS controllerName, urlR.id AS routeID, SQLString AS QueryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, completeAuth AS CompleteAuth, p.name AS ProprietyName FROM URLRoutes urlR INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = @ProprietyID INNER JOIN Controllers c ON c.id = @ControllerID WHERE urlR.id_baseRoute = @BaseRoute AND rq.ind = 1 AND urlR.id_controller = @ControllerID", true);
+        internal static readonly Query getControllerID = Query.fromQueryString(QueryTypes.VALUE, "SELECT id FROM Controllers WHERE name = @ControllerName", true);
         internal DynamicMapperGenerator(long id, long controllerID, string controllerName, long routeID, string QueryString, long QueryTypeID, bool CompleteCheck, bool CompleteAuth, string ProprietyName)
         {
             this.id = id;

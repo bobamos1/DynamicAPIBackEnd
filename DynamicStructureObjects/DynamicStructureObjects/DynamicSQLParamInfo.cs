@@ -9,8 +9,8 @@ namespace DynamicStructureObjects
         internal string VarAffected { get; set; }
         internal bool isRequired { get; set; }
         internal List<DynamicValidator> Validators { get; set; }
-        internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @SQLParamInfoID", true, true);
-        internal static readonly Query insertSQLParamInfo = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO SQLParamInfos (id_Propriety, id_RouteQuery, varAffected) VALUES (@PropretyID, @RouteQueryID, @VarAffected)", true, true);
+        internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @SQLParamInfoID", true);
+        internal static readonly Query insertSQLParamInfo = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO SQLParamInfos (id_Propriety, id_RouteQuery, varAffected) VALUES (@PropretyID, @RouteQueryID, @VarAffected)", true);
         internal DynamicSQLParamInfo(long id, string VarAffected, long ProprietyID)
         {
             this.id = id;

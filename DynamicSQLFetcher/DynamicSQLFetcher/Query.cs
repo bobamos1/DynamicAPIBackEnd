@@ -221,7 +221,7 @@ namespace DynamicSQLFetcher
                 return true;
             return paramsUsed.ContainsKey(varsInfoList[index].VarName);
         }
-        public static Query fromQueryString(QueryTypes queryType, string query, bool completeCheck = true, bool completeAuth = false, bool removeVarIdentifier = true)
+        public static Query fromQueryString(QueryTypes queryType, string query, bool completeAuth = false, bool completeCheck = true, bool removeVarIdentifier = true)
         {
             char[] tempNoComma = query.ToCharArray();
             handleReplacements('\'', tempNoComma);

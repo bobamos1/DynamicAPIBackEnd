@@ -7,7 +7,7 @@ namespace DynamicStructureObjects
         internal string AssociatedVarName { get; set; }
         internal object Value { get; set; }
         internal bool IsStatic { get; set; }
-        internal static readonly Query insertParamInitializer = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ListVars (name, value, id_CSharpType, id_link) VALUES (@Name, @Value, @CSharpTypeID, @LinkID)", true, true);
+        internal static readonly Query insertParamInitializer = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ListVars (name, value, id_CSharpType, id_link) VALUES (@Name, @Value, @CSharpTypeID, @LinkID)", true);
         internal DynamicParamInitializer(string AssociatedVarName, string Value, long CSharpType)
         {
             this.AssociatedVarName = AssociatedVarName;

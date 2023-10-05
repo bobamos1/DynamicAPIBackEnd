@@ -9,8 +9,8 @@ namespace DynamicStructureObjects
         public ValidatorTypes ValidatorType { get; internal set; }
         public object Value { get; internal set; }
         public string Message { get; internal set; }
-        internal static readonly Query insertSQLParamInfoValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorSQLParamInfoValues (id_SQLParamInfo, id_ValidatorType, value, message) VALUES (@ParentID, @ValidatorTypeID, @Value, @messagw)", true, true);
-        internal static readonly Query insertProprietyValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorProprietyValues (id_ValidatorType, id_ValidatorType, value, message) VALUES (@ParentID, @ValidatorTypeID, @Value, @message)", true, true);
+        internal static readonly Query insertSQLParamInfoValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorSQLParamInfoValues (id_SQLParamInfo, id_ValidatorType, value, message) VALUES (@ParentID, @ValidatorTypeID, @Value, @messagw)", true);
+        internal static readonly Query insertProprietyValidators = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO ValidatorProprietyValues (id_ValidatorType, id_ValidatorType, value, message) VALUES (@ParentID, @ValidatorTypeID, @Value, @message)", true);
         internal DynamicValidator(string Value, long ValidatorTypeID, string message)
         {
             this.ValidatorType = (ValidatorTypes)ValidatorTypeID;
