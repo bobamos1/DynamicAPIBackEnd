@@ -5,13 +5,11 @@ namespace DynamicStructureObjects
 {
     public class EmailSender
     {
-
         private string from { get; set; }
         private string smtpUsername { get; set; }
         private string smtpPassword { get; set; }
         private string Host { get; set; }
         private int Port { get; set; }
-        private Dictionary<string, string> bodiesSubjects = new Dictionary<string, string>();
         public EmailSender(string fromEmail, string smtpUsername, string smtpPassword, string host, int port)
         {
             from = fromEmail;
@@ -20,15 +18,13 @@ namespace DynamicStructureObjects
             this.Host = host;
             this.Port = port;
         }
-        public static bool SendEmail(string fromEmail, List<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, string host, int port)//"smtp.gmail.com" //587
+        public static bool SendEmail(string fromEmail, IEnumerable<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, string host, int port)//"smtp.gmail.com" //587
         {
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = new MailAddress(fromEmail);
 
             foreach (var toEmail in toEmails)
-            {
                 mailMessage.To.Add(toEmail);
-            }
 
             mailMessage.Subject = subject;
             mailMessage.Body = body;
@@ -50,36 +46,9 @@ namespace DynamicStructureObjects
                 return false;
             }
         }
-
         public bool SendEmail(IEnumerable<string> toEmails, string subject, string body)
         {
-            MailMessage mailMessage = new MailMessage();
-            mailMessage.From = new MailAddress(from);
-
-            foreach (var toEmail in toEmails)
-            {
-                mailMessage.To.Add(toEmail);
-            }
-
-            mailMessage.Subject = subject;
-            mailMessage.Body = body;
-
-            SmtpClient smtpClient = new SmtpClient();
-            smtpClient.Host = Host;
-            smtpClient.Port = Port;
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
-            smtpClient.EnableSsl = true;
-
-            try
-            {
-                smtpClient.Send(mailMessage);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
+            return SendEmail(from, toEmails, subject, body, smtpUsername, smtpPassword, Host, Port);
         }
         public void SendEmail(string toEmail, string subject, string body)
         {
