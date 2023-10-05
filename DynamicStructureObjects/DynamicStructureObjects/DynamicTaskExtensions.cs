@@ -218,17 +218,17 @@ namespace DynamicStructureObjects
         {
             return await (await task).addMapperGenerator(ProprietyName, ControllerName, linkers);
         }
-        public async static Task<DynamicController> addCBOInfo(this Task<DynamicController> task, string ProprietyName, string ControllerName, string key, params ParamLinker[] linkers)
+        public async static Task<DynamicController> addCBOInfo(this Task<DynamicController> task, string ProprietyName, string ControllerName, string value, params ParamLinker[] linkers)
         {
-            return await (await task).addCBOInfo(ProprietyName, ControllerName, key, linkers);
+            return await (await task).addCBOInfo(ProprietyName, ControllerName, value, linkers);
         }
         public async static Task<DynamicController> addMapperGenerator(this Task<DynamicController> task, string ControllerName, params ParamLinker[] linkers)
         {
             return await (await task).addMapperGenerator(ControllerName, linkers);
         }
-        public async static Task<DynamicController> addCBOInfo(this Task<DynamicController> task, string ControllerName, string key, params ParamLinker[] linkers)
+        public async static Task<DynamicController> addCBOInfo(this Task<DynamicController> task, string ControllerName, string value, params ParamLinker[] linkers)
         {
-            return await (await task).addCBOInfo(ControllerName, key, linkers);
+            return await (await task).addCBOInfo(ControllerName, value, linkers);
         }
         public async static Task<DynamicController> addAuthorizedRouteRole(this Task<DynamicController> task, string routeName, long RoleID)
         {

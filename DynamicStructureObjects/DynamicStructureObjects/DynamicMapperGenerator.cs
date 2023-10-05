@@ -74,9 +74,9 @@ namespace DynamicStructureObjects
             mapperGenerator.makeMapper();
             return mapperGenerator;
         }
-        internal async static Task<DynamicMapperGenerator> addMapperGenerator(string ControllerName, long ProprietyID, string key, params ParamLinker[] linkers)
+        internal async static Task<DynamicMapperGenerator> addMapperGenerator(string ControllerName, long ProprietyID, string value, params ParamLinker[] linkers)
         {
-            return await (await addMapperGenerator(ControllerName, ProprietyID, true, linkers)).addParamInitializer(SQLExecutor.KEY_FOR_CBO, key, CSharpTypes.REFERENCE);
+            return await (await addMapperGenerator(ControllerName, ProprietyID, true, linkers)).addParamInitializer(SQLExecutor.VALUE_FOR_CBO, value, CSharpTypes.REFERENCE);
         }
         internal Task<DynamicMapperGenerator> addParamInitializer(string AssociatedVarName, string Value, CSharpTypes CSharpType)
         {

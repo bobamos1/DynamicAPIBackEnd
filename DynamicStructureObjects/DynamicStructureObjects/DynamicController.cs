@@ -232,9 +232,9 @@ namespace DynamicStructureObjects
             await Proprieties.First(propriety => propriety.Name == ProprietyName).addMapperGenerator(ControllerName, linkers);
             return this;
         }
-        public async Task<DynamicController> addCBOInfo(string ProprietyName, string ControllerName, string key, params ParamLinker[] linkers)
+        public async Task<DynamicController> addCBOInfo(string ProprietyName, string ControllerName, string value, params ParamLinker[] linkers)
         {
-            await Proprieties.First(propriety => propriety.Name == ProprietyName).addCBOInfo(ControllerName, key, linkers);
+            await Proprieties.First(propriety => propriety.Name == ProprietyName).addCBOInfo(ControllerName, value, linkers);
             return this;
         }
         public async Task<DynamicController> addMapperGenerator(string ControllerName, params ParamLinker[] linkers)
@@ -242,9 +242,9 @@ namespace DynamicStructureObjects
             await Proprieties.Last().addMapperGenerator(ControllerName, linkers);
             return this;
         }
-        public async Task<DynamicController> addCBOInfo(string ControllerName, string key, params ParamLinker[] linkers)
+        public async Task<DynamicController> addCBOInfo(string ControllerName, string value, params ParamLinker[] linkers)
         {
-            await Proprieties.Last().addCBOInfo(ControllerName, key, linkers);
+            await Proprieties.Last().addCBOInfo(ControllerName, value, linkers);
             return this;
         }
         public async Task<DynamicController> addAuthorizedRouteRole(string routeName, long RoleID)
@@ -288,7 +288,7 @@ namespace DynamicStructureObjects
         }
         public IEnumerable<string> getCBOKeyValues(IEnumerable<DynamicPropriety> proprieties)
         {
-            return proprieties.Where(prop => prop.ShowType == ShowTypes.CBO).Select(prop => prop.MapperGenerator.parametersToLink[SQLExecutor.KEY_FOR_CBO]);
+            return proprieties.Where(prop => prop.ShowType == ShowTypes.CBO).Select(prop => prop.MapperGenerator.parametersToLink[SQLExecutor.VALUE_FOR_CBO]);
         }
         public IEnumerable<DynamicPropriety> getAuthorizedProprieties(bool onlyModify, IEnumerable<long> roles)
         {
