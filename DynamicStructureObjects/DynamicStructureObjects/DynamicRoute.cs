@@ -38,6 +38,9 @@ namespace DynamicStructureObjects
             this.RouteType = dynamicRoute.RouteType;
             this.Queries = dynamicRoute.Queries;
             this.Roles = dynamicRoute.Roles;
+            this.requireAuthorization = baseRoute.requireAuthorization();
+            this.getAuthorizedCols = baseRoute.getAuthorizedCols();
+            this.onlyModify = baseRoute.onlyModify();
         }
         internal static async Task<DynamicRoute> init(DynamicRoute route)
         {
@@ -76,9 +79,11 @@ namespace DynamicStructureObjects
                 , onlyModify
             );
         }
-        public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
+        public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
-            Queries.Add(await DynamicQueryForRoute.addRouteQuery(Queries.Count + 1, queryString, QueryType, id, CompleteAuth, CompleteCheck));
+            if (CompleteAuth is null)
+                CompleteAuth = QueryType.CompleteAuth();
+            Queries.Add(await DynamicQueryForRoute.addRouteQuery(Queries.Count + 1, queryString, QueryType, id, (bool)CompleteAuth, CompleteCheck));
             return this;
         }
         public DynamicRoute addEmptyQuery()

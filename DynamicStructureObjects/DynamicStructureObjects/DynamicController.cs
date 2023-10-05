@@ -38,7 +38,7 @@ namespace DynamicStructureObjects
         public List<DynamicPropriety> Proprieties { get; internal set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles");
         internal static readonly Query getControllers = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, name AS Name, isMain AS IsMain FROM Controllers", true, true);
-        internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isReadOnly AS ReadOnly, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true, true);
+        internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isUpdatable AS IsUpdatable, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true, true);
         internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, COALESCE(BaseRoutes.name, URLRoutes.name) AS Name, id_routeType AS RouteTypeID, requireAuthorization AS requireAuthorization, getAuthorizedCols AS getAuthorizedCols, onlyModify AS onlyModify FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true, true);
         internal static readonly Query insertController = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Controllers (name, isMain) VALUES (@Name, @IsMain)", true, true);
         private DynamicController(long id, string Name, bool IsMain)
@@ -113,7 +113,7 @@ namespace DynamicStructureObjects
                     queriesToRun.Add($"DBCC CHECKIDENT ('{table.Key}', RESEED, 0)");
             }
             queriesToRun.Add("INSERT Controllers (name, isMain) VALUES ('NULL', 0)");
-            queriesToRun.Add("INSERT Proprieties (name, isMain, id_ShowType, id_controller, isReadOnly) VALUES ('NULL', 0, 1, 1, 1)");
+            queriesToRun.Add("INSERT Proprieties (name, isMain, id_ShowType, id_controller, isUpdatable) VALUES ('NULL', 0, 1, 1, 0)");
             await executor.ExecuteQueryWithTransaction(queriesToRun.ToArray());
         }
         public static async Task resetStructureData(SQLExecutor executor)
@@ -149,12 +149,12 @@ namespace DynamicStructureObjects
             Routes.Last().addEmptyQuery();
             return this;
         }
-        public async Task<DynamicController> addRouteQuery(string routeName, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
+        public async Task<DynamicController> addRouteQuery(string routeName, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             await Routes.First(route => route.Name == routeName).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
             return this;
         }
-        public async Task<DynamicController> addRouteQuery(string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
+        public async Task<DynamicController> addRouteQuery(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             await Routes.Last().addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
             return this;
@@ -212,9 +212,9 @@ namespace DynamicStructureObjects
             await Routes.First(route => route.Name == routeName).addFilter(index, name, showType, VarAffected);
             return this;
         }
-        public async Task<DynamicController> addPropriety(string Name, bool IsMain, bool IsReadOnly, ShowTypes showType, params ValidatorBundle[] validatorBundle)
+        public async Task<DynamicController> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, params ValidatorBundle[] validatorBundle)
         {
-            Proprieties.Add(await DynamicPropriety.addPropriety(Name, IsMain, IsReadOnly, showType, id, validatorBundle));
+            Proprieties.Add(await DynamicPropriety.addPropriety(Name, IsMain, IsUpdatable, showType, id, validatorBundle));
             return this;
         }
         public async Task<DynamicController> addValidatorForPropriety(string ProprietyName, string Value, ValidatorTypes ValidatorType)

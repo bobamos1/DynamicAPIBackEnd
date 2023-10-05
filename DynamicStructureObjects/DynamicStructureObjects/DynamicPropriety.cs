@@ -7,7 +7,7 @@ namespace DynamicStructureObjects
         public long id { get; internal set; }
         public string Name { get; internal set; }
         public bool IsMain { get; internal set; }
-        public bool ReadOnly { get; internal set; }
+        public bool IsUpdatable { get; internal set; }
         public List<DynamicValidator> Validators { get; internal set; }
         public ShowTypes ShowType { get; internal set; }
         public DynamicMapperGenerator MapperGenerator { get; internal set; }
@@ -16,14 +16,14 @@ namespace DynamicStructureObjects
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT id, canModify FROM PermissionProprieties INNER JOIN Roles ON id = id_role WHERE id_propriety = @ProprietyID", true, true);
         internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true, true);
         internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT lnk.id AS id, c.id AS controllerID, c.Name AS controllerName, urlR.id AS routeID, SQLString AS QueryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, completeAuth AS CompleteAuth, p.name AS ProprietyName FROM LinkProprietiesControllers lnk INNER JOIN Controllers c ON c.id = lnk.id_controller INNER JOIN URLRoutes urlR ON urlR.id_controller = c.id INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = lnk.id_propriety WHERE urlR.id_baseRoute = @BaseRouteID AND rq.ind = 1 AND lnk.id_propriety = @ProprietyID", true, true);
-        internal static readonly Query insertPropriety = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Proprieties (name, isMain, isReadOnly,id_ShowType, id_controller) VALUES (@Name, @IsMain, @IsReadOnly, @ShowTypeID, @ControllerID)", true, true);
+        internal static readonly Query insertPropriety = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Proprieties (name, isMain, isUpdatable, id_ShowType, id_controller) VALUES (@Name, @IsMain, @IsUpdatable, @ShowTypeID, @ControllerID)", true, true);
         internal static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionProprieties (id_propriety, id_role, canModify) VALUES (@ProprietyID, @RoleID, @CanModify)", true, true);
-        internal DynamicPropriety(long id, string Name, bool IsMain, bool ReadOnly, long ShowTypeID)
+        internal DynamicPropriety(long id, string Name, bool IsMain, bool IsUpdatable, long ShowTypeID)
         {
             this.id = id;
             this.Name = Name;
             this.IsMain = IsMain;
-            this.ReadOnly = ReadOnly;
+            this.IsUpdatable = IsUpdatable;
             this.ShowType = (ShowTypes)ShowTypeID;
             this.Validators = new List<DynamicValidator>();
             this.MapperGenerator = null;
@@ -56,20 +56,20 @@ namespace DynamicStructureObjects
                 );
             return propriety;
         }
-        public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsReadOnly, ShowTypes showType, long ControllerID, params ValidatorBundle[] validatorBundle)
+        public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, long ControllerID, params ValidatorBundle[] validatorBundle)
         {
             var dynamicPropriety = new DynamicPropriety(
                 await DynamicController.executor.ExecuteInsertWithLastID(
                     insertPropriety
                         .setParam("Name", Name)
                         .setParam("IsMain", IsMain)
-                        .setParam("IsReadOnly", IsReadOnly)
+                        .setParam("IsUpdatable", IsUpdatable)
                         .setParam("ShowTypeID", (long)showType)
                         .setParam("ControllerID", ControllerID)
                     )
                 , Name
                 , IsMain
-                , IsReadOnly
+                , IsUpdatable
                 , (long)showType
             );
 

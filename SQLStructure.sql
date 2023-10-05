@@ -36,7 +36,7 @@ CREATE TABLE Proprieties (
     id BIGINT IDENTITY(1,1),
     name VARCHAR(100),
     isMain BIT,
-    isReadOnly BIT DEFAULT 0,
+    isUpdatable BIT DEFAULT 0,
     id_ShowType BIGINT,
     id_controller BIGINT
 )
@@ -646,7 +646,7 @@ INSERT Controllers (name, isMain)
 VALUES 
 ('NULL', 0)
 GO
-INSERT Proprieties (name, isMain, id_ShowType, id_controller, isReadOnly)
+INSERT Proprieties (name, isMain, id_ShowType, id_controller, isUpdatable)
 VALUES 
 ('NULL', 0, 1, 1, 1)
 GO

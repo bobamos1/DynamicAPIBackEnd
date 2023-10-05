@@ -33,7 +33,7 @@ namespace DynamicStructureObjects
             await task[controllerName].addRoute(Name, routeType, requireAuthorization, getAuthorizedCols, onlyModify);
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Dictionary<string, DynamicController> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
+        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Dictionary<string, DynamicController> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             await task[controllerName].addRouteQuery(routeName, queryString, QueryType, CompleteAuth, CompleteCheck);
             return task;
@@ -53,9 +53,9 @@ namespace DynamicStructureObjects
             await task[controllerName].addValidatorForSQLParam(routeName, indexQuery, VarAffected, Value, ValidatorType);
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addPropriety(this Dictionary<string, DynamicController> task, string controllerName, string Name, bool IsMain, bool IsReadOnly, ShowTypes showType)
+        public async static Task<Dictionary<string, DynamicController>> addPropriety(this Dictionary<string, DynamicController> task, string controllerName, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType)
         {
-            await task[controllerName].addPropriety(Name, IsMain, IsReadOnly, showType);
+            await task[controllerName].addPropriety(Name, IsMain, IsUpdatable, showType);
             return task;
         }
         public async static Task<Dictionary<string, DynamicController>> addValidatorForPropriety(this Dictionary<string, DynamicController> task, string controllerName, string ProprietyName, string Value, ValidatorTypes ValidatorType)
@@ -98,7 +98,7 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRoute(controllerName, Name, routeType, requireAuthorization, getAuthorizedCols, onlyModify);
         }
-        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
+        public async static Task<Dictionary<string, DynamicController>> addRouteQuery(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             return await (await task).addRouteQuery(controllerName, routeName, queryString, QueryType, CompleteAuth, CompleteCheck);
         }
@@ -114,9 +114,9 @@ namespace DynamicStructureObjects
         {
             return await (await task).addValidatorForSQLParam(controllerName, routeName, indexQuery, VarAffected, Value, ValidatorType);
         }
-        public async static Task<Dictionary<string, DynamicController>> addPropriety(this Task<Dictionary<string, DynamicController>> task, string controllerName, string Name, bool IsMain, bool IsReadOnly, ShowTypes showType)
+        public async static Task<Dictionary<string, DynamicController>> addPropriety(this Task<Dictionary<string, DynamicController>> task, string controllerName, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType)
         {
-            return await (await task).addPropriety(controllerName, Name, IsMain, IsReadOnly, showType);
+            return await (await task).addPropriety(controllerName, Name, IsMain, IsUpdatable, showType);
         }
         public async static Task<Dictionary<string, DynamicController>> addValidatorForPropriety(this Task<Dictionary<string, DynamicController>> task, string controllerName, string ProprietyName, string Value, ValidatorTypes ValidatorType)
         {
@@ -154,11 +154,11 @@ namespace DynamicStructureObjects
         {
             return (await task).addEmptyQuery();
         }
-        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string routeName, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
+        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string routeName, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             return await (await task).addRouteQuery(routeName, queryString, QueryType, CompleteAuth, CompleteCheck);
         }
-        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
+        public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             return await (await task).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
         }
@@ -202,9 +202,9 @@ namespace DynamicStructureObjects
         {
             return await (await task).addFilter(routeName, index, name, showType, VarAffected);
         }
-        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsReadOnly,ShowTypes showType, params ValidatorBundle[] validatorBundles)
+        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable,ShowTypes showType, params ValidatorBundle[] validatorBundles)
         {
-            return await (await task).addPropriety(Name, IsMain, IsReadOnly, showType, validatorBundles);
+            return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, validatorBundles);
         }
         public async static Task<DynamicController> addValidatorForPropriety(this Task<DynamicController> task, string ProprietyName, string Value, ValidatorTypes ValidatorType)
         {
@@ -257,7 +257,7 @@ namespace DynamicStructureObjects
 
 
 
-        public async static Task<DynamicRoute> addRouteQuery(this Task<DynamicRoute> task, string queryString, QueryTypes QueryType, bool CompleteAuth, bool CompleteCheck)
+        public async static Task<DynamicRoute> addRouteQuery(this Task<DynamicRoute> task, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             return await (await task).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
         }
