@@ -58,15 +58,15 @@ namespace DynamicSQLFetcher
         {
             return SelectQuery(_connectionString, query, page, step, authorizedColumns);
         }
-        public Task<dynamic> DetailedSelectQuerySingle(Query query, List<DynamicMapper> mappers, params string[] authorizedColumns)
+        public Task<dynamic> DetailedSelectQuerySingle(Query query, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
         {
             return DetailedSelectQuerySingle(_connectionString, query, mappers, authorizedColumns);
         }
-        public Task<IEnumerable<dynamic>> DetailedSelectQuery(Query query, List<DynamicMapper> mappers, params string[] authorizedColumns)
+        public Task<IEnumerable<dynamic>> DetailedSelectQuery(Query query, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
         {
             return DetailedSelectQuery(_connectionString, query, mappers, authorizedColumns);
         }
-        public Task<IEnumerable<dynamic>> DetailedSelectQuery(Query query, int page, int step, List<DynamicMapper> mappers, params string[] authorizedColumns)
+        public Task<IEnumerable<dynamic>> DetailedSelectQuery(Query query, int page, int step, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
         {
             return DetailedSelectQuery(_connectionString, query, page, step, mappers, authorizedColumns);
         }
@@ -206,7 +206,7 @@ namespace DynamicSQLFetcher
             using (IDbConnection cnn = new SqlConnection(connectionString))
                 return await cnn.QueryAsync(query, parameters);
         }
-        private async static Task getDetails(string connectionString, dynamic obj, List<DynamicMapper> mappers)
+        private async static Task getDetails(string connectionString, dynamic obj, IEnumerable<DynamicMapper> mappers)
         {
             using (IDbConnection con = new SqlConnection(connectionString))
             {
@@ -220,7 +220,7 @@ namespace DynamicSQLFetcher
                 }
             }
         }
-        public async static Task<dynamic> DetailedSelectQuerySingle(string connectionString, Query query, List<DynamicMapper> mappers, params string[] authorizedColumns)
+        public async static Task<dynamic> DetailedSelectQuerySingle(string connectionString, Query query, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
         {
             dynamic result = null;
             using (IDbConnection connection = new SqlConnection(connectionString))
@@ -245,15 +245,15 @@ namespace DynamicSQLFetcher
                 return await connection.QueryFirstOrDefaultAsync<T>(query, parameters);
             }
         }
-        public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, int page, int step, List<DynamicMapper> mappers, params string[] authorizedColumns)
+        public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, int page, int step, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
         {
             return DetailedSelectQueryString(connectionString, query.Parse(page, step, authorizedColumns), query.getParameters(), mappers);
         }
-        public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, List<DynamicMapper> mappers, params string[] authorizedColumns)
+        public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
         {
             return DetailedSelectQueryString(connectionString, query.Parse(authorizedColumns), query.getParameters(), mappers);
         }
-        private async static Task<IEnumerable<dynamic>> DetailedSelectQueryString(string connectionString, string query, DynamicParameters parameters, List<DynamicMapper> mappers)
+        private async static Task<IEnumerable<dynamic>> DetailedSelectQueryString(string connectionString, string query, DynamicParameters parameters, IEnumerable<DynamicMapper> mappers)
         {
             IEnumerable<dynamic> results = null;
             using (IDbConnection connection = new SqlConnection(connectionString))

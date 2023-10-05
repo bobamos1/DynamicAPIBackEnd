@@ -4,10 +4,12 @@ namespace APIDynamic
 {
     public enum Roles
     {
+        [Value("Anonymous")]
+        Anonymous = 0,
         [Value("Client")]
         Client = 1,
         [Value("Admin")]
-        Admin = 2
+        Admin = 2,
     }
 
     public static class RoleHelper

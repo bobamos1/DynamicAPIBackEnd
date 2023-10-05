@@ -12,12 +12,13 @@ namespace DynamicStructureObjects
         public ShowTypes ShowType { get; internal set; }
         public DynamicMapperGenerator MapperGenerator { get; internal set; }
         public Dictionary<long, bool> roles { get; internal set; }
+        public static readonly long AnonymousRoleID = 0;
         internal string getCBOIdName() => ShowType == ShowTypes.CBO ? MapperGenerator.parametersToLink[SQLExecutor.KEY_FOR_CBO] : null;
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT id, canModify FROM PermissionProprieties INNER JOIN Roles ON id = id_role WHERE id_propriety = @ProprietyID", true, true);
         internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true, true);
-        internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT lnk.id AS id, c.id AS controllerID, c.Name AS controllerName, urlR.id AS RouteID, SQLString AS queryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, p.name AS ProprietyName FROM LinkProprietiesControllers lnk INNER JOIN Controllers c ON c.id = lnk.id_controller INNER JOIN URLRoutes urlR ON urlR.id_controller = c.id INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = lnk.id_propriety WHERE urlR.id_baseRoute = @BaseRouteID AND rq.ind = 1 AND lnk.id_propriety = @ProprietyID", true, true);
+        internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT lnk.id AS id, c.id AS controllerID, c.Name AS controllerName, urlR.id AS routeID, SQLString AS QueryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, completeAuth AS CompleteAuth, p.name AS ProprietyName FROM LinkProprietiesControllers lnk INNER JOIN Controllers c ON c.id = lnk.id_controller INNER JOIN URLRoutes urlR ON urlR.id_controller = c.id INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = lnk.id_propriety WHERE urlR.id_baseRoute = @BaseRouteID AND rq.ind = 1 AND lnk.id_propriety = @ProprietyID", true, true);
         internal static readonly Query insertPropriety = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Proprieties (name, isMain, isReadOnly,id_ShowType, id_controller) VALUES (@Name, @IsMain, @IsReadOnly, @ShowTypeID, @ControllerID)", true, true);
-        internal static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionProprieties(id_propriety, id_role, canModify) VALUES(@ProprietyID, @RoleID, @CanModify)", true, true);
+        internal static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionProprieties (id_propriety, id_role, canModify) VALUES (@ProprietyID, @RoleID, @CanModify)", true, true);
         internal DynamicPropriety(long id, string Name, bool IsMain, bool ReadOnly, long ShowTypeID)
         {
             this.id = id;
@@ -27,6 +28,7 @@ namespace DynamicStructureObjects
             this.ShowType = (ShowTypes)ShowTypeID;
             this.Validators = new List<DynamicValidator>();
             this.MapperGenerator = null;
+            this.roles = new Dictionary<long, bool>();
         }
         internal static async Task<DynamicPropriety> init(DynamicPropriety propriety)
         {
@@ -99,11 +101,11 @@ namespace DynamicStructureObjects
         }
         public Task<DynamicPropriety> addAuthorizedRoleAnonymous()
         {
-            return addAuthorizedRole(-1, false);
+            return addAuthorizedRole(AnonymousRoleID, false);
         }
         public async Task<DynamicPropriety> addAuthorizedRole(long RoleID, bool CanModify)
         {
-            await DynamicController.executor.ExecuteInsertWithLastID(
+            await DynamicController.executor.ExecuteQueryWithTransaction(
                 insertRole
                     .setParam("RoleID", RoleID)
                     .setParam("ProprietyID", id)
@@ -122,11 +124,11 @@ namespace DynamicStructureObjects
         }
         internal bool CanSee(IEnumerable<long> rolesUser)
         {
-            return rolesUser.Any(role => roles.ContainsKey(role));
+            return roles.ContainsKey(AnonymousRoleID) || rolesUser.Any(role => roles.ContainsKey(role));
         }
         internal bool CanModify(IEnumerable<long> rolesUser)
         {
-            return rolesUser.Any(role => roles.ContainsKey(role) && roles[role]);
+            return roles.ContainsKey(AnonymousRoleID) || rolesUser.Any(role => roles.ContainsKey(role) && roles[role]);
         }
     }
 }

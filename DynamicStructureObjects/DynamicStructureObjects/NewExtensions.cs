@@ -37,7 +37,7 @@ namespace DynamicStructureObjects
             object result;
             if (data.TryGetValue(DynamicController.USERIDKEY, out result))
                 return (long)result;
-            return -1;
+            return DynamicPropriety.AnonymousRoleID;
         }
         public static long[] UserRoles(this Dictionary<string, object> data)
         {
@@ -49,7 +49,7 @@ namespace DynamicStructureObjects
         public static string[] AuthProprieties(this Dictionary<string, object> data)
         {
             object result;
-            if (data.TryGetValue(DynamicController.ROLESKEY, out result))
+            if (data.TryGetValue(DynamicController.PROPRETYKEY, out result))
                 return (string[])result;
             return null;
         }
