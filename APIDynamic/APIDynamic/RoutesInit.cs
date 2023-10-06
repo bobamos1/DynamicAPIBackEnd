@@ -21,13 +21,13 @@ namespace APIDynamic
                 (queries, bodyData) =>
                 {
                     var password = bodyData.Get<string>("Password");
-                    return DynamicConnection.makeConnection2Factor(bodyData.Get<string>("Email"), password, queries[0].setParam("Password", password), queries[1], executorData);
+                    return DynamicConnection.makeConnectionStepOne(executorData, queries[0].setParam("Password", password), queries[1], bodyData.Get<string>("Email"), password);
                 }
             );
             controllers["Clients"].addRouteAPI("ConnexionStepTwo",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeConnection(bodyData.Get<string>("Token"), queries[0], Roles.Client.ID(), executorData);
+                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID());
                 }
             );
             controllers["Clients"].addRouteAPI("InscriptionClient",

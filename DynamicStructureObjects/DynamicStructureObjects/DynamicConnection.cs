@@ -26,6 +26,7 @@ namespace DynamicStructureObjects
         public static readonly string CourrielTokenSubject = "Votre identifiant a 2 facteur est {0}";
         public static readonly string CourrielTokenBodyRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
         public static readonly string CourrielTokenSubjectRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
+        internal static readonly Query getRolesQuery = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id_role FROM UsersRoles WHERE id_user = @UserID");
         internal static string apiKey { get; set; }
         internal static EmailSender emailSender { get; set; }
         internal static TimeSpan TokenLifetime = TimeSpan.FromHours(2);
@@ -172,10 +173,10 @@ namespace DynamicStructureObjects
                 return null;
             return userInfo;
         }
-        public static async Task<long[]> getRoles(Query getRolesQuery, long userID)
+        public static async Task<long[]> getRolesArray(long userID)
         {
             return (await DynamicController.executor.SelectArray<long>(getRolesQuery.setParam("UserID", userID))).ToArray();
-        }
+        }/*
         public static async Task<IResult> makeConnection(SQLExecutor executor, string Email, string password, Query readUserInfoQuery, Query getRolesQuery = null, long defaultRole = -1)
         {
             var userInfo = await checkUserInfo(Email, password, readUserInfoQuery, executor);
@@ -185,28 +186,17 @@ namespace DynamicStructureObjects
             if (getRolesQuery is not null)
                 roles = await getRoles(getRolesQuery, userInfo.userID);//Utiliser structure pour role  
             return Results.Ok(CreateToken(userInfo, roles));
-        }
-        public static Task<IResult> makeConnection(string twoFactor, Query readUserInfoQuery, long defaultRole, SQLExecutor executor)
-        {
-            return makeConnection(twoFactor, readUserInfoQuery, null, defaultRole, executor);
-        }
-        public static Task<IResult> makeConnection(string twoFactor, Query readUserInfoQuery, Query getRolesQuery, SQLExecutor executor)
-        {
-            return makeConnection(twoFactor, readUserInfoQuery, getRolesQuery, -1, executor);
-        }
-        private static async Task<IResult> makeConnection(string twoFactor, Query readUserInfoQuery, Query getRolesQuery, long defaultRole, SQLExecutor executor)
+        }*/
+        public static async Task<IResult> makeConnectionStepTwo(SQLExecutor executor, Query readUserInfoQuery, string twoFactor, bool getRoles, params long[] roles)
         {
             var userInfo = await executor.SelectSingle<UserInfo>(readUserInfoQuery.setParam("Token", twoFactor));
             if (userInfo is null)
                 return Results.Forbid();
-            long[] roles;
-            if (getRolesQuery is null)
-                roles = new long[] { defaultRole };
-            else
-                roles = await getRoles(getRolesQuery, userInfo.userID);//Utiliser structure pour role
+            if (getRoles)
+                roles.Concat(await getRolesArray(userInfo.userID));//Utiliser structure pour role
             return Results.Ok(CreateToken(userInfo, roles));
         }
-        public static async Task<IResult> makeConnection2Factor(string Email, string password, Query readUserInfoQuery, Query write2Factor, SQLExecutor executor)
+        public static async Task<IResult> makeConnectionStepOne(SQLExecutor executor, Query readUserInfoQuery, Query write2Factor, string Email, string password)
         {
             var userInfo = await checkUserInfo(Email, password, readUserInfoQuery, executor);
             if (userInfo is null)
