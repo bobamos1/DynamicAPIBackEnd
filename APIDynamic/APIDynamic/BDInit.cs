@@ -102,14 +102,12 @@ namespace APIDynamic
                 .addPropriety("EtatProduitID", true, true, ShowTypes.CBO).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS CategorieID, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatsProduitNom FROM produits AS p LEFT JOIN categories AS c ON c.id = p.id_categorie LEFT JOIN etats_produit AS ep ON ep.id = p.id_etat_produit WHERE p.id = @_ID AND p.id_categorie = @_CategorieID AND p.id_etat_produit = @_EtatProduitID", QueryTypes.SELECT)
                         .setSQLParam("ID", "ID")
                         .setSQLParam("CategorieID", "CategorieID")
                         .setSQLParam("EtatProduitID", "EtatProduitID")
 
                 .addRoute(BaseRoutes.INSERT)
-                    .addAuthorizedRouteRoles(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@nom, @descriptions, @prix, @id_categorie, @id_etat_produit", QueryTypes.INSERT)
                         .setSQLParam("nom", "Nom")
                         .setSQLParam("descriptions", "Descriptions")
@@ -117,7 +115,6 @@ namespace APIDynamic
                         .setSQLParam("id_categorie", "CategorieID")
                         .setSQLParam("id_etat_produit", "EtatProduitID")
                 .addRoute(BaseRoutes.UPDATE)
-                    .addAuthorizedRouteRoles(Roles.Admin.ID())
                     .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, ingrediants = @_ingrediants, quantite_inventaire = @_quantite_inventaire, prix = @_prix, id_categorie = @_id_categorie, id_etat_produit = @_id_etat_produit WHERE id = @id", QueryTypes.UPDATE)
                         .setSQLParam("id", "ID")
                         .setSQLParam("nom", "Nom")
@@ -127,7 +124,6 @@ namespace APIDynamic
                         .setSQLParam("id_etat_produit", "EtatProduitID")
 
                 .addRoute(BaseRoutes.CBO)
-                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT id, nom FROM produits", QueryTypes.CBO)
 
             ;
@@ -213,7 +209,7 @@ namespace APIDynamic
                 .addPropriety("ID", true, true, ShowTypes.INT)
                 .addPropriety("Nom", true, true, ShowTypes.STRING)
                 //.addPropriety("ProduitID", true, true, ShowTypes.CBO)
-
+                
                 .addRoute("FormatDispoProduits", RouteTypes.GET)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT p.id AS ProduitID, fp.nom AS Nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit INNER JOIN formats_produit_produits AS fpp ON fpp.id_format_produit = fp.id INNER JOIN produits AS p ON p.id = fpp.id_produit WHERE fpp.id_produit = @_produit_id AND fp.id = @_FormatID", QueryTypes.SELECT)
@@ -365,7 +361,6 @@ namespace APIDynamic
                 .addPropriety("Commandes", true, true, ShowTypes.Ref)//.Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT cli.id AS ID, cli.nom AS Nom, cli.prenom AS Prenom, cli.date_naissance AS DateNaissance, cli.adresse_courriel AS AdresseCourriel, cli.mdp AS MDP, cli.token AS Token, cli.sel AS Sel, cli.actif AS Actif FROM clients AS cli", QueryTypes.SELECT)
                         .setSQLParam("ID", "ID")
                         
