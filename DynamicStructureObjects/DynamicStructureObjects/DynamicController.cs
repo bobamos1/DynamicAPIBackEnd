@@ -20,11 +20,18 @@ using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using System.Collections;
 using System.Runtime.Serialization;
 using ParserLib;
+using Microsoft.Extensions.Primitives;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace DynamicStructureObjects
 {
     public class DynamicController
     {
+        public static readonly string ISASCENDINGKEY = "IsAscending";
+        public readonly static string STEPKEY = "Step";
+        public readonly static int DEFAULTSTEP = 25; 
+        public readonly static int DEFAULTPAGE = 1;
+        public readonly static string PAGEKEY = "Page";
         public readonly static string USERIDKEY = "CurrentUserID";
         public readonly static string PROPRETYKEY = "AuthorizedProprieties";
         public readonly static string ROLESKEY = "CurrentUserRoles";
@@ -361,20 +368,51 @@ namespace DynamicStructureObjects
             DynamicRoute route = getRoute(routeName);
             if (route is null)
                 throw new Exception();
-            List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();
-            Func<dynamic, string, Task<IResult>> delegateMethod = async ([FromBody] dynamic? request, [FromHeader(Name = "Authorization")] string? JWT) =>
+            List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();/*
+            Func<Dictionary<string, object>, string, Task<IResult>> baseFunction = async (bodyData, JWT) =>
             {
-                Dictionary<string, object> bodyData = request is null ? new Dictionary<string, object>() : JObjectToDictionary(JObject.Parse(request.ToString()));
                 if (!fillBodyData(bodyData, DynamicConnection.ParseClaim(JWT), route))
                     return Results.Forbid();
                 if (!route.validateParams(bodyData))
                     return Results.Forbid();
                 return await function(queries, bodyData);
-            };
+            };*/
+            Func<HttpRequest, Task<IResult>> delegateMethod = async (request) =>
+            {
+                var bodyData = JObjectToDictionary(await StreamToJObject(request.Body));
+                QueryCollectionToDictionary(request.Query, bodyData);
+                StringValues JWT;
+                request.Headers.TryGetValue("Authorization", out JWT);
+                if (!fillBodyData(bodyData, DynamicConnection.ParseClaim(JWT.Any() ? JWT[0] : null), route))
+                    return Results.Forbid();
+                if (!route.validateParams(bodyData))
+                    return Results.Forbid();
+                return await function(queries, bodyData);
+            };/*
+            if (route.RouteType != RouteTypes.GET)
+                delegateMethod = async ([FromBody] dynamic? request, [FromHeader(Name = "Authorization")] string? JWT) =>
+                {
+                    Dictionary<string, object> bodyData = request is null ? new Dictionary<string, object>() : JObjectToDictionary(JObject.Parse(request.ToString()));
+                    return await baseFunction(bodyData, JWT);
+                };
+            else
+                delegateMethod = async ([FromQuery] dynamic? request, [FromHeader(Name = "Authorization")] string? JWT) =>
+                {
+                    Dictionary<string, object> bodyData = request is null ? new Dictionary<string, object>() : QueryCollectionToDictionary(request);
+                    return await baseFunction(bodyData, JWT);
+                };*/
             var routeBuilder = app.MapRoute(route.RouteType, $"/{Name}/{routeName}", delegateMethod).WithName($"{Name}{routeName}").WithGroupName(Name);
             /*
             if (requireAuthorization)
                 routeBuilder.RequireAuthorization($"{Name}_{route.Name}_Policy");*/
+        }
+        internal async Task<string> StreamToJObject(Stream stream)
+        {
+            if (stream is null)
+                return string.Empty; 
+            using (var reader = new StreamReader(stream,
+                      encoding: Encoding.UTF8, detectEncodingFromByteOrderMarks: false))
+                return await reader.ReadToEndAsync();
         }
         internal bool fillBodyData(Dictionary<string, object> bodyData, JwtSecurityToken token, DynamicRoute route)
         {
@@ -383,19 +421,15 @@ namespace DynamicStructureObjects
             {
                 if (route.requireAuthorization)
                     return false;
-
                 authorizedProprieties = getAuthorizedProprieties(route.onlyModify);
                 bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
-
                 return true;
-
             }
             var roles = DynamicConnection.ParseRoles(token);
             bodyData[USERIDKEY] = DynamicConnection.ParseUserID(token);
             bodyData[ROLESKEY] = roles;
             if (route.getAuthorizedCols)
             {
-
                 authorizedProprieties = getAuthorizedProprieties(route.onlyModify, roles);
                 bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.Name).Concat(getCBOKeyValues(authorizedProprieties));
             }
@@ -403,7 +437,29 @@ namespace DynamicStructureObjects
                 return route.CanUse(roles);
             return true;
         }
-
+        public static void QueryCollectionToDictionary(IQueryCollection queryParameters, Dictionary<string, object> dictionary)
+        {
+            foreach (var (key, values) in queryParameters)
+                if (values.Count == 1)
+                {
+                    if (int.TryParse(values[0], out var intValue))
+                        dictionary[key] = intValue;
+                    else if (bool.TryParse(values[0], out var boolValue))
+                        dictionary[key] = boolValue;
+                    else if (DateTime.TryParse(values[0], out var dateTimeValue))
+                        dictionary[key] = dateTimeValue;
+                    else
+                        dictionary[key] = values[0];
+                }
+                else
+                    dictionary[key] = values.ToArray();
+        }
+        public static Dictionary<string, object> JObjectToDictionary(string json)
+        {
+            if (json.IsNullOrEmpty())
+                return new Dictionary<string, object>();
+            return JObjectToDictionary(JObject.Parse(json));
+        }
         public static Dictionary<string, object> JObjectToDictionary(JObject jObject)
         {
             Dictionary<string, object> dictionary = new Dictionary<string, object>();
@@ -447,7 +503,13 @@ namespace DynamicStructureObjects
                 if (controller.Value.hasRoute(BaseRoutes.GETALL.Value()))
                     controller.Value.addRouteAPI(BaseRoutes.GETALL, async (queries, bodyData) =>
                     {
-                        queries[0].setParams(bodyData);
+                        if (queries[0].setParams(bodyData).containOrderVar)
+                            return Results.Ok(await executorData.SelectQuery(queries[0],
+                                bodyData.SafeGet<int>(PAGEKEY, DEFAULTPAGE),
+                                bodyData.SafeGet<int>(STEPKEY, DEFAULTSTEP),
+                                bodyData.SafeGet<string>(Query.ORDERBYVARKEY, null),
+                                bodyData.SafeGet<bool>(ISASCENDINGKEY, true),
+                                bodyData.AuthProprieties()));
                         return Results.Ok(await executorData.SelectQuery(queries[0], bodyData.AuthProprieties()));
                     });//, true, true, false
                 if (controller.Value.hasRoute(BaseRoutes.CBO.Value()))
@@ -487,6 +549,14 @@ namespace DynamicStructureObjects
                     {
                         var authorizedProprieties = bodyData.AuthProprieties();
                         var mappers = controller.Value.getMappersGenerated(controllers, bodyData.UserRoles(), authorizedProprieties);
+                        if (queries[0].setParams(bodyData).containOrderVar)
+                            return Results.Ok(await executorData.DetailedSelectQuery(queries[0],
+                                bodyData.SafeGet<int>(PAGEKEY, DEFAULTPAGE),
+                                bodyData.SafeGet<int>(STEPKEY, DEFAULTSTEP),
+                                bodyData.SafeGet<string>(Query.ORDERBYVARKEY, null),
+                                bodyData.SafeGet<bool>(ISASCENDINGKEY, true),
+                                mappers,
+                                authorizedProprieties));
                         return Results.Ok(await executorData.DetailedSelectQuery(queries[0], mappers, authorizedProprieties));
                     });//, true, true, false
                 if (controller.Value.hasRoute(BaseRoutes.GETDETAILED.Value()))

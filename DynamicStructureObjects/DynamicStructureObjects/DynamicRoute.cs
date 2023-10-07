@@ -166,7 +166,7 @@ namespace DynamicStructureObjects
 
         internal bool CanUse(IEnumerable<long> rolesUser)
         {
-            return rolesUser.Any(role => Roles.Contains(role));
+            return !requireAuthorization || Roles.Any(role => rolesUser.Contains(role));
         }
         internal bool validateParams(Dictionary<string, object> bodyData)
         {

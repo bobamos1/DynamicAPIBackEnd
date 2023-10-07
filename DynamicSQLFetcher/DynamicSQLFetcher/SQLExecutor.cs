@@ -49,15 +49,19 @@ namespace DynamicSQLFetcher
         public Task<IEnumerable<T>> SelectQuery<T>(Query query, params string[] authorizedColumns)
         {
             return SelectQuery<T>(_connectionString, query, authorizedColumns);
+        }
+        public Task<IEnumerable<dynamic>> SelectQuery(Query query, int page, int step, string orderCol, bool isAscending, params string[] authorizedColumns)
+        {
+            return SelectQuery(_connectionString, query, page, step, orderCol, isAscending, authorizedColumns);
+        }
+        public Task<IEnumerable<T>> SelectQuery<T>(Query query, int page, int step, string orderCol, bool isAscending, params string[] authorizedColumns)
+        {
+            return SelectQuery<T>(_connectionString, query, page, step, orderCol, isAscending, authorizedColumns);
         }/*
         public Task<IEnumerable<T>> SelectQueryTotal<T>(Query query)
         {
             return SelectQuery<T>(_connectionString, query.ParseTotalAuth(), query.getParameters());
         }*/
-        public Task<IEnumerable<dynamic>> SelectQuery(Query query, int page, int step, params string[] authorizedColumns)
-        {
-            return SelectQuery(_connectionString, query, page, step, authorizedColumns);
-        }
         public Task<dynamic> DetailedSelectQuerySingle(Query query, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
         {
             return DetailedSelectQuerySingle(_connectionString, query, mappers, authorizedColumns);
@@ -66,9 +70,9 @@ namespace DynamicSQLFetcher
         {
             return DetailedSelectQuery(_connectionString, query, mappers, authorizedColumns);
         }
-        public Task<IEnumerable<dynamic>> DetailedSelectQuery(Query query, int page, int step, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
+        public Task<IEnumerable<dynamic>> DetailedSelectQuery(Query query, int page, int step, string orderCol, bool isAscending, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
         {
-            return DetailedSelectQuery(_connectionString, query, page, step, mappers, authorizedColumns);
+            return DetailedSelectQuery(_connectionString, query, page, step, orderCol, isAscending, mappers, authorizedColumns);
         }
         public Task<int> ExecuteQueryWithoutTransaction(Query query, params string[] authorizedColumns)
         {
@@ -128,9 +132,13 @@ namespace DynamicSQLFetcher
         {
             return SelectQuery<T>(connectionString, query.Parse(authorizedColumns), query.getParameters());
         }
-        public static Task<IEnumerable<dynamic>> SelectQuery(string connectionString, Query query, int page, int step, params string[] authorizedColumns)
+        public static Task<IEnumerable<dynamic>> SelectQuery(string connectionString, Query query, int page, int step, string orderCol, bool isAscending, params string[] authorizedColumns)
         {
-            return SelectQuery(connectionString, query.Parse(page, step, authorizedColumns), query.getParameters());
+            return SelectQuery(connectionString, query.Parse(page, step, orderCol, isAscending, authorizedColumns), query.getParameters());
+        }
+        public static Task<IEnumerable<T>> SelectQuery<T>(string connectionString, Query query, int page, int step, string orderCol, bool isAscending, params string[] authorizedColumns)
+        {
+            return SelectQuery<T>(connectionString, query.Parse(page, step, orderCol, isAscending, authorizedColumns), query.getParameters());
         }
         public Task<object> SelectValue(Query query)
         {
@@ -210,9 +218,14 @@ namespace DynamicSQLFetcher
         {
             using (IDbConnection con = new SqlConnection(connectionString))
             {
+                var dict = obj as IDictionary<string, object>;
                 foreach (var mapper in mappers)
                 {
-                    var dict = obj as IDictionary<string, object>;
+                    if (mapper.query == null)
+                    {
+                        dict[mapper.propetyName] = Array.Empty<object>();
+                        continue;
+                    }
                     DynamicParameters parameters = mapper.getParameters();
                     foreach (var baseParam in mapper.parametersToLink)
                         parameters.Add(baseParam.Key, dict[baseParam.Value]);
@@ -245,9 +258,9 @@ namespace DynamicSQLFetcher
                 return await connection.QueryFirstOrDefaultAsync<T>(query, parameters);
             }
         }
-        public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, int page, int step, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
+        public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, int page, int step, string orderCol, bool isAscending, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
         {
-            return DetailedSelectQueryString(connectionString, query.Parse(page, step, authorizedColumns), query.getParameters(), mappers);
+            return DetailedSelectQueryString(connectionString, query.Parse(page, step, orderCol, isAscending, authorizedColumns), query.getParameters(), mappers);
         }
         public static Task<IEnumerable<dynamic>> DetailedSelectQuery(string connectionString, Query query, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
         {

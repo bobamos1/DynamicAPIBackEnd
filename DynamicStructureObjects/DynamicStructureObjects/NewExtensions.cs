@@ -13,7 +13,7 @@ namespace DynamicStructureObjects
 {
     public static class NewExtensions
     {
-        public static RouteHandlerBuilder MapRoute(this WebApplication app, RouteTypes routeType, string routePath, Func<dynamic, string, Task<IResult>> delegateMethod)
+        public static RouteHandlerBuilder MapRoute(this WebApplication app, RouteTypes routeType, string routePath, Func<HttpRequest, Task<IResult>> delegateMethod)
         {
             switch (routeType)
             {
@@ -59,12 +59,12 @@ namespace DynamicStructureObjects
         {
             return (T)data[key];
         }
-        public static T SafeGet<T>(this Dictionary<string, object> data, string key)
+        public static T SafeGet<T>(this Dictionary<string, object> data, string key, T defaultVal = default(T))
         {
             object result;
             if (data.TryGetValue(key, out result))
                 return (T)result;
-            return default(T);
+            return defaultVal;
         }
         public static readonly QueryTypes[] authQueries = new[] { QueryTypes.INSERT, QueryTypes.DELETE }; 
         public static bool CompleteAuth(this QueryTypes queryType)
