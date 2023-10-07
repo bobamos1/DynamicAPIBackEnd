@@ -214,23 +214,17 @@ namespace DynamicSQLFetcher
             using (IDbConnection cnn = new SqlConnection(connectionString))
                 return await cnn.QueryAsync(query, parameters);
         }
-        private async static Task getDetails(string connectionString, dynamic obj, IEnumerable<DynamicMapper> mappers)
+        private async static Task getDetails(IDbConnection con, IDictionary<string, object> dict, IEnumerable<DynamicMapper> mappers)
         {
-            using (IDbConnection con = new SqlConnection(connectionString))
+            foreach (var mapper in mappers)
             {
-                var dict = obj as IDictionary<string, object>;
-                foreach (var mapper in mappers)
-                {
-                    if (mapper.query == null)
-                    {
-                        dict[mapper.propetyName] = Array.Empty<object>();
-                        continue;
-                    }
-                    DynamicParameters parameters = mapper.getParameters();
-                    foreach (var baseParam in mapper.parametersToLink)
-                        parameters.Add(baseParam.Key, dict[baseParam.Value]);
-                    dict[mapper.propetyName] = await con.QueryAsync(mapper.query, parameters);
-                }
+                if (mapper.query == null)
+                    //dict[mapper.propetyName] = Array.Empty<object>();
+                    continue;
+                DynamicParameters parameters = mapper.getParameters();
+                foreach (var baseParam in mapper.parametersToLink)
+                    parameters.Add(baseParam.Key, dict[baseParam.Value]);
+                dict[mapper.propetyName] = await con.QueryAsync(mapper.query, parameters);
             }
         }
         public async static Task<dynamic> DetailedSelectQuerySingle(string connectionString, Query query, IEnumerable<DynamicMapper> mappers, params string[] authorizedColumns)
@@ -239,7 +233,7 @@ namespace DynamicSQLFetcher
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
                 result = await connection.QueryFirstOrDefaultAsync(query.Parse(authorizedColumns), query.getParameters());
-                await getDetails(connectionString, result, mappers);
+                await getDetails(connection, result as IDictionary<string, object>, mappers);
             }
             return result;
         }
@@ -272,8 +266,9 @@ namespace DynamicSQLFetcher
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
                 results = await connection.QueryAsync(query, parameters);
+                var dicts = results as IEnumerable<IDictionary<string, object>>;
                 foreach (var result in results)
-                    await getDetails(connectionString, result, mappers);
+                    await getDetails(connection, result, mappers);
             }
             return results;
         }

@@ -2,6 +2,7 @@
 //using System.Collections.Generic;
 using Dapper;
 using System;
+using System.Security;
 using System.Text.RegularExpressions;
 //using System.Linq;
 //using System.Text;
@@ -149,8 +150,9 @@ namespace DynamicSQLFetcher
         {
             return new KeyValuePair<Query, string[]>(this, authorizedColumns);
         }
-        public string DoParse(IEnumerable<string> selectedCols)
+        public string DoParse(IEnumerable<KeyValuePair<string, string>> selectedColsPairs)
         {
+            var selectedCols = selectedColsPairs.Select(pair => pair.Value);
             if (queryType == QueryTypes.CBO)
                 selectedCols = selectedCols.Take(2).Select((col, index) => $"{col} AS {(index == 0 ? "[key]" : "[value]")}");
             return finaliseParse(this.query.Replace(hilightStart + hilightEnd, string.Format(" {0} ", string.Join(", ", selectedCols))));
@@ -180,7 +182,7 @@ namespace DynamicSQLFetcher
                     return null;
                 return finaliseParse(queryStr);
             }
-            return DoParse(SelectCols(authorizedColumns).Select(item => item.Value));
+            return DoParse(SelectCols(authorizedColumns));
         }
         public string Parse(int page, int step, string orderCol, bool isAscending, params string[] authorizedColumns)
         {
@@ -188,8 +190,8 @@ namespace DynamicSQLFetcher
                 throw new Exception("need to be of type select to add pagination");
             var selectedCols = SelectCols(authorizedColumns);
             if (setOrder(orderCol, isAscending, selectedCols))
-                return string.Format("{0} {1}", DoParse(selectedCols.Select(item => item.Value)), getPagination(page, step));
-            return DoParse(selectedCols.Select(item => item.Value));
+                return string.Format("{0} {1}", DoParse(selectedCols), getPagination(page, step));
+            return DoParse(selectedCols);
         }
         private bool setOrder(string orderCol, bool isAscending, IEnumerable<KeyValuePair<string, string>> selectedCols)
         {
