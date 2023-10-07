@@ -92,14 +92,14 @@ namespace APIDynamic
                 ;
 
             await controllers["Produits"]
-                .addPropriety("ID", true, true, ShowTypes.INT)
-                .addPropriety("Nom", true, true, ShowTypes.STRING)
-                .addPropriety("Descriptions", true, true, ShowTypes.STRING)
-                .addPropriety("Ingrediants", true, true, ShowTypes.STRING)
-                .addPropriety("Prix", true, true, ShowTypes.FLOAT)
-                .addPropriety("QuantiteInventaire", true, true, ShowTypes.INT)
-                .addPropriety("CategorieID", true, true, ShowTypes.CBO)
-                .addPropriety("EtatProduitID", true, true, ShowTypes.CBO)
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Ingrediants", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Prix", true, true, ShowTypes.FLOAT).Anonymous()
+                .addPropriety("QuantiteInventaire", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("CategorieID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("EtatProduitID", true, true, ShowTypes.CBO).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
@@ -400,10 +400,10 @@ namespace APIDynamic
                     .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
                         .setSQLParam("Email", "AdresseCourriel")
                         .addSQLParam("Password", ValidatorTypes.REQUIRED.SetValue("true", "Password is missing from request."))
-                    .addRouteQuery("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE)
+                    .addRouteQuery("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE, true)
                         .setSQLParam("ID", "ID")
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
-                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW)
+                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
                 .addRoute("InscriptionClient", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @AdresseCourriel, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
 
