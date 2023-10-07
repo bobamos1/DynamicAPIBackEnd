@@ -32,16 +32,18 @@ namespace DynamicStructureObjects
             this.getAuthorizedCols = getAuthorizedCols;
             this.onlyModify = onlyModify;
         }
-        internal DynamicRoute(DynamicRoute dynamicRoute, BaseRoutes baseRoute)
+        internal DynamicRoute(DynamicRoute dynamicRoute, BaseRoutes baseRoute, bool requiredID = false)
         {
             this.id = dynamicRoute.id;
             this.Name = baseRoute.Value();
             this.RouteType = dynamicRoute.RouteType;
-            this.Queries = dynamicRoute.Queries;
+            this.Queries = dynamicRoute.Queries.ToList();
             this.Roles = dynamicRoute.Roles;
             this.requireAuthorization = baseRoute.requireAuthorization();
             this.getAuthorizedCols = baseRoute.getAuthorizedCols();
             this.onlyModify = baseRoute.onlyModify();
+            if (requiredID)
+                Queries[0] = new DynamicQueryForRoute(Queries[0], true);
         }
         internal static async Task<DynamicRoute> init(DynamicRoute route)
         {

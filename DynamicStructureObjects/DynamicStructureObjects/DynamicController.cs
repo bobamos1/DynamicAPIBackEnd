@@ -78,9 +78,17 @@ namespace DynamicStructureObjects
                 if (getAllRoute.Queries.First().ParamsInfos.ContainsKey("ID"))
                 {
                     if (!controller.hasRoute(BaseRoutes.GET.Value()))
-                        controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GET));
+                    {
+                        controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GET, true));
+                    }
+                    else if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
+                    {
+                        controller.Routes.Add(new DynamicRoute(controller.getRoute(BaseRoutes.GET.Value()), BaseRoutes.GETDETAILED));
+                    }
                     if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
-                        controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED));
+                    {
+                        controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, true));
+                    }
                 }
             }
             return controller;
@@ -368,15 +376,7 @@ namespace DynamicStructureObjects
             DynamicRoute route = getRoute(routeName);
             if (route is null)
                 throw new Exception();
-            List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();/*
-            Func<Dictionary<string, object>, string, Task<IResult>> baseFunction = async (bodyData, JWT) =>
-            {
-                if (!fillBodyData(bodyData, DynamicConnection.ParseClaim(JWT), route))
-                    return Results.Forbid();
-                if (!route.validateParams(bodyData))
-                    return Results.Forbid();
-                return await function(queries, bodyData);
-            };*/
+            List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();
             Func<HttpRequest, Task<IResult>> delegateMethod = async (request) =>
             {
                 var bodyData = JObjectToDictionary(await StreamToJObject(request.Body));
@@ -388,19 +388,7 @@ namespace DynamicStructureObjects
                 if (!route.validateParams(bodyData))
                     return Results.Forbid();
                 return await function(queries, bodyData);
-            };/*
-            if (route.RouteType != RouteTypes.GET)
-                delegateMethod = async ([FromBody] dynamic? request, [FromHeader(Name = "Authorization")] string? JWT) =>
-                {
-                    Dictionary<string, object> bodyData = request is null ? new Dictionary<string, object>() : JObjectToDictionary(JObject.Parse(request.ToString()));
-                    return await baseFunction(bodyData, JWT);
-                };
-            else
-                delegateMethod = async ([FromQuery] dynamic? request, [FromHeader(Name = "Authorization")] string? JWT) =>
-                {
-                    Dictionary<string, object> bodyData = request is null ? new Dictionary<string, object>() : QueryCollectionToDictionary(request);
-                    return await baseFunction(bodyData, JWT);
-                };*/
+            };
             var routeBuilder = app.MapRoute(route.RouteType, $"/{Name}/{routeName}", delegateMethod).WithName($"{Name}{routeName}").WithGroupName(Name);
             /*
             if (requireAuthorization)
@@ -515,14 +503,12 @@ namespace DynamicStructureObjects
                 if (controller.Value.hasRoute(BaseRoutes.CBO.Value()))
                     controller.Value.addRouteAPI(BaseRoutes.CBO, async (queries, bodyData) =>
                     {
-                        queries[0].setParams(bodyData);
-                        return Results.Ok(await executorData.SelectDictionary(queries[0]));
+                        return Results.Ok(await executorData.SelectDictionary(queries[0].setParams(bodyData)));
                     });
                 if (controller.Value.hasRoute(BaseRoutes.GET.Value()))
                     controller.Value.addRouteAPI(BaseRoutes.GET, async (queries, bodyData) =>
                     {
-                        queries[0].setParams(bodyData);
-                        return Results.Ok(await executorData.SelectSingle(queries[0], bodyData.AuthProprieties()));
+                        return Results.Ok(await executorData.SelectSingle(queries[0].setParams(bodyData), bodyData.AuthProprieties()));
                     });//, true, true, false
                 if (controller.Value.hasRoute(BaseRoutes.INSERT.Value()))
                     controller.Value.addRouteAPI(BaseRoutes.INSERT, async (queries, bodyData) =>
@@ -564,7 +550,7 @@ namespace DynamicStructureObjects
                     {
                         var authorizedProprieties = bodyData.AuthProprieties();
                         var mappers = controller.Value.getMappersGenerated(controllers, bodyData.UserRoles(), authorizedProprieties);
-                        return Results.Ok(await executorData.DetailedSelectQuerySingle(queries[0], mappers, authorizedProprieties));
+                        return Results.Ok(await executorData.DetailedSelectQuerySingle(queries[0].setParams(bodyData), mappers, authorizedProprieties));
                     });//, true, true, false
             }
         }

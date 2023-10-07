@@ -33,6 +33,17 @@ namespace DynamicStructureObjects
             this.CompleteAuth = true;
             this.Filters = new List<DynamicFilter>();
         }
+        internal DynamicQueryForRoute(DynamicQueryForRoute dynamicQuery, bool requiredID)
+        {
+            this.id = dynamicQuery.id;
+            this.query = dynamicQuery.query;
+            this.ParamsInfos = dynamicQuery.ParamsInfos.ToDictionary(param => param.Key, param => param.Value);
+            this.CompleteAuth = dynamicQuery.CompleteAuth;
+            this.Filters = dynamicQuery.Filters;
+            DynamicSQLParamInfo paramInfo;
+            if (requiredID && ParamsInfos.TryGetValue("ID", out paramInfo))
+                ParamsInfos["ID"] = new DynamicSQLParamInfo(paramInfo, true);
+        }
         internal static async Task<DynamicQueryForRoute> init(DynamicQueryForRoute query)
         {
             foreach (var paramInfo in await DynamicController.executor.SelectQuery<DynamicSQLParamInfo>(

@@ -17,6 +17,15 @@ namespace DynamicStructureObjects
             this.VarAffected = VarAffected;
             this.ProprietyID = ProprietyID;
             this.Validators = new List<DynamicValidator>();
+            this.isRequired = false;
+        }
+        internal DynamicSQLParamInfo(DynamicSQLParamInfo paramInfo, bool isRequired)
+        {
+            this.id = paramInfo.id;
+            this.VarAffected = paramInfo.VarAffected;
+            this.ProprietyID = paramInfo.ProprietyID;
+            this.Validators = paramInfo.Validators;
+            this.isRequired = isRequired;
         }
         internal static async Task<DynamicSQLParamInfo> init(DynamicSQLParamInfo paramInfo)
         {

@@ -111,7 +111,9 @@ namespace DynamicSQLFetcher
             new("WHEREORDER", "ORDER"),
             new("WHEREGROUP", "GROUP"),
             new("WHERE)", ")"),
-            new("WHERE )", ")")
+            new("WHERE )", ")"),
+            new("ANDORDER", "ORDER"),
+            new("ORORDER", "ORDER")
         };
         private static readonly List<string> removeEnd = new List<string>()
         {
@@ -196,10 +198,9 @@ namespace DynamicSQLFetcher
                 var indexOrder = selectedCols.ToList().FindIndex(pair => pair.Key == orderCol);
                 if (indexOrder != -1)
                 {
-                    setParam(ORDERBYVARKEY, string.Format("{0} {1}", (indexOrder + 1).ToString(), isAscending ? "ASC" : "DESC"));
+                    setParam(ORDERBYVARKEY + ORDERBYVARKEY, string.Format("{0} {1}", (indexOrder + 1).ToString(), isAscending ? "ASC" : "DESC"));
                     return true;
                 }
-                paramsUsed.Remove(ORDERBYVARKEY);
             }
             return false;
         }
@@ -225,15 +226,14 @@ namespace DynamicSQLFetcher
         }
         private string validateAll(string completeQuery)
         {
+            for (int i = 0; i < emptyRemover.Count; i++)
+                completeQuery = completeQuery.Replace(emptyRemover[i].Key, emptyRemover[i].Value);
             completeQuery = completeQuery.Trim();
             removeEnd.ForEach(ending =>
             {
                 if (completeQuery.EndsWith(ending))
                     completeQuery = completeQuery.Substring(0, completeQuery.Length - ending.Length);
             });
-            for (int i = 0; i < emptyRemover.Count; i++)
-                completeQuery = completeQuery.Replace(emptyRemover[i].Key, emptyRemover[i].Value);
-
             return completeQuery;
         }
         private bool checkIfOkParam(string lookString, Dictionary<string, object> paramsUsed)
@@ -270,8 +270,12 @@ namespace DynamicSQLFetcher
                 }
             Query newQuery = new Query(queryType);
             query = parseVariables(query, newQuery, removeVarIdentifier);
-            if (newQuery.varsInfoList.Any(varInfo => varInfo.isSQLText && varInfo.VarName == ORDERBYVARKEY))
+            var orderVar = newQuery.varsInfoList.FirstOrDefault(varinfo => varinfo.isSQLText && varinfo.VarName == ORDERBYVARKEY);
+            if (orderVar is not null)
+            {
+                orderVar.VarName = ORDERBYVARKEY + ORDERBYVARKEY;
                 newQuery.containOrderVar = true;
+            }
             int startSelectPart = query.IndexOf(hilightStart);
             int endSelectPart = query.IndexOf(hilightEnd);
             if (startSelectPart != -1 && endSelectPart != -1)
