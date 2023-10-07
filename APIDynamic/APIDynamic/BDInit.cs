@@ -362,7 +362,7 @@ namespace APIDynamic
                 .addPropriety("Sel", false, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Actif", true, true, ShowTypes.INT).Anonymous()
                 .addPropriety("ExpirationToken", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("Commandes", true, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("Commandes", true, true, ShowTypes.Ref)//.Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())

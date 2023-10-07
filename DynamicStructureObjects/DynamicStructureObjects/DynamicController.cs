@@ -75,21 +75,17 @@ namespace DynamicStructureObjects
             {
                 if (!controller.hasRoute(BaseRoutes.GETALLDETAILED.Value()))
                     controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETALLDETAILED));
-                if (getAllRoute.Queries.First().ParamsInfos.ContainsKey("ID"))
+                if (!controller.hasRoute(BaseRoutes.GET.Value()))
                 {
-                    if (!controller.hasRoute(BaseRoutes.GET.Value()))
+                    if (getAllRoute.Queries.First().ParamsInfos.ContainsKey("ID"))
                     {
                         controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GET, true));
-                    }
-                    else if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
-                    {
-                        controller.Routes.Add(new DynamicRoute(controller.getRoute(BaseRoutes.GET.Value()), BaseRoutes.GETDETAILED));
-                    }
-                    if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
-                    {
-                        controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, true));
+                        if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
+                            controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, true));
                     }
                 }
+                else if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
+                    controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED));
             }
             return controller;
         }
@@ -330,35 +326,48 @@ namespace DynamicStructureObjects
                     });
                 }
         }
+        internal IEnumerable<long> getRolesInfo(string JWT)
+        {
+            var claim = DynamicConnection.ParseClaim(JWT);
+            if (claim is null)
+                return new long[0];
+            return DynamicConnection.ParseRoles(claim);
+        }
         internal void setBaseInfoRoutes()
         {
-            app.MapGet($"/{Name}/Info/Propriety", ([FromHeader(Name = "Authorization")] string JWT) =>
+            app.MapGet($"/{Name}/Info/Propriety", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                return Task.FromResult<IResult>(Results.Ok(getAuthorizedProprieties(false, DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT)))));
+                var roles = getRolesInfo(JWT);
+                if (!roles.Any())
+                    return Results.Forbid();
+                return Results.Ok(getAuthorizedProprieties(false, roles));
             }).WithName($"{Name}InfoPropriety");
-            app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string JWT) =>
+            app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                return Task.FromResult<IResult>(Results.Ok(getAuthorizedRoutes(DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT)))));
+                var roles = getRolesInfo(JWT);
+                if (!roles.Any())
+                    return Results.Forbid();
+                return Results.Ok(getAuthorizedRoutes(roles));
             }).WithName($"{Name}InfoRoutes");
             foreach (var route in Routes)
             {
-                app.MapGet($"/{Name}/Info/RouteFilters/{route.Name}", ([FromHeader(Name = "Authorization")] string JWT) =>
+                app.MapGet($"/{Name}/Info/RouteFilters/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
                 {
-                    if (!route.CanUse(DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT))))
-                        return Task.FromResult<IResult>(Results.Forbid());
-                    List<DynamicFilter> filters = new List<DynamicFilter>();
-                    foreach (var query in route.Queries)
-                        filters.AddRange(query.Filters);
-                    return Task.FromResult<IResult>(Results.Ok(filters));
+                    var roles = getRolesInfo(JWT);
+                    if (!roles.Any())
+                        return Results.Forbid();
+                    if (!route.CanUse(roles))
+                        return Results.Forbid();
+                    return Results.Ok(route.Queries.SelectMany(query => query.Filters));
                 }).WithName($"{Name}Info{route.Name}Filters");
-                app.MapGet($"/{Name}/Info/RouteVariables/{route.Name}", ([FromHeader(Name = "Authorization")] string JWT) =>
+                app.MapGet($"/{Name}/Info/RouteVariables/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
                 {
-                    if (!route.CanUse(DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT))))
-                        return Task.FromResult<IResult>(Results.Forbid());
-                    List<DynamicSQLParamInfo> paramInfo = new List<DynamicSQLParamInfo>();
-                    foreach (var query in route.Queries)
-                        paramInfo.AddRange(query.ParamsInfos.Values);
-                    return Task.FromResult<IResult>(Results.Ok(paramInfo));
+                    var roles = getRolesInfo(JWT);
+                    if (!roles.Any())
+                        return Results.Forbid();
+                    if (!route.CanUse(roles))
+                        return Results.Forbid();
+                    return Results.Ok(route.Queries.SelectMany(query => query.ParamsInfos.Values));
                 }).WithName($"{Name}Info{route.Name}Variables");
             }
         }

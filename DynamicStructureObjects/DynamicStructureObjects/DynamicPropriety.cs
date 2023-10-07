@@ -54,6 +54,8 @@ namespace DynamicStructureObjects
                         .setParam("ProprietyID", propriety.id)
                     )
                 );
+            if (propriety.ShowType == ShowTypes.Ref && !propriety.roles.Any())//!propriety.roles.ContainsKey(AnonymousRoleID))
+                propriety.roles[AnonymousRoleID] = false;
             return propriety;
         }
         public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, long ControllerID, params ValidatorBundle[] validatorBundle)
