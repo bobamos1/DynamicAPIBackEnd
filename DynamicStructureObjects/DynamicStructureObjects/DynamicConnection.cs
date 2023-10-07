@@ -1,18 +1,12 @@
 ﻿using DynamicSQLFetcher;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.IdentityModel.Tokens;
-using ParserLib;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DynamicStructureObjects
 {
@@ -27,6 +21,9 @@ namespace DynamicStructureObjects
         public static readonly string CourrielTokenBodyRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
         public static readonly string CourrielTokenSubjectRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
         internal static readonly Query getRolesQuery = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id_role FROM UsersRoles WHERE id_user = @UserID");
+        private const int SaltSize = 16; // 16 bytes for the salt
+        private const int HashSize = 64; // 64 bytes for the hash
+
         internal static string apiKey { get; set; }
         internal static EmailSender emailSender { get; set; }
         internal static TimeSpan TokenLifetime = TimeSpan.FromHours(2);
@@ -34,31 +31,40 @@ namespace DynamicStructureObjects
         {
             emailSender = new EmailSender(hostEmail, hostUsername, hostPassword, host, port);
         }
-        private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        private static byte[] GenerateSalt()
         {
-            using (var hmac = new HMACSHA512())
+            using (var rngCryptoServiceProvider = new RNGCryptoServiceProvider())
             {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                var salt = new byte[SaltSize];
+                rngCryptoServiceProvider.GetBytes(salt);
+                return salt;
             }
         }
         public static UserInfo CreatePasswordHash(string password)
         {
-            using (var hmac = new HMACSHA512())
-                return new UserInfo(-1, "", "", hmac.Key, hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)));
+            (byte[] hash, byte[] salt) = GeneratePasswordHash(password);
+            return new UserInfo(-1, "", "", hash, salt);
         }
         public static UserInfo CreatePasswordHash(string username, string Email, string password)
         {
-            using (var hmac = new HMACSHA512())
-                return new UserInfo(-1, username, Email, hmac.Key, hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)));
+            (byte[] hash, byte[] salt) = GeneratePasswordHash(password);
+            return new UserInfo(-1, username, Email, hash, salt);
         }
-
-        private static bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        public static (byte[] hash, byte[] salt) GeneratePasswordHash(string password)
         {
-            using (var hmac = new HMACSHA512(passwordSalt))
+            using (var hmac = new HMACSHA512())
+            {
+                var salt = GenerateSalt();
+                var hash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password + Convert.ToBase64String(salt)));
+                return (hash, salt);
+            }
+        }
+        public static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+        {
+            using (var hmac = new HMACSHA512(storedSalt))
             {
                 var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return computedHash.SequenceEqual(passwordHash);
+                return computedHash.SequenceEqual(storedHash);
             }
         }
         public static IEnumerable<long> ParseRoles(JwtSecurityToken token)

@@ -396,15 +396,15 @@ namespace APIDynamic
                         .setSQLParam("actif", "Actif")
 
 
-                .addRoute("ConnexionStepOne", RouteTypes.POST, false)
-                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE adresse_courriel = @Email", QueryTypes.ROW, false)
+                .addRoute("ConnexionStepOne", RouteTypes.POST)
+                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
                         .setSQLParam("Email", "AdresseCourriel")
                         .addSQLParam("Password", ValidatorTypes.REQUIRED.SetValue("true", "Password is missing from request."))
                     .addRouteQuery("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE)
                         .setSQLParam("ID", "ID")
-                .addRoute("ConnexionStepTwo", RouteTypes.POST, false)
+                .addRoute("ConnexionStepTwo", RouteTypes.POST)
                     .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW)
-                .addRoute("InscriptionClient", RouteTypes.POST, false)
+                .addRoute("InscriptionClient", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @AdresseCourriel, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.CBO)

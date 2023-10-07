@@ -1,7 +1,4 @@
 ﻿using DynamicSQLFetcher;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Microsoft.AspNetCore.Http;
-using System;
 
 namespace DynamicStructureObjects
 {
