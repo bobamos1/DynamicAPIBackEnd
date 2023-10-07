@@ -210,9 +210,12 @@ namespace DynamicStructureObjects
             var randomToken = GetRandom();
             string subject = string.Format(CourrielTokenSubject, randomToken);
             string message = string.Format(CourrielTokenBody, randomToken);
-            emailSender.SendEmail(userInfo.Email, subject, message);
-            await executor.ExecuteQueryWithTransaction(write2Factor.setParam("Token", randomToken).setParam("ID", userInfo.userID));
-            return Results.Ok();
+            if (await executor.ExecuteQueryWithTransaction(write2Factor.setParam("Token", randomToken).setParam("ID", userInfo.userID)) > 0)
+            {
+                emailSender.SendEmail(userInfo.Email, subject, message);
+                return Results.Ok();
+            }
+            return Results.Forbid();
         }
     }
 }

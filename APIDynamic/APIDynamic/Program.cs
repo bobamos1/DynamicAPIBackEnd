@@ -88,7 +88,22 @@ RoutesInit.InitRoutes(controllers, app, connectionStrings);
 app.Run();
 
 
-
+/*
+ "ConnectionStrings": {
+    "structure": "Data Source=...",
+    "data": "Data Source=..."
+  },
+  "JwtSettings": {
+    "Issuer": "https://localhost:7247",
+    "Audience": "https://localhost:7247",
+    "Key": "NotDoingWhatIAmSupposeToDoPisFautRajouterDuStockPourQueLaLigneSoisAssezLngue"
+  },
+  "Email": {
+    "EmailHost": "testcourriel415@gmail.com",
+    "UsernameHost": "testcourriel415",
+    "PasswordHost": "cbnyrpctgpgcahki"
+  },
+ */
 
 
 
