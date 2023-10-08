@@ -27,7 +27,7 @@ namespace DynamicStructureObjects
 
         internal static string apiKey { get; set; }
         internal static EmailSender emailSender { get; set; }
-        internal static TimeSpan TokenLifetime = TimeSpan.FromHours(2);
+        internal static TimeSpan TokenLifetime = TimeSpan.FromHours(8);
         public static void setEmailSender(string hostEmail, string hostUsername, string hostPassword, string host, int port)
         {
             emailSender = new EmailSender(hostEmail, hostUsername, hostPassword, host, port);

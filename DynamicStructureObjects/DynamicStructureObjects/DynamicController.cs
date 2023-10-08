@@ -156,6 +156,14 @@ namespace DynamicStructureObjects
         public async Task<DynamicController> addRouteQuery(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             await Routes.Last().addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
+            foreach (var paramInfo in Routes.Last().Queries.Last().ParamsInfos)
+                if (Proprieties.Any(propriety => propriety.Name == paramInfo.Key))
+                    await setSQLParam(paramInfo.Key, paramInfo.Key);
+            return this;
+        }
+        public async Task<DynamicController> addRouteQueryNoMapping(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
+        {
+            await Routes.Last().addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
             return this;
         }
         public async Task<DynamicController> addRouteQueryNoVar(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)

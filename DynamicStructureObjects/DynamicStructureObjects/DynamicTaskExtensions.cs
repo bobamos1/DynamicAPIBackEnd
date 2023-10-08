@@ -144,7 +144,12 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRouteQuery(routeName, queryString, QueryType, CompleteAuth, CompleteCheck);
         }
+        
         public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
+        {
+            return await (await task).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
+        }
+        public async static Task<DynamicController> addRouteQueryNoMapping(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             return await (await task).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
         }
