@@ -79,12 +79,16 @@ namespace DynamicStructureObjects
                 , onlyModify
             );
         }
-        public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
+        public async Task<DynamicRoute> addRouteQuery(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true, bool withVar = true)
         {
             if (CompleteAuth is null)
                 CompleteAuth = QueryType.CompleteAuth();
-            Queries.Add(await DynamicQueryForRoute.addRouteQuery(Queries.Count + 1, queryString, QueryType, id, (bool)CompleteAuth, CompleteCheck));
+            Queries.Add(await DynamicQueryForRoute.addRouteQuery(Queries.Count + 1, queryString, QueryType, id, (bool)CompleteAuth, CompleteCheck, withVar));
             return this;
+        }
+        public Task<DynamicRoute> addRouteQueryNoVar(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
+        {
+            return addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck, false);
         }
         public DynamicRoute addEmptyQuery()
         {
@@ -121,6 +125,11 @@ namespace DynamicStructureObjects
             await Queries.Last().setValidator(VarAffected, 1, ValidatorBundles);
             return this;
         }
+        public async Task<DynamicRoute> setNotRequired(params string[] VarsAffected)
+        {
+            await Queries.Last().setNotRequired(VarsAffected);
+            return this;
+        }
         public async Task<DynamicRoute> addValidator(int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
             await Queries[indexQuery].addValidator(VarAffected, Value, ValidatorType);
@@ -131,9 +140,9 @@ namespace DynamicStructureObjects
             await Queries.Last().addValidator(Value, ValidatorType);
             return this;
         }
-        public async Task<DynamicRoute> addValidator(string varAffected, params ValidatorBundle[] validatorBundles)
+        public async Task<DynamicRoute> addValidator(string varAffected, bool addRequired, params ValidatorBundle[] validatorBundles)
         {
-            await Queries.Last().addValidator(varAffected, validatorBundles);
+            await Queries.Last().addValidator(varAffected, addRequired, validatorBundles);
             return this;
         }
         public async Task<DynamicRoute> addFilter(int indexQuery, string name, ShowTypes showType, string VarAffected)

@@ -223,17 +223,17 @@ namespace DynamicStructureObjects
             }
             return Results.Forbid();
         }
-        public static async Task<IResult> makeRecuperationStepOne(SQLExecutor executor, Query readUserInfoQuery, Query write2Factor, string Email, string password)
+        public static async Task<IResult> makeRecuperationStepOne(SQLExecutor executor, Query readUserInfoQuery, Query write2Factor, string Email)
         {
-            var userInfo = await checkUserInfo(Email, password, readUserInfoQuery, executor);
-            if (userInfo is null)
+            var userID = await executor.SelectValue<long>(readUserInfoQuery.setParam("Email", Email));
+            if (userID == default)
                 return Results.Forbid();
             var randomToken = GetRandom(); 
             string subject = string.Format(CourrielTokenSubjectRecovery, randomToken);
             string message = string.Format(CourrielTokenBodyRecovery, randomToken);
-            if (await executor.ExecuteQueryWithTransaction(write2Factor.setParam("Token", randomToken).setParam("ID", userInfo.userID)) > 0)
+            if (await executor.ExecuteQueryWithTransaction(write2Factor.setParam("Token", randomToken).setParam("ID", userID)) > 0)
             {
-                emailSender.SendEmail(userInfo.Email, subject, message);
+                emailSender.SendEmail(Email, subject, message);
                 return Results.Ok();
             }
             return Results.Forbid();

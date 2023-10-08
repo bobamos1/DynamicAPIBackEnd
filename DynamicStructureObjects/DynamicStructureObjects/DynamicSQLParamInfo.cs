@@ -1,4 +1,5 @@
 ﻿using DynamicSQLFetcher;
+using System.Reflection.Metadata;
 
 namespace DynamicStructureObjects
 {
@@ -64,10 +65,16 @@ namespace DynamicStructureObjects
             Validators.Add(await DynamicValidator.addValidator(Value, id, ValidatorType, false));
             return this;
         }
-        public async Task<DynamicSQLParamInfo> addValidator(params ValidatorBundle[] bundles)
+        public Task<DynamicSQLParamInfo> addValidator(params ValidatorBundle[] bundles)
+        {
+            return addValidator(false, bundles);
+        }
+        public async Task<DynamicSQLParamInfo> addValidator(bool addRequired, params ValidatorBundle[] bundles)
         {
             foreach (var bundle in bundles)
                 Validators.Add(await DynamicValidator.addValidator(bundle, id, false));
+            if (addRequired)
+                Validators.Add(await DynamicValidator.addValidator(ValidatorTypes.REQUIRED.SetValue("true", "needed"), id, false));
             return this;
         }
         internal bool validateParam(object value)

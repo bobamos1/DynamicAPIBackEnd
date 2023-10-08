@@ -148,6 +148,10 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
         }
+        public async static Task<DynamicController> addRouteQueryNoVar(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
+        {
+            return await (await task).addRouteQueryNoVar(queryString, QueryType, CompleteAuth, CompleteCheck);
+        }
         public async static Task<DynamicController> addSQLParamInfo(this Task<DynamicController> task, string routeName, int index, string varAffected, string ProprietyName)
         {
             return await (await task).addSQLParamInfo(routeName, index, varAffected, ProprietyName);
@@ -168,6 +172,10 @@ namespace DynamicStructureObjects
         {
             return await (await task).addValidatorForSQLParam(Value, ValidatorType);
         }
+        public async static Task<DynamicController> setNotRequired(this Task<DynamicController> task, params string[] VarsAffected)
+        {
+            return await (await task).setNotRequired(VarsAffected);
+        }
         public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
         {
             return await (await task).setSQLParam(VarAffected, ProprietyName, ValidatorBundles);
@@ -182,7 +190,7 @@ namespace DynamicStructureObjects
         }
         public async static Task<DynamicController> addSQLParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).addParam(VarAffected, ValidatorBundles);
+            return await (await task).addSQLParam(VarAffected, ValidatorBundles);
         }
         public async static Task<DynamicController> addFilter(this Task<DynamicController> task, string routeName, int index, string name, ShowTypes showType, string VarAffected)
         {
@@ -267,9 +275,9 @@ namespace DynamicStructureObjects
         {
             return await (await task).addValidator(indexQuery, VarAffected, Value, ValidatorType);
         }
-        public async static Task<DynamicRoute> addValidator(this Task<DynamicRoute> task, string varAffected, params ValidatorBundle[] validatorBundle)
+        public async static Task<DynamicRoute> addValidator(this Task<DynamicRoute> task, string varAffected, bool addRequired, params ValidatorBundle[] validatorBundle)
         {
-            return await (await task).addValidator(varAffected, validatorBundle);
+            return await (await task).addValidator(varAffected, addRequired, validatorBundle);
         }
         public async static Task<DynamicRoute> addFilter(this Task<DynamicRoute> task, int index, string name, ShowTypes showType, string VarAffected)
         {

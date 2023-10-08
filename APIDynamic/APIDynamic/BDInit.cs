@@ -395,27 +395,26 @@ namespace APIDynamic
                     .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
                         .setSQLParam("Email", "AdresseCourriel")
                         .addSQLParam("Password", ValidatorTypes.REQUIRED.SetValue("true", "Password is missing from request."))
-                    .addRouteQuery("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE, true)
-                        .setSQLParam("ID", "ID")
+                    .addRouteQueryNoVar("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE, true)
 
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
                     .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
 
                 .addRoute("InscriptionClient", RouteTypes.POST)
-                    .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @AdresseCourriel, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
+                        .setNotRequired("MDP", "Sel", "Token")
+                        .addParam("Password")
                 
 
                 .addRoute("RecuperationStepOne", RouteTypes.POST)
-                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
+                    .addRouteQuery("SELECT id FROM clients WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
                         .setSQLParam("Email", "AdresseCourriel")
-                        .addSQLParam("Password", ValidatorTypes.REQUIRED.SetValue("true", "Password is missing from request."))
-                    .addRouteQuery("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE, true)
-                        .setSQLParam("ID", "ID")
+                    .addRouteQueryNoVar("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE, true)
 
                 .addRoute("RecuperationStepTwo", RouteTypes.POST)
-                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @TokenAND expiration_token > GETDATE()", QueryTypes.ROW, true)
+                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
                         .addSQLParam("NewPassword", ValidatorTypes.REQUIRED.SetValue("true", "NewPassword is missing from request."))
-                    .addRouteQuery("UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID", QueryTypes.UPDATE, true)
+                    .addRouteQueryNoVar("UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID", QueryTypes.UPDATE, true)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom) FROM clients", QueryTypes.CBO)

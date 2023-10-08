@@ -31,14 +31,10 @@ namespace APIDynamic
                     var email = bodyData.Get<string>("Email");
                     var userInfo = DynamicConnection.CreatePasswordHash(nom, email, bodyData.Get<string>("Password"));
                     var id = await executorData.ExecuteInsertWithLastID(queries[0]
-                        .setParam("Nom", nom)
-                        .setParam("Prenom", bodyData.Get<string>("Prenom"))
-                        .setParam("DateNaissance", bodyData.Get<string>("DateNaissance"))
-                        .setParam("AdresseCourriel", email)
+                        .setParams(bodyData)
                         .setParam("MDP", userInfo.passwordHash)
                         .setParam("Token", "")
                         .setParam("Sel", userInfo.passwordSalt)
-                        .setParam("Actif", bodyData.Get<bool>("Actif"))
                         //.setParam("Password", bodyData.Get<bool>("Password"))
                     );
                     return Results.Ok(DynamicConnection.CreateToken(id, userInfo));
@@ -47,13 +43,13 @@ namespace APIDynamic
             controllers["Clients"].mapRoute("RecuperationStepOne",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeRecuperationStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"));
+                    return DynamicConnection.makeRecuperationStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"));
                 }
             );
             controllers["Clients"].mapRoute("RecuperationStepTwo",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("NewPassword"), false, Roles.Client.ID());
+                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), false, Roles.Client.ID());
                 }
             );
 
