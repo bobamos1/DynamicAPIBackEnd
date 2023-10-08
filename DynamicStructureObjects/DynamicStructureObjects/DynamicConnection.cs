@@ -54,8 +54,8 @@ namespace DynamicStructureObjects
         {
             using (var hmac = new HMACSHA512())
             {
-                var salt = GenerateSalt();
-                var hash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password + Convert.ToBase64String(salt)));
+                var salt = hmac.Key;
+                var hash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 return (hash, salt);
             }
         }
@@ -169,13 +169,18 @@ namespace DynamicStructureObjects
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        public static bool testUser(string password)
+        {
+            (byte[] passwordHash, byte[] passwordSalt) = GeneratePasswordHash(password);
+            return VerifyPasswordHash(password, passwordHash, passwordSalt);
+        }
         public static async Task<UserInfo> checkUserInfo(string Email, string password, Query readUserInfoQuery, SQLExecutor executor)
         {
 
             var userInfo = await executor.SelectSingle<UserInfo>(readUserInfoQuery.setParam("Email", Email));
             if (userInfo is null)
                 return null;
-            if (!VerifyPasswordHash(password, userInfo.passwordHash, userInfo.passwordSalt) && false)
+            if (!VerifyPasswordHash(password, userInfo.passwordHash, userInfo.passwordSalt))
                 return null;
             return userInfo;
         }
