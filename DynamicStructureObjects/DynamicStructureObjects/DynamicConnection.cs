@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -109,7 +110,7 @@ namespace DynamicStructureObjects
         {
             var oldToken = ParseClaim(oldTokenString);
 
-            if (oldToken.ValidTo > DateTime.UtcNow)
+            if (oldToken is null || oldToken.ValidTo > DateTime.UtcNow)
                 return null;
             return CreateToken(oldToken.Claims);
 
@@ -221,6 +222,34 @@ namespace DynamicStructureObjects
                 return Results.Ok();
             }
             return Results.Forbid();
+        }
+        public static async Task<IResult> makeRecuperationStepOne(SQLExecutor executor, Query readUserInfoQuery, Query write2Factor, string Email, string password)
+        {
+            var userInfo = await checkUserInfo(Email, password, readUserInfoQuery, executor);
+            if (userInfo is null)
+                return Results.Forbid();
+            var randomToken = GetRandom(); 
+            string subject = string.Format(CourrielTokenSubjectRecovery, randomToken);
+            string message = string.Format(CourrielTokenBodyRecovery, randomToken);
+            if (await executor.ExecuteQueryWithTransaction(write2Factor.setParam("Token", randomToken).setParam("ID", userInfo.userID)) > 0)
+            {
+                emailSender.SendEmail(userInfo.Email, subject, message);
+                return Results.Ok();
+            }
+            return Results.Forbid();
+        }
+        public static async Task<IResult> makeRecuperationStepTwo(SQLExecutor executor, Query readUserInfoQuery, Query updatePasswordQuery, string twoFactor, string newPassword, bool getRoles, params long[] roles)
+        {
+            var userInfo = await executor.SelectSingle<UserInfo>(readUserInfoQuery.setParam("Token", twoFactor));
+            if (userInfo is null)
+                return Results.Forbid();
+            (byte[] passwordHash, byte[] passworSalt) = GeneratePasswordHash(newPassword);
+            if (await executor.ExecuteQueryWithTransaction(updatePasswordQuery.setParam("PasswordHash", passwordHash).setParam("PasswordSalt", passworSalt).setParam("ID", userInfo.userID)) == 0)
+                return Results.Forbid();
+
+            if (getRoles)
+                roles.Concat(await getRolesArray(userInfo.userID));
+            return Results.Ok(CreateToken(userInfo, roles));
         }
     }
 }

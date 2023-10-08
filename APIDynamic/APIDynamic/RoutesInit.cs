@@ -12,20 +12,19 @@ namespace APIDynamic
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
-            controllers["Clients"].addRouteAPI("ConnexionStepOne",
+            controllers["Clients"].mapRoute("ConnexionStepOne",
                 (queries, bodyData) =>
                 {
-                    var password = bodyData.Get<string>("Password");
-                    return DynamicConnection.makeConnectionStepOne(executorData, queries[0].setParam("Password", password), queries[1], bodyData.Get<string>("Email"), password);
+                    return DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"));
                 }
             );
-            controllers["Clients"].addRouteAPI("ConnexionStepTwo",
+            controllers["Clients"].mapRoute("ConnexionStepTwo",
                 (queries, bodyData) =>
                 {
                     return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID());
                 }
             );
-            controllers["Clients"].addRouteAPI("InscriptionClient",
+            controllers["Clients"].mapRoute("InscriptionClient",
                 async (queries, bodyData) =>
                 {
                     var nom = bodyData.Get<string>("Nom");
@@ -43,6 +42,18 @@ namespace APIDynamic
                         //.setParam("Password", bodyData.Get<bool>("Password"))
                     );
                     return Results.Ok(DynamicConnection.CreateToken(id, userInfo));
+                }
+            );
+            controllers["Clients"].mapRoute("RecuperationStepOne",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeRecuperationStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"));
+                }
+            );
+            controllers["Clients"].mapRoute("RecuperationStepTwo",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("NewPassword"), false, Roles.Client.ID());
                 }
             );
 
