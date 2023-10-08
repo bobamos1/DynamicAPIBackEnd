@@ -52,6 +52,14 @@ namespace APIDynamic
                     return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), false, Roles.Client.ID());
                 }
             );
+            controllers["Clients"].mapRoute("ChangePassword",
+                async (queries, bodyData) =>
+                {
+                    if (await DynamicConnection.ChangePassword(executorData, queries[0], bodyData.UserID(), bodyData.Get<string>("NewPassword")))
+                        return Results.Ok();
+                    return Results.Forbid();
+                }
+            );
 
             /*
             controllers["Clients"].addRouteAPI("CreateUser",

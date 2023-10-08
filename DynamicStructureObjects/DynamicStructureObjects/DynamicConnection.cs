@@ -1,5 +1,6 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Data;
@@ -199,6 +200,14 @@ namespace DynamicStructureObjects
                 roles = await getRoles(getRolesQuery, userInfo.userID);//Utiliser structure pour role  
             return Results.Ok(CreateToken(userInfo, roles));
         }*/
+
+        public static async Task<bool> ChangePassword(SQLExecutor executor, Query updatePasswordQuery, long userID, string newPassword)
+        {
+            (byte[] passwordHash, byte[] passworSalt) = GeneratePasswordHash(newPassword);
+            if (await executor.ExecuteQueryWithTransaction(updatePasswordQuery.setParam("PasswordHash", passwordHash).setParam("PasswordSalt", passworSalt).setParam("ID", userID)) == 0)
+                return false;
+            return true;
+        }
         public static async Task<IResult> makeConnectionStepTwo(SQLExecutor executor, Query readUserInfoQuery, string twoFactor, bool getRoles, params long[] roles)
         {
             var userInfo = await executor.SelectSingle<UserInfo>(readUserInfoQuery.setParam("Token", twoFactor));

@@ -416,6 +416,10 @@ namespace APIDynamic
                         .addSQLParam("NewPassword", ValidatorTypes.REQUIRED.SetValue("true", "NewPassword is missing from request."))
                     .addRouteQueryNoVar("UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID", QueryTypes.UPDATE, true)
 
+                .addRoute("ChangePassword", RouteTypes.POST)
+                    .addRouteQueryNoVar("UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID", QueryTypes.UPDATE, true)
+                        .addParam("NewPassword")
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom) FROM clients", QueryTypes.CBO)
             ;
