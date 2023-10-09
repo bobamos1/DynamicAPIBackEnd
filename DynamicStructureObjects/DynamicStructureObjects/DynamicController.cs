@@ -2,26 +2,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-//using System.Text.Json;
-using System.Dynamic;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Data;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using System.Collections;
-using System.Runtime.Serialization;
-using ParserLib;
 using Microsoft.Extensions.Primitives;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace DynamicStructureObjects
 {
@@ -75,21 +63,17 @@ namespace DynamicStructureObjects
             {
                 if (!controller.hasRoute(BaseRoutes.GETALLDETAILED.Value()))
                     controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETALLDETAILED));
-                if (getAllRoute.Queries.First().ParamsInfos.ContainsKey("ID"))
+                if (!controller.hasRoute(BaseRoutes.GET.Value()))
                 {
-                    if (!controller.hasRoute(BaseRoutes.GET.Value()))
+                    if (getAllRoute.Queries.First().ParamsInfos.ContainsKey("ID"))
                     {
                         controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GET, true));
-                    }
-                    else if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
-                    {
-                        controller.Routes.Add(new DynamicRoute(controller.getRoute(BaseRoutes.GET.Value()), BaseRoutes.GETDETAILED));
-                    }
-                    if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
-                    {
-                        controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, true));
+                        if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
+                            controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, true));
                     }
                 }
+                else if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
+                    controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED));
             }
             return controller;
         }
@@ -172,6 +156,23 @@ namespace DynamicStructureObjects
         public async Task<DynamicController> addRouteQuery(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             await Routes.Last().addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
+            var lastRouteQuery = Routes.Last().Queries.Last();
+            foreach (var paramInfo in lastRouteQuery.ParamsInfos)
+            {
+                var bindedPropriety = Proprieties.FirstOrDefault(propriety => propriety.Name == paramInfo.Key);
+                if (bindedPropriety is not null)
+                    await lastRouteQuery.setValidator(paramInfo.Key, bindedPropriety.id, true);
+            }
+            return this;
+        }
+        public async Task<DynamicController> addRouteQueryNoMapping(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
+        {
+            await Routes.Last().addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
+            return this;
+        }
+        public async Task<DynamicController> addRouteQueryNoVar(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
+        {
+            await Routes.Last().addRouteQueryNoVar(queryString, QueryType, CompleteAuth, CompleteCheck);
             return this;
         }
         public async Task<DynamicController> addSQLParamInfo(string routeName, int index, string varAffected, string ProprietyName)
@@ -204,9 +205,19 @@ namespace DynamicStructureObjects
             await Routes.Last().addValidator(Value, ValidatorType);
             return this;
         }
+        public async Task<DynamicController> addSQLParam(string ParamName, params ValidatorBundle[] ValidatorBundles)
+        {
+            await Routes.Last().addSQLParamInfo(ParamName, 1).addValidator(ParamName, false, ValidatorBundles);
+            return this;
+        }
         public async Task<DynamicController> addParam(string ParamName, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().addSQLParamInfo(ParamName, 1).addValidator(ParamName, ValidatorBundles);
+            await Routes.Last().addSQLParamInfo(ParamName, 1).addValidator(ParamName, true, ValidatorBundles);
+            return this;
+        }
+        public async Task<DynamicController> addParam(string ParamName, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        {
+            await Routes.Last().addSQLParamInfo(ParamName, 1).addValidator(ParamName, addRequired, ValidatorBundles);
             return this;
         }
         public async Task<DynamicController> setSQLParam(string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
@@ -220,6 +231,11 @@ namespace DynamicStructureObjects
         public async Task<DynamicController> setSQLParam(string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
             await Routes.Last().setValidator(VarAffected, ValidatorBundles);
+            return this;
+        }
+        public async Task<DynamicController> setNotRequired(params string[] VarsAffected)
+        {
+            await Routes.Last().setNotRequired(VarsAffected);
             return this;
         }
         public async Task<DynamicController> addFilter(string routeName, int index, string name, ShowTypes showType, string VarAffected)
@@ -316,6 +332,13 @@ namespace DynamicStructureObjects
         public static void initRoutesControllersInfo(WebApplication app, Dictionary<string, DynamicController> controllers)
         {
             DynamicController.app = app;
+            app.MapGet("RefreshToken", ([FromHeader(Name = "Authorization")] string? JWT) =>
+            {
+                var result = DynamicConnection.RefreshToken(JWT);
+                if (result is null)
+                    return Results.Forbid();
+                return Results.Ok(result);
+            });
             foreach (var controller in controllers)
                 controller.Value.setBaseInfoRoutes();
         }
@@ -330,35 +353,48 @@ namespace DynamicStructureObjects
                     });
                 }
         }
+        internal IEnumerable<long> getRolesInfo(string JWT)
+        {
+            var claim = DynamicConnection.ParseClaim(JWT);
+            if (claim is null)
+                return new long[0];
+            return DynamicConnection.ParseRoles(claim);
+        }
         internal void setBaseInfoRoutes()
         {
-            app.MapGet($"/{Name}/Info/Propriety", ([FromHeader(Name = "Authorization")] string JWT) =>
+            app.MapGet($"/{Name}/Info/Propriety", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                return Task.FromResult<IResult>(Results.Ok(getAuthorizedProprieties(false, DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT)))));
+                var roles = getRolesInfo(JWT);
+                if (!roles.Any())
+                    return Results.Forbid();
+                return Results.Ok(getAuthorizedProprieties(false, roles));
             }).WithName($"{Name}InfoPropriety");
-            app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string JWT) =>
+            app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                return Task.FromResult<IResult>(Results.Ok(getAuthorizedRoutes(DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT)))));
+                var roles = getRolesInfo(JWT);
+                if (!roles.Any())
+                    return Results.Forbid();
+                return Results.Ok(getAuthorizedRoutes(roles));
             }).WithName($"{Name}InfoRoutes");
             foreach (var route in Routes)
             {
-                app.MapGet($"/{Name}/Info/RouteFilters/{route.Name}", ([FromHeader(Name = "Authorization")] string JWT) =>
+                app.MapGet($"/{Name}/Info/RouteFilters/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
                 {
-                    if (!route.CanUse(DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT))))
-                        return Task.FromResult<IResult>(Results.Forbid());
-                    List<DynamicFilter> filters = new List<DynamicFilter>();
-                    foreach (var query in route.Queries)
-                        filters.AddRange(query.Filters);
-                    return Task.FromResult<IResult>(Results.Ok(filters));
+                    var roles = getRolesInfo(JWT);
+                    if (!roles.Any())
+                        return Results.Forbid();
+                    if (!route.CanUse(roles))
+                        return Results.Forbid();
+                    return Results.Ok(route.Queries.SelectMany(query => query.Filters));
                 }).WithName($"{Name}Info{route.Name}Filters");
-                app.MapGet($"/{Name}/Info/RouteVariables/{route.Name}", ([FromHeader(Name = "Authorization")] string JWT) =>
+                app.MapGet($"/{Name}/Info/RouteVariables/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
                 {
-                    if (!route.CanUse(DynamicConnection.ParseRoles(DynamicConnection.ParseClaim(JWT))))
-                        return Task.FromResult<IResult>(Results.Forbid());
-                    List<DynamicSQLParamInfo> paramInfo = new List<DynamicSQLParamInfo>();
-                    foreach (var query in route.Queries)
-                        paramInfo.AddRange(query.ParamsInfos.Values);
-                    return Task.FromResult<IResult>(Results.Ok(paramInfo));
+                    var roles = getRolesInfo(JWT);
+                    if (!roles.Any())
+                        return Results.Forbid();
+                    if (!route.CanUse(roles))
+                        return Results.Forbid();
+                    return Results.Ok(route.Queries.SelectMany(query => query.ParamsInfos.Values));
                 }).WithName($"{Name}Info{route.Name}Variables");
             }
         }
@@ -366,12 +402,12 @@ namespace DynamicStructureObjects
         {
             return Proprieties.First(propriety => propriety.Name == ProprietyName).id;
         }
-        public void addRouteAPI(BaseRoutes routeName, Func<List<Query>, Dictionary<string, object>, Task<IResult>> function)
+        public void mapRoute(BaseRoutes routeName, Func<List<Query>, Dictionary<string, object>, Task<IResult>> function)
         {
-            addRouteAPI(routeName.Value(), function);
+            mapRoute(routeName.Value(), function);
         }
 
-        public void addRouteAPI(string routeName, Func<List<Query>, Dictionary<string, object>, Task<IResult>> function)
+        public void mapRoute(string routeName, Func<List<Query>, Dictionary<string, object>, Task<IResult>> function)
         {
             DynamicRoute route = getRoute(routeName);
             if (route is null)
@@ -405,7 +441,7 @@ namespace DynamicStructureObjects
         internal bool fillBodyData(Dictionary<string, object> bodyData, JwtSecurityToken token, DynamicRoute route)
         {
             IEnumerable<DynamicPropriety> authorizedProprieties;
-            if (token is null || token.ValidTo > DateTime.UtcNow)
+            if (token is null || token.ValidTo < DateTime.UtcNow)
             {
                 if (route.requireAuthorization)
                     return false;
@@ -413,13 +449,13 @@ namespace DynamicStructureObjects
                 bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
                 return true;
             }
-            var roles = DynamicConnection.ParseRoles(token);
+            var roles = DynamicConnection.ParseRoles(token).ToArray();
             bodyData[USERIDKEY] = DynamicConnection.ParseUserID(token);
             bodyData[ROLESKEY] = roles;
             if (route.getAuthorizedCols)
             {
                 authorizedProprieties = getAuthorizedProprieties(route.onlyModify, roles);
-                bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.Name).Concat(getCBOKeyValues(authorizedProprieties));
+                bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
             }
             if (route.requireAuthorization)
                 return route.CanUse(roles);
@@ -489,7 +525,7 @@ namespace DynamicStructureObjects
             foreach (var controller in controllers)
             {
                 if (controller.Value.hasRoute(BaseRoutes.GETALL.Value()))
-                    controller.Value.addRouteAPI(BaseRoutes.GETALL, async (queries, bodyData) =>
+                    controller.Value.mapRoute(BaseRoutes.GETALL, async (queries, bodyData) =>
                     {
                         if (queries[0].setParams(bodyData).containOrderVar)
                             return Results.Ok(await executorData.SelectQuery(queries[0],
@@ -501,17 +537,17 @@ namespace DynamicStructureObjects
                         return Results.Ok(await executorData.SelectQuery(queries[0], bodyData.AuthProprieties()));
                     });//, true, true, false
                 if (controller.Value.hasRoute(BaseRoutes.CBO.Value()))
-                    controller.Value.addRouteAPI(BaseRoutes.CBO, async (queries, bodyData) =>
+                    controller.Value.mapRoute(BaseRoutes.CBO, async (queries, bodyData) =>
                     {
                         return Results.Ok(await executorData.SelectDictionary(queries[0].setParams(bodyData)));
                     });
                 if (controller.Value.hasRoute(BaseRoutes.GET.Value()))
-                    controller.Value.addRouteAPI(BaseRoutes.GET, async (queries, bodyData) =>
+                    controller.Value.mapRoute(BaseRoutes.GET, async (queries, bodyData) =>
                     {
                         return Results.Ok(await executorData.SelectSingle(queries[0].setParams(bodyData), bodyData.AuthProprieties()));
                     });//, true, true, false
                 if (controller.Value.hasRoute(BaseRoutes.INSERT.Value()))
-                    controller.Value.addRouteAPI(BaseRoutes.INSERT, async (queries, bodyData) =>
+                    controller.Value.mapRoute(BaseRoutes.INSERT, async (queries, bodyData) =>
                     {
                         foreach (var query in queries)
                             query.setParams(bodyData);
@@ -521,17 +557,20 @@ namespace DynamicStructureObjects
                         return Results.Ok(nbAffected);
                     });//, true, true, false
                 if (controller.Value.hasRoute(BaseRoutes.UPDATE.Value()))
-                    controller.Value.addRouteAPI(BaseRoutes.UPDATE, async (queries, bodyData) =>
+                    controller.Value.mapRoute(BaseRoutes.UPDATE, async (queries, bodyData) =>
                     {
+                        var authorizedCols = bodyData.AuthProprieties();
+                        var authorizedVariables = bodyData
+                            .Where(kv => authorizedCols.Contains(kv.Key));
                         foreach (var query in queries)
-                            query.setParams(bodyData);
-                        int nbAffected = await executorData.ExecuteQueryWithTransaction(bodyData.AuthProprieties(), queries.ToArray());
+                            query.setParams(authorizedVariables);
+                        int nbAffected = await executorData.ExecuteQueryWithTransaction(queries.ToArray());
                         if (nbAffected <= 0)
                             return Results.Problem();
                         return Results.Ok(nbAffected);
                     });//, true, true, true
                 if (controller.Value.hasRoute(BaseRoutes.GETALLDETAILED.Value()))
-                    controller.Value.addRouteAPI(BaseRoutes.GETALLDETAILED, async (queries, bodyData) =>
+                    controller.Value.mapRoute(BaseRoutes.GETALLDETAILED, async (queries, bodyData) =>
                     {
                         var authorizedProprieties = bodyData.AuthProprieties();
                         var mappers = controller.Value.getMappersGenerated(controllers, bodyData.UserRoles(), authorizedProprieties);
@@ -546,7 +585,7 @@ namespace DynamicStructureObjects
                         return Results.Ok(await executorData.DetailedSelectQuery(queries[0], mappers, authorizedProprieties));
                     });//, true, true, false
                 if (controller.Value.hasRoute(BaseRoutes.GETDETAILED.Value()))
-                    controller.Value.addRouteAPI(BaseRoutes.GETDETAILED, async (queries, bodyData) =>
+                    controller.Value.mapRoute(BaseRoutes.GETDETAILED, async (queries, bodyData) =>
                     {
                         var authorizedProprieties = bodyData.AuthProprieties();
                         var mappers = controller.Value.getMappersGenerated(controllers, bodyData.UserRoles(), authorizedProprieties);

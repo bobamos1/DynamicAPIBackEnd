@@ -75,7 +75,21 @@ namespace DynamicSQLFetcher
             }
             return this;
         }
+        public Query addParams(IEnumerable<KeyValuePair<string, object>> paramsUsed)
+        {
+            foreach (var variable in variablesInQuery)
+            {
+                var matchingParam = paramsUsed.FirstOrDefault(param => param.Key == variable.Key);
+                if (!Equals(matchingParam, default(KeyValuePair<string, object>)))
+                    this.paramsUsed[variable.Key] = matchingParam.Value;
+            }
+            return this;
+        }
         public Query setParams(Dictionary<string, object> paramsUsed)
+        {
+            return clearParams().addParams(paramsUsed);
+        }
+        public Query setParams(IEnumerable<KeyValuePair<string, object>> paramsUsed)
         {
             return clearParams().addParams(paramsUsed);
         }
@@ -114,7 +128,11 @@ namespace DynamicSQLFetcher
             new("WHERE)", ")"),
             new("WHERE )", ")"),
             new("ANDORDER", "ORDER"),
-            new("ORORDER", "ORDER")
+            new("ORORDER", "ORDER"),
+            new(",WHERE", " WHERE"),
+            new(", WHERE", " WHERE"),
+            new(",FROM", " FROM"),
+            new(", FROM", " FROM")
         };
         private static readonly List<string> removeEnd = new List<string>()
         {
@@ -413,7 +431,7 @@ namespace DynamicSQLFetcher
                     if (optionalType != ' ')
                         indexes.Add(variableType[optionalType](i, variableName, completeQuery));
                     if (!queryObj.variablesInQuery.ContainsKey(variableName))
-                        queryObj.variablesInQuery.Add(variableName, optionalType > 0);
+                        queryObj.variablesInQuery.Add(variableName, optionalType != ' ');
                     else if (optionalType == ' ')
                         queryObj.variablesInQuery[variableName] = false;
                 }

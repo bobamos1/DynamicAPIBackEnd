@@ -1,7 +1,4 @@
-﻿using Microsoft.Net.Http.Headers;
-using System.Reflection.Metadata.Ecma335;
-
-namespace DynamicStructureObjects
+﻿namespace DynamicStructureObjects
 {
     public enum ValidatorTypes
     {

@@ -1,4 +1,5 @@
 ﻿using DynamicSQLFetcher;
+using System.Reflection.Metadata;
 
 namespace DynamicStructureObjects
 {
@@ -9,7 +10,7 @@ namespace DynamicStructureObjects
         internal string VarAffected { get; set; }
         internal bool isRequired { get; set; }
         internal List<DynamicValidator> Validators { get; set; }
-        internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @SQLParamInfoID", true);
+        internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @SQLParamInfoID UNION ALL SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true);
         internal static readonly Query insertSQLParamInfo = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO SQLParamInfos (id_Propriety, id_RouteQuery, varAffected) VALUES (@PropretyID, @RouteQueryID, @VarAffected)", true);
         internal DynamicSQLParamInfo(long id, string VarAffected, long ProprietyID)
         {
@@ -31,8 +32,9 @@ namespace DynamicStructureObjects
         {
             paramInfo.Validators = (
                 await DynamicController.executor.SelectQuery<DynamicValidator>(
-                    (paramInfo.ProprietyID == 1 ? getValidators : DynamicPropriety.getValidators)
-                        .setParam("SQLParamInfoID", (paramInfo.ProprietyID == 1 ? paramInfo.id : paramInfo.ProprietyID))
+                    getValidators
+                        .setParam("SQLParamInfoID", paramInfo.id)
+                        .setParam("ProprietyID", paramInfo.ProprietyID)
                     )
                 ).ToList();
             foreach (var query in paramInfo.Validators)
@@ -64,10 +66,16 @@ namespace DynamicStructureObjects
             Validators.Add(await DynamicValidator.addValidator(Value, id, ValidatorType, false));
             return this;
         }
-        public async Task<DynamicSQLParamInfo> addValidator(params ValidatorBundle[] bundles)
+        public Task<DynamicSQLParamInfo> addValidator(params ValidatorBundle[] bundles)
+        {
+            return addValidator(false, bundles);
+        }
+        public async Task<DynamicSQLParamInfo> addValidator(bool addRequired, params ValidatorBundle[] bundles)
         {
             foreach (var bundle in bundles)
                 Validators.Add(await DynamicValidator.addValidator(bundle, id, false));
+            if (addRequired)
+                Validators.Add(await DynamicValidator.addValidator(ValidatorTypes.REQUIRED.SetValue("true", "needed"), id, false));
             return this;
         }
         internal bool validateParam(object value)

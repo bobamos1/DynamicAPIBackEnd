@@ -12,37 +12,55 @@ namespace APIDynamic
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
-            controllers["Clients"].addRouteAPI("ConnexionStepOne",
+            controllers["Clients"].mapRoute("ConnexionStepOne",
                 (queries, bodyData) =>
                 {
-                    var password = bodyData.Get<string>("Password");
-                    return DynamicConnection.makeConnectionStepOne(executorData, queries[0].setParam("Password", password), queries[1], bodyData.Get<string>("Email"), password);
+                    return DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"));
                 }
             );
-            controllers["Clients"].addRouteAPI("ConnexionStepTwo",
+            controllers["Clients"].mapRoute("ConnexionStepTwo",
                 (queries, bodyData) =>
                 {
                     return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID());
                 }
             );
-            controllers["Clients"].addRouteAPI("InscriptionClient",
+            controllers["Clients"].mapRoute("InscriptionClient",
                 async (queries, bodyData) =>
                 {
                     var nom = bodyData.Get<string>("Nom");
                     var email = bodyData.Get<string>("Email");
                     var userInfo = DynamicConnection.CreatePasswordHash(nom, email, bodyData.Get<string>("Password"));
                     var id = await executorData.ExecuteInsertWithLastID(queries[0]
-                        .setParam("Nom", nom)
-                        .setParam("Prenom", bodyData.Get<string>("Prenom"))
-                        .setParam("DateNaissance", bodyData.Get<string>("DateNaissance"))
-                        .setParam("AdresseCourriel", email)
+                        .setParams(bodyData)
                         .setParam("MDP", userInfo.passwordHash)
                         .setParam("Token", "")
                         .setParam("Sel", userInfo.passwordSalt)
-                        .setParam("Actif", bodyData.Get<bool>("Actif"))
                         //.setParam("Password", bodyData.Get<bool>("Password"))
                     );
                     return Results.Ok(DynamicConnection.CreateToken(id, userInfo));
+                }
+            );
+            controllers["Clients"].mapRoute("RecuperationStepOne",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeRecuperationStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"));
+                }
+            );
+            controllers["Clients"].mapRoute("RecuperationStepTwo",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), false, Roles.Client.ID());
+                }
+            );
+            controllers["Clients"].mapRoute("ChangePassword",
+                async (queries, bodyData) =>
+                {
+                    var userID = bodyData.UserID();
+                    if (userID == -1)
+                        return Results.Ok();
+                    if (await DynamicConnection.ChangePassword(executorData, queries[0], userID, bodyData.Get<string>("NewPassword")))
+                        return Results.Ok();
+                    return Results.Forbid();
                 }
             );
 

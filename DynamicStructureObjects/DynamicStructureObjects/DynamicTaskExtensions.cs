@@ -1,23 +1,9 @@
 ﻿using DynamicSQLFetcher;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json.Linq;
-using System.Data;
-using System.Reflection.Metadata.Ecma335;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace DynamicStructureObjects
 {
     public static class DynamicTaskExtensions
     {
-
-
-
-
-
-
-
         public async static Task<Dictionary<string, DynamicController>> addController(this Dictionary<string, DynamicController> task, string Name, bool IsMain)
         {
             task.Add(Name, await DynamicController.addController(Name, IsMain));
@@ -28,7 +14,7 @@ namespace DynamicStructureObjects
             await task[controllerName].addRoute(baseRoute);
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addRoute(this Dictionary<string, DynamicController> task, string controllerName, string Name, RouteTypes routeType, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = true)
+        public async static Task<Dictionary<string, DynamicController>> addRoute(this Dictionary<string, DynamicController> task, string controllerName, string Name, RouteTypes routeType, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = false)
         {
             await task[controllerName].addRoute(Name, routeType, getAuthorizedCols, onlyModify, requireAuthorization);
             return task;
@@ -94,7 +80,7 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRoute(controllerName, baseRoute);
         }
-        public async static Task<Dictionary<string, DynamicController>> addRoute(this Task<Dictionary<string, DynamicController>> task, string controllerName, string Name, RouteTypes routeType, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = true)
+        public async static Task<Dictionary<string, DynamicController>> addRoute(this Task<Dictionary<string, DynamicController>> task, string controllerName, string Name, RouteTypes routeType, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = false)
         {
             return await (await task).addRoute(controllerName, Name, routeType, getAuthorizedCols, onlyModify, requireAuthorization);
         }
@@ -146,7 +132,7 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRoute(baseRoute);
         }
-        public async static Task<DynamicController> addRoute(this Task<DynamicController> task, string Name, RouteTypes routeType, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = true)
+        public async static Task<DynamicController> addRoute(this Task<DynamicController> task, string Name, RouteTypes routeType, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = false)
         {
             return await (await task).addRoute(Name, routeType, getAuthorizedCols, onlyModify, requireAuthorization);
         }
@@ -158,9 +144,18 @@ namespace DynamicStructureObjects
         {
             return await (await task).addRouteQuery(routeName, queryString, QueryType, CompleteAuth, CompleteCheck);
         }
+        
         public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             return await (await task).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
+        }
+        public async static Task<DynamicController> addRouteQueryNoMapping(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
+        {
+            return await (await task).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
+        }
+        public async static Task<DynamicController> addRouteQueryNoVar(this Task<DynamicController> task, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
+        {
+            return await (await task).addRouteQueryNoVar(queryString, QueryType, CompleteAuth, CompleteCheck);
         }
         public async static Task<DynamicController> addSQLParamInfo(this Task<DynamicController> task, string routeName, int index, string varAffected, string ProprietyName)
         {
@@ -182,6 +177,10 @@ namespace DynamicStructureObjects
         {
             return await (await task).addValidatorForSQLParam(Value, ValidatorType);
         }
+        public async static Task<DynamicController> setNotRequired(this Task<DynamicController> task, params string[] VarsAffected)
+        {
+            return await (await task).setNotRequired(VarsAffected);
+        }
         public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
         {
             return await (await task).setSQLParam(VarAffected, ProprietyName, ValidatorBundles);
@@ -196,7 +195,7 @@ namespace DynamicStructureObjects
         }
         public async static Task<DynamicController> addSQLParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).addParam(VarAffected, ValidatorBundles);
+            return await (await task).addSQLParam(VarAffected, ValidatorBundles);
         }
         public async static Task<DynamicController> addFilter(this Task<DynamicController> task, string routeName, int index, string name, ShowTypes showType, string VarAffected)
         {
@@ -281,9 +280,9 @@ namespace DynamicStructureObjects
         {
             return await (await task).addValidator(indexQuery, VarAffected, Value, ValidatorType);
         }
-        public async static Task<DynamicRoute> addValidator(this Task<DynamicRoute> task, string varAffected, params ValidatorBundle[] validatorBundle)
+        public async static Task<DynamicRoute> addValidator(this Task<DynamicRoute> task, string varAffected, bool addRequired, params ValidatorBundle[] validatorBundle)
         {
-            return await (await task).addValidator(varAffected, validatorBundle);
+            return await (await task).addValidator(varAffected, addRequired, validatorBundle);
         }
         public async static Task<DynamicRoute> addFilter(this Task<DynamicRoute> task, int index, string name, ShowTypes showType, string VarAffected)
         {
