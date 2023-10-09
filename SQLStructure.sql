@@ -353,19 +353,19 @@ ADD CONSTRAINT FK_Filters_SQLParamInfos
 FOREIGN KEY (id_SQLParamInfo) REFERENCES SQLParamInfos(id);
 
 -- ValidatorSQLParamInfoValues Table
-ALTER TABLE ValidatorSQLParamInfoValues
+/*ALTER TABLE ValidatorSQLParamInfoValues
 ADD CONSTRAINT FK_ValidatorSQLParamInfoValues_ValidatorTypes
 FOREIGN KEY (id_ValidatorType) REFERENCES ValidatorTypes(id);
-
+*/
 ALTER TABLE ValidatorSQLParamInfoValues
 ADD CONSTRAINT FK_ValidatorSQLParamInfoValues_SQLParamInfos
 FOREIGN KEY (id_SQLParamInfo) REFERENCES SQLParamInfos(id);
 
 -- ValidatorProprietyValues Table
-ALTER TABLE ValidatorProprietyValues
+/*ALTER TABLE ValidatorProprietyValues
 ADD CONSTRAINT FK_ValidatorProprietyValues_ValidatorTypes
 FOREIGN KEY (id_ValidatorType) REFERENCES ValidatorTypes(id);
-
+*/
 ALTER TABLE ValidatorProprietyValues
 ADD CONSTRAINT FK_ValidatorProprietyValues_Proprieties
 FOREIGN KEY (id_Propriety) REFERENCES Proprieties(id);
