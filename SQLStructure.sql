@@ -76,7 +76,8 @@ CREATE TABLE URLRoutes (
     id_routeType BIGINT,
     requireAuthorization BIT,
     getAuthorizedCols BIT,
-    onlyModify BIT
+    onlyModify BIT,
+    id_proprietyForUserID BIGINT
 )
 CREATE TABLE RouteQueries (
     id BIGINT IDENTITY(1,1),
@@ -292,6 +293,10 @@ ALTER TABLE URLRoutes
 ADD CONSTRAINT FK_Routes_RouteTypes
 FOREIGN KEY (id_routeType) REFERENCES RouteTypes(id);
 
+ALTER TABLE URLRoutes
+ADD CONSTRAINT FK_Routes_Proprieties
+FOREIGN KEY (id_proprietyForUserID) REFERENCES Proprieties(id);
+
 -- RouteQueries Table
 ALTER TABLE RouteQueries
 ADD CONSTRAINT FK_RouteQueries_QueryTypes
@@ -348,19 +353,19 @@ ADD CONSTRAINT FK_Filters_SQLParamInfos
 FOREIGN KEY (id_SQLParamInfo) REFERENCES SQLParamInfos(id);
 
 -- ValidatorSQLParamInfoValues Table
-ALTER TABLE ValidatorSQLParamInfoValues
+/*ALTER TABLE ValidatorSQLParamInfoValues
 ADD CONSTRAINT FK_ValidatorSQLParamInfoValues_ValidatorTypes
 FOREIGN KEY (id_ValidatorType) REFERENCES ValidatorTypes(id);
-
+*/
 ALTER TABLE ValidatorSQLParamInfoValues
 ADD CONSTRAINT FK_ValidatorSQLParamInfoValues_SQLParamInfos
 FOREIGN KEY (id_SQLParamInfo) REFERENCES SQLParamInfos(id);
 
 -- ValidatorProprietyValues Table
-ALTER TABLE ValidatorProprietyValues
+/*ALTER TABLE ValidatorProprietyValues
 ADD CONSTRAINT FK_ValidatorProprietyValues_ValidatorTypes
 FOREIGN KEY (id_ValidatorType) REFERENCES ValidatorTypes(id);
-
+*/
 ALTER TABLE ValidatorProprietyValues
 ADD CONSTRAINT FK_ValidatorProprietyValues_Proprieties
 FOREIGN KEY (id_Propriety) REFERENCES Proprieties(id);

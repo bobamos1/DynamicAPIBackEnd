@@ -392,7 +392,9 @@ namespace APIDynamic
 
 
             ;
-
+            string selectUserInfoStart = "SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli ";
+            string updateToken = "UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID";
+            string updatePassword = "UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID";
             await controllers["Clients"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
@@ -416,25 +418,24 @@ namespace APIDynamic
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
                 .addPropriety("Commandes", true, true, ShowTypes.Ref)//.Anonymous()
 
-                .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT cli.id AS ID, cli.nom AS Nom, cli.prenom AS Prenom, cli.date_naissance AS DateNaissance, cli.adresse_courriel AS Email, cli.mdp AS MDP, cli.token AS Token, cli.sel AS Sel, cli.actif AS Actif FROM clients AS cli", QueryTypes.SELECT)
-                        .setSQLParam("ID", "ID")
+                .addRoute(BaseRoutes.GETALL, "ID")
+                    .addRouteQuery("SELECT cli.id AS ID, cli.nom AS Nom, cli.prenom AS Prenom, cli.date_naissance AS DateNaissance, cli.adresse_courriel AS Email, cli.actif AS Actif FROM clients AS cli WHERE cli.id = @_ID", QueryTypes.SELECT)
                         
                 .addRoute(BaseRoutes.INSERT)
-                    .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@ID, @Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, actif) VALUES (@ID, @Nom, @Prenom, @DateNaissance, @Email, @Actif)", QueryTypes.INSERT)
 
-                .addRoute(BaseRoutes.UPDATE)
+                .addRoute(BaseRoutes.UPDATE, "ID")
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("UPDATE clients SET nom = @_Nom, prenom = @_Prenom, date_naissance = @_DateNaissance, adresse_courriel = @_Email, actif = @_Actif WHERE id = @ID", QueryTypes.UPDATE)
 
 
                 .addRoute("ConnexionStepOne", RouteTypes.POST)
-                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
+                    .addRouteQuery(selectUserInfoStart + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
                         .addParam("Password")
-                    .addRouteQueryNoVar("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE, true)
+                    .addRouteQueryNoVar(updateToken, QueryTypes.UPDATE, true)
 
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
-                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
+                    .addRouteQuery(selectUserInfoStart + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
 
                 .addRoute("InscriptionClient", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
@@ -444,17 +445,22 @@ namespace APIDynamic
 
                 .addRoute("RecuperationStepOne", RouteTypes.POST)
                     .addRouteQuery("SELECT id FROM clients WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
-                    .addRouteQueryNoVar("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE, true)
+                    .addRouteQueryNoVar(updateToken, QueryTypes.UPDATE, true)
 
                 .addRoute("RecuperationStepTwo", RouteTypes.POST)
-                    .addRouteQuery("SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
+                    .addRouteQuery(selectUserInfoStart + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
                         .addParam("NewPassword")
-                    .addRouteQueryNoVar("UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID", QueryTypes.UPDATE, true)
+                    .addRouteQueryNoVar(updatePassword, QueryTypes.UPDATE, true)
 
                 .addRoute("ChangePassword", RouteTypes.PUT)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQueryNoVar("UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID", QueryTypes.UPDATE, true)
+                    .addRouteQuery(selectUserInfoStart + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
                         .addParam("NewPassword")
+                        .addParam("Password")
+                    .addRouteQueryNoVar(updatePassword, QueryTypes.UPDATE, true)
+
+                .addRoute("CheckEmail", RouteTypes.GET)
+                    .addRouteQuery("SELECT COUNT(*) FROM Clients WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom) FROM clients", QueryTypes.CBO)

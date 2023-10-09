@@ -34,7 +34,7 @@ namespace DynamicStructureObjects
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles");
         internal static readonly Query getControllers = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, name AS Name, isMain AS IsMain FROM Controllers", true);
         internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isUpdatable AS IsUpdatable, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true);
-        internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, COALESCE(BaseRoutes.name, URLRoutes.name) AS Name, id_routeType AS RouteTypeID, requireAuthorization AS requireAuthorization, getAuthorizedCols AS getAuthorizedCols, onlyModify AS onlyModify FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true);
+        internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, COALESCE(BaseRoutes.name, URLRoutes.name) AS Name, id_routeType AS RouteTypeID, requireAuthorization AS requireAuthorization, getAuthorizedCols AS getAuthorizedCols, onlyModify AS onlyModify, id_proprietyForUserID AS proprietyToBindUserID FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true);
         internal static readonly Query insertController = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Controllers (name, isMain) VALUES (@Name, @IsMain)", true);
         private DynamicController(long id, string Name, bool IsMain)
         {
@@ -133,14 +133,25 @@ namespace DynamicStructureObjects
                 , IsMain
             );
         }
-        public async Task<DynamicController> addRoute(BaseRoutes baseRoute)
+        internal long GetProprietyID(string proprietyName)
         {
-            Routes.Add(await DynamicRoute.addRoute(id, baseRoute));
+            if (proprietyName is null)
+                return 1;
+            var bindedPropriety = Proprieties.FirstOrDefault(propriety => propriety.Name == proprietyName);
+            if (bindedPropriety is not null)
+                return bindedPropriety.id;
+            return 1;
+        }
+        public async Task<DynamicController> addRoute(BaseRoutes baseRoute, string proprietyToBindUserID = null)
+        {
+            var proprietyId = GetProprietyID(proprietyToBindUserID);
+            Routes.Add(await DynamicRoute.addRoute(id, baseRoute, proprietyId));
             return this;
         }
-        public async Task<DynamicController> addRoute(string Name, RouteTypes routeType, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = false)
+        public async Task<DynamicController> addRoute(string Name, RouteTypes routeType, string proprietyToBindUserID = null, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = false)
         {
-            Routes.Add(await DynamicRoute.addRoute(id, Name, routeType, getAuthorizedCols, onlyModify, requireAuthorization));
+            var proprietyId = GetProprietyID(proprietyToBindUserID);
+            Routes.Add(await DynamicRoute.addRoute(id, Name, routeType, proprietyId, getAuthorizedCols, onlyModify, requireAuthorization));
             return this;
         }
         public DynamicController addEmptyQuery()
@@ -159,9 +170,9 @@ namespace DynamicStructureObjects
             var lastRouteQuery = Routes.Last().Queries.Last();
             foreach (var paramInfo in lastRouteQuery.ParamsInfos)
             {
-                var bindedPropriety = Proprieties.FirstOrDefault(propriety => propriety.Name == paramInfo.Key);
-                if (bindedPropriety is not null)
-                    await lastRouteQuery.setValidator(paramInfo.Key, bindedPropriety.id, true);
+                var bindedProprietyId = GetProprietyID(paramInfo.Key);
+                if (bindedProprietyId > -1)
+                    await lastRouteQuery.setValidator(paramInfo.Key, bindedProprietyId, true);
             }
             return this;
         }
@@ -450,8 +461,11 @@ namespace DynamicStructureObjects
                 return true;
             }
             var roles = DynamicConnection.ParseRoles(token).ToArray();
-            bodyData[USERIDKEY] = DynamicConnection.ParseUserID(token);
+            var userID = DynamicConnection.ParseUserID(token);
+            bodyData[USERIDKEY] = userID;
             bodyData[ROLESKEY] = roles;
+            if (route.proprietyToBindUserID != 1)
+                bodyData[route.proprietyName] = userID;
             if (route.getAuthorizedCols)
             {
                 authorizedProprieties = getAuthorizedProprieties(route.onlyModify, roles);

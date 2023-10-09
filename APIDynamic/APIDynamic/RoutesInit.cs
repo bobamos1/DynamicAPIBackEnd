@@ -46,6 +46,15 @@ namespace APIDynamic
                     return DynamicConnection.makeRecuperationStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"));
                 }
             );
+            controllers["Clients"].mapRoute("CheckEmail",
+                async (queries, bodyData) =>
+                {
+                    var result = await executorData.SelectValue<int>(queries[0].setParam("Email", bodyData["Email"]));
+                    if (result == 0)
+                        return Results.Ok();
+                    return Results.Problem("", "", 410);
+                }
+            );
             controllers["Clients"].mapRoute("RecuperationStepTwo",
                 (queries, bodyData) =>
                 {
@@ -55,10 +64,10 @@ namespace APIDynamic
             controllers["Clients"].mapRoute("ChangePassword",
                 async (queries, bodyData) =>
                 {
-                    var userID = bodyData.UserID();
-                    if (userID == -1)
-                        return Results.Ok();
-                    if (await DynamicConnection.ChangePassword(executorData, queries[0], userID, bodyData.Get<string>("NewPassword")))
+                    var userInfo = await DynamicConnection.checkUserInfo(bodyData.Get<string>("Email"), bodyData.Get<string>("Password"), queries[0], executorData);
+                    if (userInfo is null)
+                        return Results.Forbid();
+                    if (await DynamicConnection.ChangePassword(executorData, queries[1], userInfo.userID, bodyData.Get<string>("NewPassword")))
                         return Results.Ok();
                     return Results.Forbid();
                 }
