@@ -76,7 +76,8 @@ CREATE TABLE URLRoutes (
     id_routeType BIGINT,
     requireAuthorization BIT,
     getAuthorizedCols BIT,
-    onlyModify BIT
+    onlyModify BIT,
+    id_proprietyForUserID BIGINT
 )
 CREATE TABLE RouteQueries (
     id BIGINT IDENTITY(1,1),
@@ -291,6 +292,10 @@ FOREIGN KEY (id_controller) REFERENCES Controllers(id);
 ALTER TABLE URLRoutes
 ADD CONSTRAINT FK_Routes_RouteTypes
 FOREIGN KEY (id_routeType) REFERENCES RouteTypes(id);
+
+ALTER TABLE URLRoutes
+ADD CONSTRAINT FK_Routes_Proprieties
+FOREIGN KEY (id_proprietyForUserID) REFERENCES Proprieties(id);
 
 -- RouteQueries Table
 ALTER TABLE RouteQueries
