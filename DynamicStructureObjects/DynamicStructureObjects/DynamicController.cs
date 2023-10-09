@@ -449,13 +449,13 @@ namespace DynamicStructureObjects
                 bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
                 return true;
             }
-            var roles = DynamicConnection.ParseRoles(token);
+            var roles = DynamicConnection.ParseRoles(token).ToArray();
             bodyData[USERIDKEY] = DynamicConnection.ParseUserID(token);
             bodyData[ROLESKEY] = roles;
             if (route.getAuthorizedCols)
             {
                 authorizedProprieties = getAuthorizedProprieties(route.onlyModify, roles);
-                bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.Name).Concat(getCBOKeyValues(authorizedProprieties));
+                bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
             }
             if (route.requireAuthorization)
                 return route.CanUse(roles);
