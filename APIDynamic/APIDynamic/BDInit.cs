@@ -365,7 +365,6 @@ namespace APIDynamic
                         .setSQLParam("ID", "ID")
                         
                 .addRoute(BaseRoutes.INSERT)
-                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@ID, @Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)

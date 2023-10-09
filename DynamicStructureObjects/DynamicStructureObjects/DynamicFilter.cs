@@ -8,7 +8,7 @@ namespace DynamicStructureObjects
         public string Name { get; internal set; }
         public string VarAffected { get; internal set; }
         internal static readonly Query insertFilter = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Filters (ind, name, id_ShowType, id_SQLParamInfo) VALUES (@index, @name, @ShowTypeID, @SQLParamInfoID)", true);
-        internal static readonly Query selectSQLParamName = Query.fromQueryString(QueryTypes.VALUE, "SELECT varAffected FROM SQLParamInfos WHERE id = @SQLParamInfoID", true);
+        internal static readonly Query selectSQLParamName = Query.fromQueryString(QueryTypes.VALUE, "SELECT varAffected FROM SQLParamInfos WHERE id = @SQLParamInfoID");
         internal DynamicFilter(long id, string Name, string VarAffected)
         {
             this.id = id;

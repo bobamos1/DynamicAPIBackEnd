@@ -12,11 +12,11 @@ namespace DynamicStructureObjects
         public bool onlyModify { get; internal set; }
         public List<DynamicQueryForRoute> Queries { get; internal set; }
         public List<long> Roles { get; internal set; }
-        internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id FROM PermissionRoutes INNER JOIN Roles ON id = id_role WHERE id_route = @RouteID", true);
+        internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id FROM PermissionRoutes INNER JOIN Roles ON id = id_role WHERE id_route = @RouteID");
         internal static readonly Query getQueries = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, SQLString AS queryString, id_queryType AS QueryTypeID, completeAuth AS CompleteAuth, completeCheck AS CompleteCheck FROM RouteQueries WHERE id_route = @RouteID ORDER BY ind", true);
         internal static readonly Query insertRoute = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO URLRoutes (name, id_baseRoute, id_controller, id_routeType, requireAuthorization, getAuthorizedCols, onlyModify) VALUES (@Name, @BaseRouteID, @ControllerID, @RouteTypeID, @requireAuthorization, @getAuthorizedCols, @onlyModify)", true);
         internal static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionRoutes (id_route, id_role) VALUES (@RouteID, @RoleID)", true);
-        internal static readonly Query getBaseRouteName = Query.fromQueryString(QueryTypes.VALUE, "SELECT Name FROM BaseRoutes WHERE id = @BaseRouteID", true);
+        internal static readonly Query getBaseRouteName = Query.fromQueryString(QueryTypes.VALUE, "SELECT Name FROM BaseRoutes WHERE id = @BaseRouteID");
         internal static readonly Query updateRequired = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE URLRoutes SET requireAuthorization = 1 WHERE @ID = id", true);
         internal DynamicRoute(long id, string Name, long RouteTypeID, bool requireAuthorization, bool getAuthorizedCols, bool onlyModify)
         {
