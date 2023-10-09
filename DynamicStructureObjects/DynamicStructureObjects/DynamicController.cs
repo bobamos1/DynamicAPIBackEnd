@@ -619,7 +619,14 @@ namespace DynamicStructureObjects
         {
             return Routes.FirstOrDefault(route => route.Name == routeName);
         }
-
+        public async static Task InsertEnum<T>(SQLExecutor executor, string insertTemplate, string tableName) where T : Enum
+        {
+            List<string> queries = new List<string>() { $"DELETE {tableName}", $"DBCC CHECKIDENT ('{tableName}', RESEED, 0)", $"SET IDENTITY_INSERT {tableName} ON" };
+            foreach (T entry in Enum.GetValues(typeof(T)))
+                queries.Add(string.Format(insertTemplate, entry.ID(), entry.Value()));
+            queries.Add($"SET IDENTITY_INSERT {tableName} OFF");
+            await executor.ExecuteQueryWithTransaction(queries.ToArray());
+        }
 
 
         /*

@@ -1,4 +1,6 @@
-﻿namespace DynamicStructureObjects
+﻿using DynamicSQLFetcher;
+
+namespace DynamicStructureObjects
 {
     [AttributeUsage(AttributeTargets.Field)]
     public class ValueAttribute : Attribute
@@ -26,8 +28,15 @@
 
             return attribute?.Value;
         }
-        public static string Value<TEnum>(this TEnum enumEntry) where TEnum : struct, Enum => ValueOf<TEnum>(enumEntry);
+        public static string Value<TEnum>(this TEnum enumEntry) where TEnum : Enum => ValueOf<TEnum>(enumEntry);
+        public static long ID<TEnum>(this TEnum enumEntry) where TEnum : Enum => Convert.ToInt64(enumEntry);
         public static KeyValuePair<TEnum, bool> CanModify<TEnum>(this TEnum enumEntry) where TEnum : struct, Enum => new KeyValuePair<TEnum, bool>(enumEntry, true);
         public static KeyValuePair<TEnum, bool> CannotModify<TEnum>(this TEnum enumEntry) where TEnum : struct, Enum => new KeyValuePair<TEnum, bool>(enumEntry, false);
+
+        public static string insertTemplate = "INSERT INTO Roles (id, name) VALUES ({0}, '{1}')";/*
+        public static Task populateBDEnums(SQLExecutor executor)
+        {
+
+        }*/
     }
 }

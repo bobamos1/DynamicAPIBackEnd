@@ -179,20 +179,5 @@ namespace APIDynamic
                 });
             */
         }
-        public static Dictionary<string, string> LoadConnectionStrings(IConfiguration configuration)
-        {
-            SQLExecutor.Initialize(configuration);
-            var connectionStringSection = configuration.GetSection("ConnectionStrings");
-            Dictionary<string, string> connectionStrings = new Dictionary<string, string>();
-            foreach (var child in connectionStringSection.GetChildren())
-            {
-                var key = child.Key;
-                var value = child.Value;
-
-                if (!string.IsNullOrEmpty(value))
-                    connectionStrings[key] = value;
-            }
-            return connectionStrings;
-        }
     }
 }
