@@ -54,14 +54,14 @@ namespace APIDynamic
                 
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("Descriptions", true, true, ShowTypes.INT).Anonymous()
                       .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("CategorieMereID", true, true, ShowTypes.CBO).Anonymous()
                       .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                      .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                      .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
 
                 .addRoute(BaseRoutes.GETALL)
                     //.addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
@@ -101,20 +101,20 @@ namespace APIDynamic
 
             await controllers["Produits"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Ingrediants", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Prix", true, true, ShowTypes.FLOAT).Anonymous()
-                                      .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("QuantiteInventaire", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("CategorieID", true, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("EtatProduitID", true, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("ImageID", true, true, ShowTypes.Ref).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
 
 
                 .addRoute(BaseRoutes.GETALL)
@@ -124,20 +124,14 @@ namespace APIDynamic
                         .setSQLParam("EtatProduitID", "EtatProduitID")
 
                 .addRoute(BaseRoutes.INSERT)
-                    .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@nom, @descriptions, @prix, @id_categorie, @id_etat_produit", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@nom, @descriptions, @prix, @CategorieID, @EtatProduitID", QueryTypes.INSERT)
                         .setSQLParam("nom", "Nom")
                         .setSQLParam("descriptions", "Descriptions")
                         .setSQLParam("prix", "Prix")
                         .setSQLParam("id_categorie", "CategorieID")
                         .setSQLParam("id_etat_produit", "EtatProduitID")
                 .addRoute(BaseRoutes.UPDATE)
-                    .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, ingrediants = @_ingrediants, quantite_inventaire = @_quantite_inventaire, prix = @_prix, id_categorie = @_id_categorie, id_etat_produit = @_id_etat_produit WHERE id = @id", QueryTypes.UPDATE)
-                        .setSQLParam("id", "ID")
-                        .setSQLParam("nom", "Nom")
-                        .setSQLParam("descriptions", "Descriptions")
-                        .setSQLParam("prix", "Prix")
-                        .setSQLParam("id_categorie", "CategorieID")
-                        .setSQLParam("id_etat_produit", "EtatProduitID")
+                    .addRouteQuery("UPDATE produits SET nom = @_Nom, descriptions = @_Descriptions, ingrediants = @_Ingrediants, quantite_inventaire = @_QuantiteInventaire, prix = @_Prix, id_categorie = @_CategorieID, id_etat_produit = @_EtatProduitID WHERE id = @ID", QueryTypes.UPDATE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM produits", QueryTypes.CBO)
@@ -146,11 +140,11 @@ namespace APIDynamic
 
             await controllers["Provinces"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM provinces WHERE id = @_ID", QueryTypes.SELECT)
-                        .setSQLParam("ID", "ID")
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM provinces", QueryTypes.CBO)
@@ -159,8 +153,11 @@ namespace APIDynamic
             await controllers["Villes"]
 
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("ProvinceID", true, true, ShowTypes.CBO).Anonymous()
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT v.id AS ID, v.nom AS Ville, v.id_province AS ProvinceID FROM villes AS v INNER JOIN provinces AS pro ON pro.id = v.id_province WHERE pro.id = @_ProvinceID AND v.id = @_ID", QueryTypes.SELECT)
                         .setSQLParam("ID", "ID")
@@ -195,6 +192,7 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS, prenom AS Prenom, date_naissance AS DateNaissance, adresse_courriel AS AdresseCourriel, mdp AS MDP, token AS Token, sel AS Sel, actif AS Actif FROM employes WHERE id = @_ID", QueryTypes.SELECT)
                         .setSQLParam("id", "ID")
+
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@nom, @prenom, @date_naissance, @adresse_courriel, @mdp, @token, @sel, @actif)", QueryTypes.INSERT)
                         .setSQLParam("nom", "Nom")
@@ -205,17 +203,9 @@ namespace APIDynamic
                         .setSQLParam("token", "Token")
                         .setSQLParam("sel", "Sel")
                         .setSQLParam("actif", "Actif")
+
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE employes SET nom = @_nom, prenom = @_prenom, date_naissance = @_date_naissance, adresse_courriel = @_adresse_courriel, mdp = @_mdp, token = @_token, sel = @_sel, actif = @_actif WHERE id = @id", QueryTypes.UPDATE)
-                        .setSQLParam("id", "ID")
-                        .setSQLParam("nom", "Nom")
-                        .setSQLParam("prenom", "Prenom")
-                        .setSQLParam("date_naissance", "DateNaissance")
-                        .setSQLParam("adresse_courriel", "AdresseCourriel")
-                        .setSQLParam("mdp", "MDP")
-                        .setSQLParam("token", "Token")
-                        .setSQLParam("sel", "Sel")
-                        .setSQLParam("actif", "Actif")
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM employes", QueryTypes.CBO)
