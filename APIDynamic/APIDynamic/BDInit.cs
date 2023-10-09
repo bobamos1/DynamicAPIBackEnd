@@ -347,6 +347,8 @@ namespace APIDynamic
 
             ;
             string selectUserInfoStart = "SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli ";
+            string updateToken = "UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID";
+            string updatePassword = "UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID";
             await controllers["Clients"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
@@ -384,7 +386,7 @@ namespace APIDynamic
                 .addRoute("ConnexionStepOne", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStart + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
                         .addParam("Password")
-                    .addRouteQueryNoVar("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE, true)
+                    .addRouteQueryNoVar(updateToken, QueryTypes.UPDATE, true)
 
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStart + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
@@ -397,22 +399,23 @@ namespace APIDynamic
 
                 .addRoute("RecuperationStepOne", RouteTypes.POST)
                     .addRouteQuery("SELECT id FROM clients WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
-                    .addRouteQueryNoVar("UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID", QueryTypes.UPDATE, true)
+                    .addRouteQueryNoVar(updateToken, QueryTypes.UPDATE, true)
 
                 .addRoute("RecuperationStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStart + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
                         .addParam("NewPassword")
-                    .addRouteQueryNoVar("UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID", QueryTypes.UPDATE, true)
+                    .addRouteQueryNoVar(updatePassword, QueryTypes.UPDATE, true)
 
                 .addRoute("ChangePassword", RouteTypes.PUT)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(selectUserInfoStart + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
                         .addParam("NewPassword")
                         .addParam("Password")
-                    .addRouteQueryNoVar("UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID", QueryTypes.UPDATE, true)
+                    .addRouteQueryNoVar(updatePassword, QueryTypes.UPDATE, true)
 
                 .addRoute("CheckEmail", RouteTypes.GET)
                     .addRouteQuery("SELECT COUNT(*) FROM Clients WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom) FROM clients", QueryTypes.CBO)
             ;
