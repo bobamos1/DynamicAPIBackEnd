@@ -75,6 +75,7 @@ namespace APIDynamic
                         .setSQLParam("nom", "Nom")
                         .setSQLParam("descriptions", "Descriptions")
                         .setSQLParam("id_categorie_mere", "CategorieMereID")
+                        .setNotRequired("id", "nom", "descriptions", "id_categorie_mere")
                         
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM categories", QueryTypes.CBO)
@@ -132,8 +133,8 @@ namespace APIDynamic
             ;
 
             await controllers["Provinces"]
-                .addPropriety("ID", true, true, ShowTypes.INT)
-                .addPropriety("Nom", true, true, ShowTypes.STRING)
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM provinces WHERE id = @_ID", QueryTypes.SELECT)
@@ -145,9 +146,9 @@ namespace APIDynamic
 
             await controllers["Villes"]
 
-                .addPropriety("ID", true, true, ShowTypes.INT)
-                .addPropriety("Nom", true, true, ShowTypes.STRING)
-                .addPropriety("ProvinceID", true, true, ShowTypes.CBO)
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("ProvinceID", true, true, ShowTypes.CBO).Anonymous()
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT v.id AS ID, v.nom AS Ville, v.id_province AS ProvinceID FROM villes AS v INNER JOIN provinces AS pro ON pro.id = v.id_province WHERE pro.id = @_ProvinceID AND v.id = @_ID", QueryTypes.SELECT)
                         .setSQLParam("ID", "ID")
@@ -157,9 +158,9 @@ namespace APIDynamic
             ;
 
             await controllers["EtatsCommandes"]
-                .addPropriety("ID", true, true, ShowTypes.INT)
-                .addPropriety("Nom", true, true, ShowTypes.STRING)
-                .addPropriety("Descriptions", true, true, ShowTypes.STRING)
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Descriptions FROM etats_commandes WHERE id = @_ID", QueryTypes.SELECT)
@@ -209,10 +210,10 @@ namespace APIDynamic
                 ;
 
             await controllers["Formats"]
-                .addPropriety("ID", true, true, ShowTypes.INT)
-                .addPropriety("Nom", true, true, ShowTypes.STRING)
-                //.addPropriety("ProduitID", true, true, ShowTypes.CBO)
-                
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                //.addPropriety("ProduitID", true, true, ShowTypes.CBO).Anonymous()
+
                 .addRoute("FormatDispoProduits", RouteTypes.GET)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT p.id AS ProduitID, fp.nom AS Nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit INNER JOIN formats_produit_produits AS fpp ON fpp.id_format_produit = fp.id INNER JOIN produits AS p ON p.id = fpp.id_produit WHERE fpp.id_produit = @_produit_id AND fp.id = @_FormatID", QueryTypes.SELECT)
@@ -224,16 +225,16 @@ namespace APIDynamic
             ;
 
             await controllers["Taxes"]
-                .addPropriety("ProduitID", true, true, ShowTypes.INT)
-                .addPropriety("AffectationPrixID", true, true, ShowTypes.CBO)
-                .addPropriety("Taxe", true, false, ShowTypes.STRING)
-                .addPropriety("Descriptions", true, false, ShowTypes.STRING)
-                .addPropriety("Montant", true, false, ShowTypes.STRING)
-                .addPropriety("TypeAffectation", true, false, ShowTypes.STRING)
-                .addPropriety("Montant", true, true, ShowTypes.FLOAT)
-                .addPropriety("TypeAffectation", true, false, ShowTypes.STRING)
-                .addPropriety("FacteurAffectation", true, false, ShowTypes.INT)
-                .addPropriety("TypeAffectationDescriptions", true, false, ShowTypes.STRING)
+                .addPropriety("ProduitID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("AffectationPrixID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("Taxe", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("Descriptions", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("Montant", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("TypeAffectation", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
+                .addPropriety("TypeAffectation", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("FacteurAffectation", true, false, ShowTypes.INT).Anonymous()
+                .addPropriety("TypeAffectationDescriptions", true, false, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())   //Avec Formats et Taxes vérifier si l'id du format et de la taxes est sur la bonne table (genre est-ce app ou ap)
@@ -245,11 +246,11 @@ namespace APIDynamic
 
             await controllers["AffectationsPrix"]
 
-                .addPropriety("ID", true, true, ShowTypes.INT)
-                .addPropriety("Nom", true, true, ShowTypes.STRING)
-                .addPropriety("DateDebut", true, true, ShowTypes.STRING)
-                .addPropriety("DateFin", true, true, ShowTypes.STRING)
-                .addPropriety("Descriptions", true, true, ShowTypes.STRING)
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("DateDebut", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("DateFin", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT ap.id AS ID, ap.nom AS Nom, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Descriptions FROM affectation_prix AS ap WHERE ap.id = @_ID", QueryTypes.SELECT)
