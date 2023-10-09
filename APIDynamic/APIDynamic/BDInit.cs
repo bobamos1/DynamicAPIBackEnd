@@ -42,6 +42,7 @@ namespace APIDynamic
                 .addController("Collaborateurs", true)
                 .addController("Compagnies", true)
                 .addController("Employes", true)
+                .addController("ImagesProduit", false)
                 .addController("TypesPreferencesGraphique", false)
                 .addController("Couleurs", false)
                 .addController("PreferencesGraphiques", false)
@@ -69,7 +70,7 @@ namespace APIDynamic
                         .setSQLParam("id_categorie_mere", "CategorieMereID")
                 .addRoute(BaseRoutes.UPDATE)
                     .addAuthorizedRouteRoles(Roles.Admin.ID())
-                    .addRouteQuery("UPDATE produits SET nom = @_nom, descriptions = @_descriptions, id_categorie_mere = @_id_categorie_mere WHERE id = @id", QueryTypes.UPDATE)
+                    .addRouteQuery("UPDATE categpories SET nom = @_nom, descriptions = @_descriptions, id_categorie_mere = @_id_categorie_mere WHERE id = @id", QueryTypes.UPDATE)
                         .setSQLParam("id", "ID")
                         .setSQLParam("nom", "Nom")
                         .setSQLParam("descriptions", "Descriptions")
@@ -100,6 +101,7 @@ namespace APIDynamic
                 .addPropriety("QuantiteInventaire", true, true, ShowTypes.INT)
                 .addPropriety("CategorieID", true, true, ShowTypes.CBO)
                 .addPropriety("EtatProduitID", true, true, ShowTypes.CBO)
+                .addPropriety("ImageID", true, true, ShowTypes.Ref)
 
                 .addRoute(BaseRoutes.GETALL)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
@@ -184,7 +186,7 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id AS ID, nom AS, prenom AS Prenom, date_naissance AS DateNaissance, adresse_courriel AS AdresseCourriel, mdp AS MDP, token AS Token, sel AS Sel, actif AS Actif FROM employes WHERE id = @_ID", QueryTypes.SELECT)
                         .setSQLParam("id", "ID")
                 .addRoute(BaseRoutes.INSERT)
-                    .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@id, @nom, @prenom, @date_naissance, @adresse_courriel, @mdp, @token, @sel, @actif)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@nom, @prenom, @date_naissance, @adresse_courriel, @mdp, @token, @sel, @actif)", QueryTypes.INSERT)
                         .setSQLParam("nom", "Nom")
                         .setSQLParam("prenom", "Prenom")
                         .setSQLParam("date_naissance", "DateNaissance")
@@ -290,14 +292,21 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.DELETE)
                     .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @ID", QueryTypes.DELETE)
-                        .setSQLParam("ID")
-
+                        .setSQLParam("ID", "ID")
+                /*
+                 * Checker ce qui peut être modifié dans cette table là, dans le fonctionnement, tu ne peux pas changer un produit, mais au lieu l'enlever de la commande et ajouter / DOnc 1 delete et 1 insert au lieu d'un update
                 .addRoute(BaseRoutes.UPDATE)
-                    .addRouteQuery("UPDATE produits_par_commande SET id_produit = @_id_produit, id_commande = @_id_commande, quantite = @_quantite, prix_unitaire = @_prix_unitaire", QueryTypes.UPDATE)
-                        .setSQLParam("id_produit")
-                        .setSQLParam("id_commande")
-                        .setSQLParam("quantite")
-                        .setSQLParam("prix_unitaire")
+                    .addRouteQuery("UPDATE produits_par_commande SET id_produit = @_id_produit, id_commande = @_id_commande, quantite = @_quantite, prix_unitaire = @_prix_unitaire WHERE id = @ID", QueryTypes.UPDATE)
+                        .setSQLParam("ID", "ID")
+                        .setSQLParam("id_produit", "ProduitID")
+                        .setSQLParam("id_commande", "CommandeID")
+                        .setSQLParam("quantite", "Quantite")
+                        .setSQLParam("prix_unitaire", "PrixUnitaire")
+                */
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) SELECT 1, @prod, 44, p.prix FROM produits AS p WHERE p.id = @ProduitID", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT @FormatChoisiID, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatChoisiID", QueryTypes.INSERT)
+                        .addSQLParam("FormatID")
                 ;
 
             await controllers["Commandes"]
@@ -499,12 +508,30 @@ namespace APIDynamic
 
             ;
 
+            await controllers["ImagesProduit"]
+
+                .addPropriety("ImageID", true, true, ShowTypes.INT)
+                .addPropriety("URL", true, true, ShowTypes.Ref)
+                .addPropriety("ProduitID", true, true, ShowTypes.INT)
+                .addPropriety("ImageDescriptions", true, true, ShowTypes.STRING)
+
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT ip.id AS ID, ip.url AS URL FROM images_produit_produits AS ipp INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE ipp.id_produit = @ProduitID", QueryTypes.SELECT)
+                        .setSQLParam("ProduitID", "ProduitID")
+            /*
+            .addRoute(BaseRoutes.INSERT)
+                .addRouteQuery("INSERT INTO ")*/
+            ;
+
+            /*GÉNÉRATION DE CBO ET MAPGENERATORS*/
+
             await controllers["Categories"]
                 .addCBOInfo("CategorieMereID", "Categories", "CategorieMere")
             ;
             await controllers["Produits"]
                 .addCBOInfo("CategorieID", "Categories", "Categorie")
                 .addCBOInfo("EtatProduitID", "EtatsProduit", "EtatProduit")
+                //.addMapperGenerator("Images", "ImagesProduit", CSharpTypes.REFERENCE.Link("ID", "ImageID"))
             ;
             await controllers["Villes"]
                 .addCBOInfo("ProvinceID", "Provinces", "Province")
@@ -548,7 +575,6 @@ namespace APIDynamic
                 .addMapperGenerator("Collaborateur", "Collaborateurs", CSharpTypes.REFERENCE.Link("CollaborateurID", "ID"))
                 .addMapperGenerator("ReseauxSociaux", "ReseauxSociaux", CSharpTypes.REFERENCE.Link("ReseauxSociauxID", "ID"))
             ;
-
 
             //await controllers["TypesPreferencesGraphique"]
             //    .addRoute(BaseRoutes.GETALL)
