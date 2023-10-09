@@ -1,5 +1,6 @@
 ﻿using DynamicSQLFetcher;
 using ParserLib;
+using System.Text.RegularExpressions;
 
 namespace DynamicStructureObjects
 {
@@ -45,6 +46,16 @@ namespace DynamicStructureObjects
             {
                 case ValidatorTypes.REQUIRED:
                     return value.To<bool>();
+                case ValidatorTypes.MAX:
+                    return value.To<double>();
+                case ValidatorTypes.MIN:
+                    return value.To<double>();
+                case ValidatorTypes.REGEX:
+                    return new Regex(value.To<string>());
+                case ValidatorTypes.MAXOREQUAL:
+                    return value.To<double>();
+                case ValidatorTypes.MINOREQUAL:
+                    return value.To<double>();
                 default:
                     return value;
             }
@@ -55,6 +66,16 @@ namespace DynamicStructureObjects
             {
                 case ValidatorTypes.REQUIRED:
                     return value.To<bool>() == Value.To<bool>();
+                case ValidatorTypes.MAX:
+                    return value.To<double>() < Value.To<double>();
+                case ValidatorTypes.MAXOREQUAL:
+                    return value.To<double>() <= Value.To<double>();
+                case ValidatorTypes.MIN:
+                    return value.To<double>() > Value.To<double>();
+                case ValidatorTypes.MINOREQUAL:
+                    return value.To<double>() >= Value.To<double>();
+                case ValidatorTypes.REGEX:
+                    return Value.To<Regex>().IsMatch(value.To<string>());
                 default:
                     return false;
             }
