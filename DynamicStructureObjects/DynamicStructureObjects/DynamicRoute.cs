@@ -117,12 +117,12 @@ namespace DynamicStructureObjects
 
         public async Task<DynamicRoute> setValidator(string VarAffected, long ProprietyID, params ValidatorBundle[] ValidatorBundles)
         {
-            await Queries.Last().setValidator(VarAffected, ProprietyID, ValidatorBundles);
+            await Queries.Last().setValidator(VarAffected, ProprietyID, true, ValidatorBundles);
             return this;
         }
         public async Task<DynamicRoute> setValidator(string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
-            await Queries.Last().setValidator(VarAffected, 1, ValidatorBundles);
+            await Queries.Last().setValidator(VarAffected, 1, false, ValidatorBundles);
             return this;
         }
         public async Task<DynamicRoute> setNotRequired(params string[] VarsAffected)

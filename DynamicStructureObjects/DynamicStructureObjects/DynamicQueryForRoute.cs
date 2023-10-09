@@ -132,14 +132,15 @@ namespace DynamicStructureObjects
             }
             return this;
         }
-        public async Task<DynamicQueryForRoute> setValidator(string VarAffected, long ProprietyID, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicQueryForRoute> setValidator(string VarAffected, long ProprietyID, bool updatePropriety, params ValidatorBundle[] ValidatorBundles)
         {
-            await DynamicController.executor.ExecuteQueryWithTransaction(
-                updateSQLParamInfo
-                    .setParam("ProprietyID", ProprietyID)
-                    .setParam("VarAffected", VarAffected)
-                    .setParam("RouteQueryID", id)
-            );
+            if (updatePropriety)
+                await DynamicController.executor.ExecuteQueryWithTransaction(
+                    updateSQLParamInfo
+                        .setParam("ProprietyID", ProprietyID)
+                        .setParam("VarAffected", VarAffected)
+                        .setParam("RouteQueryID", id)
+                );
             foreach (var bundle in ValidatorBundles)
                 await ParamsInfos[VarAffected].addValidator(bundle);
             lastSQLParamAdded = VarAffected;

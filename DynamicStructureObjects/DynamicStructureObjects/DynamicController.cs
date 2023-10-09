@@ -161,7 +161,7 @@ namespace DynamicStructureObjects
             {
                 var bindedPropriety = Proprieties.FirstOrDefault(propriety => propriety.Name == paramInfo.Key);
                 if (bindedPropriety is not null)
-                    await lastRouteQuery.setValidator(paramInfo.Key, bindedPropriety.id);
+                    await lastRouteQuery.setValidator(paramInfo.Key, bindedPropriety.id, true);
             }
             return this;
         }
