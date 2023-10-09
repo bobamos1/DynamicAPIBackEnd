@@ -85,7 +85,7 @@ namespace DynamicStructureObjects
                 foreach (var variable in dynamicQueryForRoute.query.variablesInQuery)
                 {
                     dynamicQueryForRoute.ParamsInfos.Add(variable.Key, await DynamicSQLParamInfo.addSQLParamInfo(variable.Key, 1, dynamicQueryForRoute.id));
-                    if (variable.Value)
+                    if (!variable.Value)
                         await dynamicQueryForRoute.ParamsInfos[variable.Key].addValidator("true", ValidatorTypes.REQUIRED);
                 }
             return dynamicQueryForRoute;

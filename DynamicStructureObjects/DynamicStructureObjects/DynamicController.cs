@@ -559,9 +559,12 @@ namespace DynamicStructureObjects
                 if (controller.Value.hasRoute(BaseRoutes.UPDATE.Value()))
                     controller.Value.mapRoute(BaseRoutes.UPDATE, async (queries, bodyData) =>
                     {
+                        var authorizedCols = bodyData.AuthProprieties();
+                        var authorizedVariables = bodyData
+                            .Where(kv => authorizedCols.Contains(kv.Key));
                         foreach (var query in queries)
-                            query.setParams(bodyData);
-                        int nbAffected = await executorData.ExecuteQueryWithTransaction(bodyData.AuthProprieties(), queries.ToArray());
+                            query.setParams(authorizedVariables);
+                        int nbAffected = await executorData.ExecuteQueryWithTransaction(queries.ToArray());
                         if (nbAffected <= 0)
                             return Results.Problem();
                         return Results.Ok(nbAffected);
