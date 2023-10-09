@@ -64,10 +64,10 @@ namespace APIDynamic
             controllers["Clients"].mapRoute("ChangePassword",
                 async (queries, bodyData) =>
                 {
-                    var userID = bodyData.UserID();
-                    if (userID == -1)
-                        return Results.Ok();
-                    if (await DynamicConnection.ChangePassword(executorData, queries[0], userID, bodyData.Get<string>("NewPassword")))
+                    var userInfo = await DynamicConnection.checkUserInfo(bodyData.Get<string>("Email"), bodyData.Get<string>("Password"), queries[0], executorData);
+                    if (userInfo is null)
+                        return Results.Forbid();
+                    if (await DynamicConnection.ChangePassword(executorData, queries[1], userInfo.userID, bodyData.Get<string>("NewPassword")))
                         return Results.Ok();
                     return Results.Forbid();
                 }
