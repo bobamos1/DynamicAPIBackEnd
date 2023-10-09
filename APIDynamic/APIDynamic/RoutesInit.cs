@@ -46,6 +46,15 @@ namespace APIDynamic
                     return DynamicConnection.makeRecuperationStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"));
                 }
             );
+            controllers["Clients"].mapRoute("CheckEmail",
+                async (queries, bodyData) =>
+                {
+                    var result = await executorData.SelectValue<int>(queries[0].setParam("Email", bodyData["Email"]));
+                    if (result == 0)
+                        return Results.Ok();
+                    return Results.Problem("", "", 410);
+                }
+            );
             controllers["Clients"].mapRoute("RecuperationStepTwo",
                 (queries, bodyData) =>
                 {

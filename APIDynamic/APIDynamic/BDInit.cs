@@ -371,7 +371,7 @@ namespace APIDynamic
                 .addPropriety("Commandes", true, true, ShowTypes.Ref)//.Anonymous()
 
                 .addRoute(BaseRoutes.GETALL, "ID")
-                    .addRouteQuery("SELECT cli.id AS ID, cli.nom AS Nom, cli.prenom AS Prenom, cli.date_naissance AS DateNaissance, cli.adresse_courriel AS AdresseCourriel, cli.mdp AS MDP, cli.token AS Token, cli.sel AS Sel, cli.actif AS Actif FROM clients AS cli WHERE cli.id = @_ID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT cli.id AS ID, cli.nom AS Nom, cli.prenom AS Prenom, cli.date_naissance AS DateNaissance, cli.adresse_courriel AS Email, cli.mdp AS MDP, cli.token AS Token, cli.sel AS Sel, cli.actif AS Actif FROM clients AS cli WHERE cli.id = @_ID", QueryTypes.SELECT)
                         
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@ID, @Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
@@ -408,7 +408,8 @@ namespace APIDynamic
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQueryNoVar("UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID", QueryTypes.UPDATE, true)
                         .addParam("NewPassword")
-
+                .addRoute("CheckEmail", RouteTypes.GET)
+                    .addRouteQuery("SELECT COUNT(*) FROM Clients WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom) FROM clients", QueryTypes.CBO)
             ;
