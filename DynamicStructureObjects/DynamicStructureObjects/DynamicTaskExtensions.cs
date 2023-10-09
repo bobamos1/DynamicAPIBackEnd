@@ -168,7 +168,7 @@ namespace DynamicStructureObjects
         public async static Task<DynamicController> addSQLParamInfo(this Task<DynamicController> task, string varAffected)
         {
             return await (await task).addSQLParamInfo(varAffected);
-        }
+        }/*
         public async static Task<DynamicController> addValidatorForSQLParam(this Task<DynamicController> task, string routeName, int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
             return await (await task).addValidatorForSQLParam(routeName, indexQuery, VarAffected, Value, ValidatorType);
@@ -176,7 +176,7 @@ namespace DynamicStructureObjects
         public async static Task<DynamicController> addValidatorForSQLParam(this Task<DynamicController> task, string Value, ValidatorTypes ValidatorType)
         {
             return await (await task).addValidatorForSQLParam(Value, ValidatorType);
-        }
+        }*/
         public async static Task<DynamicController> setNotRequired(this Task<DynamicController> task, params string[] VarsAffected)
         {
             return await (await task).setNotRequired(VarsAffected);
@@ -204,7 +204,7 @@ namespace DynamicStructureObjects
         public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable,ShowTypes showType, params ValidatorBundle[] validatorBundles)
         {
             return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, validatorBundles);
-        }
+        }/*
         public async static Task<DynamicController> addValidatorForPropriety(this Task<DynamicController> task, string ProprietyName, string Value, ValidatorTypes ValidatorType)
         {
             return await (await task).addValidatorForPropriety(ProprietyName, Value, ValidatorType);
@@ -212,7 +212,7 @@ namespace DynamicStructureObjects
         public async static Task<DynamicController> addValidatorForPropriety(this Task<DynamicController> task, string Value, ValidatorTypes ValidatorType)
         {
             return await (await task).addValidatorForPropriety(Value, ValidatorType);
-        }
+        }*/
         public async static Task<DynamicController> addMapperGenerator(this Task<DynamicController> task, string ProprietyName, string ControllerName, params ParamLinker[] linkers)
         {
             return await (await task).addMapperGenerator(ProprietyName, ControllerName, linkers);

@@ -7,6 +7,9 @@ namespace APIDynamic
     {
         public async static Task InitDB()
         {
+            var minOrEqualZeroBundle = ValidatorTypes.MINOREQUAL.SetValue("0", "Must be greater or equal to 0");
+            var isEmail = ValidatorTypes.REGEX.SetValue("/^[\\w-.]+@([\\w-]+.)+[\\w-]{2,3}$/", "");
+            var isDate = ValidatorTypes.REGEX.SetValue("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$", "");
             var controllers = new Dictionary<string, DynamicController>();
             await controllers
                 .addController("Categories", true)
@@ -36,16 +39,18 @@ namespace APIDynamic
             
             await controllers["Categories"]
                 
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("Descriptions", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.INT).Anonymous()
                       .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("CategorieMereID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("CategorieMereID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                       .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                      .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
 
                 .addRoute(BaseRoutes.GETALL)
                     //.addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
@@ -53,13 +58,13 @@ namespace APIDynamic
                 
                 .addRoute(BaseRoutes.INSERT)
                     .addAuthorizedRouteRoles(Roles.Admin.ID())
-                    .addRouteQuery("INSERT INTO categories (nom, descriptions, id_categorie_mere) VALUES (@Nom, @Descriptions, @CategorieMereID)", QueryTypes.INSERT)             
+                    .addRouteQuery("INSERT INTO categories (nom, descriptions, id_categorie_mere) VALUES (@Nom, @Description, @CategorieMereID)", QueryTypes.INSERT)             
                 .addRoute(BaseRoutes.UPDATE)
                     //.addAuthorizedRouteRoles(Roles.Admin.ID())
-                    .addRouteQuery("UPDATE categpories SET nom = @_Nom, descriptions = @_Descriptions, id_categorie_mere = @_CategorieMereID WHERE id = @ID", QueryTypes.UPDATE)
+                    .addRouteQuery("UPDATE categories SET nom = @_Nom, descriptions = @_Description, id_categorie_mere = @_CategorieMereID WHERE id = @ID", QueryTypes.UPDATE)
                         
                 .addRoute(BaseRoutes.CBO)
-                    .addRouteQuery("SELECT id AS ID, nom AS Nom FROM categories", QueryTypes.CBO)
+                    .addRouteQuery("SELECT id, nom FROM categories", QueryTypes.CBO)
                 ;
             
             await controllers["EtatsProduit"]
@@ -74,25 +79,31 @@ namespace APIDynamic
                 ;
 
             await controllers["Produits"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Ingrediants", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("Prix", true, true, ShowTypes.FLOAT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
-                .addPropriety("QuantiteInventaire", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
-                .addPropriety("CategorieID", true, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
-                .addPropriety("EtatProduitID", true, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
-                .addPropriety("ImageID", true, true, ShowTypes.Ref).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+                .addPropriety("Prix", true, true, ShowTypes.FLOAT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("QuantiteInventaire", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("CategorieID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("EtatProduitID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("ImageID", true, true, ShowTypes.Ref,
+                    minOrEqualZeroBundle
+                ).Anonymous()
 
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS CategorieID, c.nom AS CategorieNom, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatsProduitNom FROM produits AS p LEFT JOIN categories AS c ON c.id = p.id_categorie LEFT JOIN etats_produit AS ep ON ep.id = p.id_etat_produit WHERE p.id = @_ID AND p.id_categorie = @_CategorieID AND p.id_etat_produit = @_EtatProduitID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS CategorieID, c.nom AS Categorie, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatsProduitNom FROM produits AS p LEFT JOIN categories AS c ON c.id = p.id_categorie LEFT JOIN etats_produit AS ep ON ep.id = p.id_etat_produit WHERE p.id = @_ID AND p.id_categorie = @_CategorieID AND p.id_etat_produit = @_EtatProduitID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@Nom, @Descriptions, @Prix, @CategorieID, @EtatProduitID", QueryTypes.INSERT)
@@ -105,8 +116,9 @@ namespace APIDynamic
             ;
 
             await controllers["Provinces"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
@@ -118,11 +130,13 @@ namespace APIDynamic
 
             await controllers["Villes"]
 
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("ProvinceID", true, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+                .addPropriety("ProvinceID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT v.id AS ID, v.nom AS Ville, v.id_province AS ProvinceID FROM villes AS v INNER JOIN provinces AS pro ON pro.id = v.id_province WHERE pro.id = @_ProvinceID AND v.id = @_ID", QueryTypes.SELECT)
@@ -144,8 +158,9 @@ namespace APIDynamic
                 ;
 
             await controllers["Employes"]
-                .addPropriety("ID", true, true, ShowTypes.INT)
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                )
                 .addPropriety("Nom", true, true, ShowTypes.STRING)
                 .addPropriety("Prenom", true, true, ShowTypes.STRING)
                 .addPropriety("DateNaissance", true, true, ShowTypes.STRING)
@@ -169,8 +184,9 @@ namespace APIDynamic
                 ;
 
             await controllers["Formats"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("ProduitID", true, true, ShowTypes.CBO).Anonymous()
 
@@ -184,18 +200,21 @@ namespace APIDynamic
             ;
 
             await controllers["Taxes"]
-                .addPropriety("ProduitID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+                .addPropriety("ProduitID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 .addPropriety("AffectationPrixID", true, true, ShowTypes.CBO).Anonymous()
                 .addPropriety("Taxe", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("Descriptions", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("Montant", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("TypeAffectation", true, false, ShowTypes.STRING).Anonymous()
-                .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+                .addPropriety("Montant", true, true, ShowTypes.FLOAT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 .addPropriety("TypeAffectation", true, false, ShowTypes.STRING).Anonymous()
-                .addPropriety("FacteurAffectation", true, false, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
+                .addPropriety("FacteurAffectation", true, false, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 .addPropriety("TypeAffectationDescriptions", true, false, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
@@ -207,11 +226,13 @@ namespace APIDynamic
 
             await controllers["AffectationsPrix"]
 
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("DateDebut", true, true, ShowTypes.STRING).Anonymous()
-                    .addValidatorForPropriety("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$", ValidatorTypes.REGEX)
+                .addPropriety("DateDebut", true, true, ShowTypes.STRING,
+                    isDate
+                ).Anonymous()
                 .addPropriety("DateFin", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
 
@@ -224,22 +245,29 @@ namespace APIDynamic
 
             await controllers["ProduitsParCommande"]
 
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
-                .addPropriety("ProduitID", true, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("ProduitID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 .addPropriety("ProduitDescriptions", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("QuantiteRestante", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
-                .addPropriety("CommandeID", true, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
-                .addPropriety("Quantite", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
-                .addPropriety("PrixUnitaire", true, true, ShowTypes.FLOAT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("QuantiteRestante", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("CommandeID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("Quantite", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("PrixUnitaire", true, true, ShowTypes.FLOAT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 .addPropriety("FormatChoisiString", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("FormatChoisiID", true, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("FormatChoisiID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                 //.addPropriety("Taxes", true, false, ShowTypes.Ref)
                 //.addMapperGenerator("Taxes", CSharpTypes.REFERENCE.Link("TaxeID", "ID"))
                 /*.addPropriety("Images", true, false, ShowTypes.Ref)
@@ -269,23 +297,29 @@ namespace APIDynamic
                 ;
 
             await controllers["Commandes"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("EmployeID", false, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("EmployeID", false, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("VilleID", false, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("VilleID", false, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("EtatsCommandesID", false, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("EtatsCommandesID", false, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("NumeroFacture", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("NumeroFacture", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("MontantBrut", true, true, ShowTypes.FLOAT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("MontantBrut", true, true, ShowTypes.FLOAT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("NumeroCiviqueLivraison", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify(), Roles.Admin.CanModify())
@@ -293,8 +327,9 @@ namespace APIDynamic
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("Produits", false, true, ShowTypes.Ref).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("ClientID", false, true, ShowTypes.CBO).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                .addPropriety("ClientID", false, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify(), Roles.Admin.CanModify())
 
              .addRoute(BaseRoutes.GETALL)
@@ -325,9 +360,10 @@ namespace APIDynamic
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
                 .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
-                .addPropriety("Email", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Email", true, true, ShowTypes.STRING,
+                    isEmail
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
-                    .addValidatorForPropriety("/^[\\w-.]+@([\\w-]+.)+[\\w-]{2,3}$/", ValidatorTypes.REGEX)
                 .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
                 .addPropriety("Token", true, true, ShowTypes.STRING).Anonymous()
@@ -411,9 +447,10 @@ namespace APIDynamic
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("Telephone", true, true, ShowTypes.INT).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("Email", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Email", true, true, ShowTypes.STRING,
+                    isEmail
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                    .addValidatorForPropriety("/^[\\w-.]+@([\\w-]+.)+[\\w-]{2,3}$/", ValidatorTypes.REGEX)
                 .addPropriety("CompagnieID", true, true, ShowTypes.CBO).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
 
@@ -436,9 +473,10 @@ namespace APIDynamic
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("Telephone", true, true, ShowTypes.INT).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("AdresseCourriel", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("AdresseCourriel", true, true, ShowTypes.STRING,
+                    isEmail
+                ).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                    .addValidatorForPropriety("/^[\\w-.]+@([\\w-]+.)+[\\w-]{2,3}$/", ValidatorTypes.REGEX)
                 .addPropriety("Contact", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
 
@@ -512,6 +550,7 @@ namespace APIDynamic
             await controllers["ProduitsParCommande"]
                 .addCBOInfo("ProduitID", "Produits", "Produit")
                 .addCBOInfo("FormatChoisiID", "Formats", "FormatChoisi")
+                .addCBOInfo("CommandeID", "Commandes", "Commande")
             ;
             await controllers["Commandes"]
                 .addCBOInfo("EmployeID", "Employes", "Employe")
@@ -530,10 +569,6 @@ namespace APIDynamic
 
             ;
 
-            await controllers["ProduitsParCommande"]
-
-                .addCBOInfo("CommandeID", "Commandes", "Commande")
-            ;
             await controllers["Collaborateurs"]
                 .addCBOInfo("CompagnieID", "Compagnies", "Compagnie")
             ;
