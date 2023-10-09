@@ -180,6 +180,7 @@ namespace APIDynamic
 
             await controllers["Employes"]
                 .addPropriety("ID", true, true, ShowTypes.INT)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("Nom", true, true, ShowTypes.STRING)
                 .addPropriety("Prenom", true, true, ShowTypes.STRING)
                 .addPropriety("DateNaissance", true, true, ShowTypes.STRING)
@@ -213,7 +214,7 @@ namespace APIDynamic
 
             await controllers["Formats"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 //.addPropriety("ProduitID", true, true, ShowTypes.CBO).Anonymous()
 
@@ -229,17 +230,17 @@ namespace APIDynamic
 
             await controllers["Taxes"]
                 .addPropriety("ProduitID", true, true, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("AffectationPrixID", true, true, ShowTypes.CBO).Anonymous()
                 .addPropriety("Taxe", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("Descriptions", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("Montant", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("TypeAffectation", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("TypeAffectation", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("FacteurAffectation", true, false, ShowTypes.INT).Anonymous()
-                    .addValidatorForPropriety("0", ValidatorTypes.MIN)
+                    .addValidatorForPropriety("0", ValidatorTypes.MINOREQUAL)
                 .addPropriety("TypeAffectationDescriptions", true, false, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
@@ -256,16 +257,13 @@ namespace APIDynamic
                     .addValidatorForPropriety("0", ValidatorTypes.MIN)
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("DateDebut", true, true, ShowTypes.STRING).Anonymous()
+                    .addValidatorForPropriety("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$", ValidatorTypes.REGEX)
                 .addPropriety("DateFin", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT ap.id AS ID, ap.nom AS Nom, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Descriptions FROM affectation_prix AS ap WHERE ap.id = @_ID", QueryTypes.SELECT)
-                        .setSQLParam("ID", "ID")
-                        .setSQLParam("Nom", "Nom")
-                        .setSQLParam("DateDebut", "DateDebut")
-                        .setSQLParam("DateFin", "DateFin")
-                        .setSQLParam("Descriptions", "Descriptions")
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM affectation_prix", QueryTypes.CBO)
             ;
@@ -297,13 +295,13 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT pc.id AS ID, pro.id AS ProduitID, pro.nom AS Produit, pro.descriptions AS ProduitDescriptions, pro.prix AS PrixCourant, pro.quantite_inventaire AS QuantiteRestante, pc.id_commande AS CommandeID, pc.quantite AS Quantite, pc.prix_unitaire AS PrixPaye, fppc.id_format_choisi AS FormatChoisiID, fppc.format_choisi AS FormatChoisiString, fp.nom AS FormatChoisi, fppc.type_format AS TypeFormat FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id INNER JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit", QueryTypes.SELECT)
-                        .setSQLParam("CommandeID")
+
                 .addRoute("InsertProduit", RouteTypes.POST)
-                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) VALUES (@id_produit, @id_commande, @quantite, @prix_unitaire)", QueryTypes.INSERT)
-                        .setSQLParam("id_produit")
-                        .setSQLParam("id_commande")
-                        .setSQLParam("quantite")
-                        .setSQLParam("prix_unitaire")
+                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) VALUES (@ProduitID, @CommandeID, @Quantite, @PrixUnitaire)", QueryTypes.INSERT)
+                        .setSQLParam("ProduitID")
+                        .setSQLParam("CommandeID")
+                        .setSQLParam("Quantite")
+                        .setSQLParam("PrixUnitaire")
 
 
                 .addRoute(BaseRoutes.DELETE)
@@ -320,7 +318,7 @@ namespace APIDynamic
                         .setSQLParam("prix_unitaire", "PrixUnitaire")
                 */
                 .addRoute(BaseRoutes.INSERT)
-                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) SELECT 1, @prod, 44, p.prix FROM produits AS p WHERE p.id = @ProduitID", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) VALUES (@ProduitID, @CommandeID, @Quantite, p.prix)", QueryTypes.INSERT)
                     .addRouteQuery("INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT @FormatChoisiID, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatChoisiID", QueryTypes.INSERT)
                         .addSQLParam("FormatID")
                 ;
@@ -406,6 +404,7 @@ namespace APIDynamic
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
                 .addPropriety("Email", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
+                    .addValidatorForPropriety("/^[\\w-.]+@([\\w-]+.)+[\\w-]{2,3}$/", ValidatorTypes.REGEX)
                 .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
                 .addPropriety("Token", true, true, ShowTypes.STRING).Anonymous()
@@ -495,6 +494,7 @@ namespace APIDynamic
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("AdresseCourriel", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .addValidatorForPropriety("/^[\\w-.]+@([\\w-]+.)+[\\w-]{2,3}$/", ValidatorTypes.REGEX)
                 .addPropriety("CompagnieID", true, true, ShowTypes.CBO).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
 
@@ -502,22 +502,22 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT coll.id AS ID, coll.nom AS Nom, coll.prenom AS Prenom, coll.telephone AS Telephone, coll.adresse_courriel AS AdresseCourriel, coll.id_compagnie AS CompagnieID, comp.nom AS CompagnieNom FROM collaborateurs AS coll LEFT JOIN compagnies AS comp ON comp.id = coll.id_compagnie WHERE coll.id = @_id AND coll.id_compagnie = @_ID", QueryTypes.SELECT)
                         .setSQLParam("id", "ID")
-                        .setSQLParam("CollaborateurID")//Met-je "Compagnie comme propriété dans le SQLParam
+                        .setSQLParam("CollaborateurID")
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO collaborateurs (nom, prenom, telephone, adresse_courriel, id_compagnie) VALUES (@nom, @prenom, @telephone, @adresse_courriel, @id_compagnie)", QueryTypes.INSERT)
                         .setSQLParam("nom", "Nom")
                         .setSQLParam("prenom", "Prenom")
                         .setSQLParam("telephone", "Telephone")
                         .setSQLParam("adresse_courriel", "AdresseCourriel")
-                        .setSQLParam("id_compagnie")//Met-je "Compagnie comme propriété dans le SQLParam
+                        .setSQLParam("id_compagnie")
                 .addRoute(BaseRoutes.UPDATE)
-                    .addRouteQuery("UPDATE collaborateurs SET nom = @_nom, prenom = @_prenom, telephone = @_telephone, adresse_courriel = @_adresse_courriel, id_compagnie = @_id_compagnie WHERE id = @id", QueryTypes.UPDATE)
+                    .addRouteQuery("UPDATE collaborateurs SET nom = @_nom, prenom = @_prenom, telephone = @_telephone, adresse_courriel = @_adresse_courriel, id_compagnie = @_id_compagnie WHERE id = @ID", QueryTypes.UPDATE)
                         .setSQLParam("id", "ID")
                         .setSQLParam("nom", "Nom")
                         .setSQLParam("prenom", "Prenom")
                         .setSQLParam("telephone", "Telephone")
                         .setSQLParam("adresse_courriel", "AdresseCourriel")
-                        .setSQLParam("id_compagnie")//Met-je "Compagnie comme propriété dans le SQLParam
+                        .setSQLParam("id_compagnie")
                 ;
             await controllers["Compagnies"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
@@ -530,6 +530,7 @@ namespace APIDynamic
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("AdresseCourriel", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .addValidatorForPropriety("/^[\\w-.]+@([\\w-]+.)+[\\w-]{2,3}$/", ValidatorTypes.REGEX)
                 .addPropriety("Contact", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
 

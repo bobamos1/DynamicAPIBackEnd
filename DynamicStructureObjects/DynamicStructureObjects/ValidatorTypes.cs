@@ -13,7 +13,9 @@
         [Value("MaxOrEqual")]
         MAXOREQUAL = 5,
         [Value("MinOrEqual")]
-        MINOREQUAL = 6
+        MINOREQUAL = 6,
+        [Value("Boolean")]
+        BOOLEAN = 7
     }
     public record ValidatorBundle(ValidatorTypes validatorType, string value, string message); 
     public static class ValidatorTypesHelper
