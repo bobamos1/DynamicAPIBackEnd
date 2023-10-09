@@ -34,7 +34,7 @@ namespace DynamicStructureObjects
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles");
         internal static readonly Query getControllers = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, name AS Name, isMain AS IsMain FROM Controllers", true);
         internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isUpdatable AS IsUpdatable, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true);
-        internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, COALESCE(BaseRoutes.name, URLRoutes.name) AS Name, id_routeType AS RouteTypeID, requireAuthorization AS requireAuthorization, getAuthorizedCols AS getAuthorizedCols, onlyModify AS onlyModify, id_proprietyForUserID AS proprietyToBindUserID FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true);
+        internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, CASE WHEN URLRoutes.id_baseRoute = 1 THEN URLRoutes.name ELSE BaseRoutes.name END AS Name, id_routeType AS RouteTypeID, requireAuthorization AS requireAuthorization, getAuthorizedCols AS getAuthorizedCols, onlyModify AS onlyModify, id_proprietyForUserID AS proprietyToBindUserID FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true);
         internal static readonly Query insertController = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Controllers (name, isMain) VALUES (@Name, @IsMain)", true);
         private DynamicController(long id, string Name, bool IsMain)
         {
@@ -619,13 +619,17 @@ namespace DynamicStructureObjects
         {
             return Routes.FirstOrDefault(route => route.Name == routeName);
         }
-        public async static Task InsertEnum<T>(SQLExecutor executor, string insertTemplate, string tableName) where T : Enum
+        public async static Task InsertEnum(SQLExecutor executor, string insertTemplate, string tableName, Type classType)
         {
             List<string> queries = new List<string>() { $"DELETE {tableName}", $"DBCC CHECKIDENT ('{tableName}', RESEED, 0)", $"SET IDENTITY_INSERT {tableName} ON" };
-            foreach (T entry in Enum.GetValues(typeof(T)))
-                queries.Add(string.Format(insertTemplate, entry.ID(), entry.Value()));
+            foreach (Enum entry in Enum.GetValues(classType))
+                queries.Add(string.Format(insertTemplate, entry.ID(), entry.Value(classType)));
             queries.Add($"SET IDENTITY_INSERT {tableName} OFF");
             await executor.ExecuteQueryWithTransaction(queries.ToArray());
+        }
+        public static Task InsertEnum<T>(SQLExecutor executor, string insertTemplate, string tableName) where T : Enum
+        {
+            return InsertEnum(executor, insertTemplate, tableName, typeof(T));
         }
 
 
