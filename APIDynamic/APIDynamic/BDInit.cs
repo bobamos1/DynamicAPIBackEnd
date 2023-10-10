@@ -10,6 +10,7 @@ namespace APIDynamic
             var minOrEqualZeroBundle = ValidatorTypes.MINOREQUAL.SetValue("0", "Must be greater or equal to 0");
             var isEmail = ValidatorTypes.REGEX.SetValue(@"/^[\w-.]+@([\w-]+.)+[\w-]{2,3}$/", "");
             var isDate = ValidatorTypes.REGEX.SetValue("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$", "");
+            var isTelephone = ValidatorTypes.REGEX.SetValue("*", "");
             var controllers = new Dictionary<string, DynamicController>();
             await controllers
                 .addController("Categories", true)
@@ -152,7 +153,7 @@ namespace APIDynamic
             ;
 
             await controllers["EtatsCommandes"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
 
@@ -244,7 +245,7 @@ namespace APIDynamic
                 .addPropriety("TypeAffectationDescriptions", true, false, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())   //Avec Formats et Taxes vérifier si l'id du format et de la taxes est sur la bonne table (genre est-ce app ou ap)
+                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT app.id_produit AS ProduitID, app.id_affectation_prix AS AffectationPrixID, ap.nom AS Taxe, ap.descriptions AS Descriptions, app.montant AS Montant, ta.nom AS TypeAffectation, ta.facteur_affectation AS FacteurAffectation, ta.descriptions AS TypeAffectationDescriptions FROM affectation_prix AS ap INNER JOIN affectation_prix_produits AS app ON app.id_affectation_prix = ap.id INNER JOIN types_affectation AS ta ON ta.id = ap.id_types_affectation WHERE app.id_produit = @_ProduitID", QueryTypes.SELECT)
 
                 //.addRoute(BaseRoutes.GET) ->Si j'en veux une pcq y'a pas de ID unique à la table on utilise un "combo id"
@@ -386,9 +387,7 @@ namespace APIDynamic
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
                 .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
-                .addPropriety("Email", true, true, ShowTypes.STRING,
-                    isEmail
-                ).Anonymous()
+                .addPropriety("Email", true, true, ShowTypes.STRING).Anonymous()    //isEmail Enlever pour test
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
                 .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanModify())
@@ -452,7 +451,7 @@ namespace APIDynamic
 
             await controllers["ReseauxSociaux"]
                 
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
@@ -466,7 +465,7 @@ namespace APIDynamic
                 ;
 
             await controllers["Collaborateurs"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
@@ -492,13 +491,13 @@ namespace APIDynamic
                     .addRouteQuery("UPDATE collaborateurs SET nom = @_Nom, prenom = @_Prenom, telephone = @_Telephone, adresse_courriel = @_Email, id_compagnie = @_CompagnieID WHERE id = @ID", QueryTypes.UPDATE)
                 ;
             await controllers["Compagnies"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("Prenom", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("Telephone", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Telephone", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("AdresseCourriel", true, true, ShowTypes.STRING,
                     isEmail
@@ -522,11 +521,11 @@ namespace APIDynamic
 
             await controllers["CollaborateursReseauxSociaux"]
 
-                .addPropriety("ReseauxSociauxID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ReseauxSociauxID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("ReseauxSociaux", true, true, ShowTypes.Ref).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("CollaborateurID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("CollaborateurID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("Collaborateur", true, true, ShowTypes.Ref).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
