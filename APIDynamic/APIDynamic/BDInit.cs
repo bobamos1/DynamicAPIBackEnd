@@ -44,6 +44,7 @@ namespace APIDynamic
                 .addController("TypeFormats", false)
                 .addController("TypeValeurs", false)
                 .addController("TypeAffectations", false)
+                .addController("FormatsProduitsCommandes", false)
                 ;
             #endregion
             #region Categories
@@ -296,7 +297,8 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
                 .addPropriety("TypeFormatID", true, true, ShowTypes.CBO).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT fp.id AS ID, fp.nom AS Nom, fp.descriptions AS Description, tfp.id AS TypeFormatID, tfp.nom AS TypeFormat FROM formats_produit fp INNER JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @_ID AND fp.id IN (SELECT id_format_choisi FROM format_produit_produits_commande WHERE id_produit_commande = @#ProduitParCommandeID)", QueryTypes.SELECT)
                 .addRoute("FormatDispoProduits", RouteTypes.GET)
                     .addRouteQuery("SELECT fp.id AS ID, fp.nom AS Nom, fp.descriptions AS Description, tfp.id = TypeFormatID, tfp.nom AS TypeFormat FROM formats_produit fp LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit LEFT JOIN formats_produit_produits AS fpp ON fpp.id_format_produit = fp.id WHERE fpp.id_produit = @_ProduitID AND fp.id = @_ID", QueryTypes.SELECT)
 
@@ -328,6 +330,32 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
 
+            ;
+            #endregion
+            #region FormatsProduitsCommandes
+            await controllers["FormatsProduitsCommandes"]
+                .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                )
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("FormatID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Format", true, false, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", true, false, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("TypeFormat", true, false, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("format_selected", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("type_format_selected", true, true, ShowTypes.STRING).Anonymous()
+
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT fp.id AS FormatID, fp.nom AS Format, ppc.id_produit AS ProduitParCommandeID, p.nom AS ProduitParCommande, fp.descriptions AS Description, tfp.nom AS TypeFormat, fppc.format_choisi AS format_selected, fppc.type_format AS type_format_selected FROM format_produit_produits_commande fppc INNER JOIN formats_produit fp ON fp.id = fppc.id_format_choisi INNER JOIN produits_par_commande AS ppc ON ppc.id = fppc.id_produit_commande INNER JOIN produits AS p ON ppc.id_produit = p.id LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
             ;
             #endregion
             #region AffectationsPrixProduits
@@ -412,35 +440,33 @@ namespace APIDynamic
 
             #endregion
             #region ProduitsParCommande
-            var queryInsertPanierDiffEtat = "INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) SELECT @ProduitID, c.id, @Quantite, 0 FROM commandes AS c";
+            var queryInsertPanierDiffEtat = "INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) SELECT @id_produit, c.id, @quantite, 0 FROM commandes AS c";
             var queryInsertFormat = "INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT fp.id, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatChoisiID";
             await controllers["ProduitsParCommande"]
 
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("id_commande", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                .addPropriety("ProduitID", true, true, ShowTypes.CBO,
+                .addPropriety("id_produit", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("QuantiteRestante", true, true, ShowTypes.INT,
+                .addPropriety("id", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                .addPropriety("CommandeID", true, true, ShowTypes.CBO,
+                .addPropriety("description", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("quantite", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                .addPropriety("Quantite", true, true, ShowTypes.INT,
+                .addPropriety("quantite_restante", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
-                ).Anonymous()
+                ).Anonymous()/*
                 .addPropriety("PrixUnitaire", true, true, ShowTypes.FLOAT,
                     minOrEqualZeroBundle
-                ).Anonymous()
-                .addPropriety("FormatChoisiString", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("FormatChoisiID", true, true, ShowTypes.CBO,
-                    minOrEqualZeroBundle
-                ).Anonymous()
-                .addPropriety("Cout", true, true, ShowTypes.FLOAT).Anonymous()
-                .addPropriety("Taxes", true, true, ShowTypes.Ref).Anonymous()
+                ).Anonymous()*/
+                .addPropriety("format", true, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("taxes", true, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("cout", true, true, ShowTypes.FLOAT).Anonymous()
+                //.addPropriety("image", true, true, ShowTypes.STRING).Anonymous()
                 //.addPropriety("Taxes", true, false, ShowTypes.Ref)
                 //.addMapperGenerator("Taxes", CSharpTypes.REFERENCE.Link("TaxeID", "ID"))
                 /*.addPropriety("Images", true, false, ShowTypes.Ref)
@@ -449,20 +475,20 @@ namespace APIDynamic
                 */
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT pc.id AS ID, pro.id AS ProduitID, pro.nom AS Produit, pro.descriptions AS Description, pro.prix AS PrixCourant, pro.quantite_inventaire AS QuantiteRestante, pc.id_commande AS CommandeID, pc.quantite AS Quantite, pc.prix_unitaire AS PrixPaye, fppc.id_format_choisi AS FormatChoisiID, fppc.format_choisi AS FormatChoisiString, fp.nom AS FormatChoisi, fppc.type_format AS TypeFormat, pc.prix_unitaire AS Cout FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id_commande = @_CommandeID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT pc.id_commande AS id_commande, pro.id AS id_produit, pc.id AS id, pro.nom AS nom, pro.descriptions AS description, pc.quantite AS quantite, pro.quantite_inventaire AS quantite_restante, pc.prix_unitaire AS cout FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id = @_id AND pc.id_commande = @_id_commande", QueryTypes.SELECT)
 
-                .addRoute("InsertPanier", RouteTypes.POST, "ClientID")
+                .addRoute("InsertPanier", RouteTypes.POST, "id_client")
                     //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @ClientID AND c.id_etat_commande = 5", QueryTypes.INSERT)
+                    .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 5", QueryTypes.INSERT)
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
-                .addRoute("InsertWishList", RouteTypes.POST, "ClientID")
+                .addRoute("InsertWishList", RouteTypes.POST, "id_client")
                     //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.INSERT)
+                    .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 4", QueryTypes.INSERT)
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.DELETE)
-                    .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @ID", QueryTypes.DELETE)
+                    .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @id", QueryTypes.DELETE)
 
                 /*
                  * Checker ce qui peut être modifié dans cette table là, dans le fonctionnement, tu ne peux pas changer un produit, mais au lieu l'enlever de la commande et ajouter / DOnc 1 delete et 1 insert au lieu d'un update
@@ -476,54 +502,56 @@ namespace APIDynamic
             #endregion
             #region Commandes
             await controllers["Commandes"]
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("id", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                .addPropriety("MontantBrut", true, true, ShowTypes.FLOAT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("produitsAchetes", false, true, ShowTypes.Ref).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("DateTransaction", true, false, ShowTypes.STRING
-                ).Anonymous()
-                    .Authorize(Roles.Admin.CanModify())
-                .addPropriety("EmployeID", false, true, ShowTypes.CBO,
-                    minOrEqualZeroBundle
-                ).Anonymous()
-                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("VilleID", false, true, ShowTypes.CBO,
-                    minOrEqualZeroBundle
+                .addPropriety("dateCreation", true, false, ShowTypes.STRING
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("EtatsCommandesID", false, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("NumeroFacture", true, true, ShowTypes.INT,
+                .addPropriety("no_civique", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("rue", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
+                .addPropriety("VilleID", false, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("MontantBrut", true, true, ShowTypes.FLOAT,
+                .addPropriety("code_postal", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
+                .addPropriety("numero_facture", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("NumeroCiviqueLivraison", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("RueLivraison", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("Produits", false, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("EmployeID", false, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("ClientID", false, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
+                .addPropriety("Province", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
 
-             .addRoute(BaseRoutes.GETALL, "ClientID")
-                 .addRouteQuery("SELECT c.id AS ID, c.numero_facture AS NumeroFacture, c.date_heure_transaction AS DateTransaction, c.montant_brut AS MontantBrut, c.no_civique_livraison AS NumeroCiviqueLivraison, c.rue_livraison AS RueLivraison, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, c.id_etat_commande AS EtatsCommandesID, ec.nom AS EtatsCommandes, c.id_ville AS VilleID, v.nom AS Ville, pro.id AS ProvinceID, pro.nom AS Province, c.id_employe AS EmployeID, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_ID AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_NumeroCiviqueLivraison AND c.id_etat_commande = @_EtatsCommandesID ORDER BY @&SortByCol", QueryTypes.SELECT)
+             .addRoute(BaseRoutes.GETALL, "id_client")// c.code_postal AS code_postal,
+                 .addRouteQuery("SELECT c.id AS id, c.montant_brut AS MontantBrut, c.date_heure_transaction AS dateCreation, c.id_etat_commande AS EtatsCommandesID, ec.nom AS etat, c.no_civique_livraison AS no_civique, c.rue_livraison AS rue, c.id_ville AS VilleID, v.nom AS ville, c.numero_facture AS numero_facture, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, pro.nom AS Province, c.id_employe AS EmployeID, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_id AND c.id_client = @_id_client AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_no_civique AND c.id_etat_commande = @_EtatsCommandesID ORDER BY @&SortByCol", QueryTypes.SELECT)
             
              .addRoute(BaseRoutes.INSERT)
                  .Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                 .addRouteQuery("INSERT INTO commandes (numero_facture, montant_brut, date_heure_transaction, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (@NumeroFacture, @MontantBrut, @DateTransaction, @NumeroCiviqueLivraison, @RueLivraison, @ClientID, @EtatsCommandesID, @VilleID, @EmployeID)", QueryTypes.INSERT)
+                 .addRouteQuery("INSERT INTO commandes (numero_facture, montant_brut, date_heure_transaction, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (@numero_facture, @MontantBrut, @dateCreation, @no_civique, @rue, @ClientID, @EtatsCommandesID, @VilleID, @EmployeID)", QueryTypes.INSERT)
 
              .addRoute(BaseRoutes.UPDATE)
                  .Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                 .addRouteQuery("UPDATE commandes SET numero_facture = @_NumeroFacture, date_heure_transaction = @_DateTransaction, montant_brut = @_MontantBrut, no_civique_livraison = @_NumeroCiviqueLivraison, rue_livraison = @_RueLivraison, id_client = @_ClientID, id_etat_commande = @_EtatsCommandesID, id_ville = @_VilleID, id_employe = @_EmployeID WHERE id = @ID", QueryTypes.UPDATE)
+                 .addRouteQuery("UPDATE commandes SET numero_facture = @_numero_facture, date_heure_transaction = @_dateCreation, montant_brut = @_MontantBrut, no_civique_livraison = @_no_civique, rue_livraison = @_rue, id_client = @_ClientID, id_etat_commande = @_EtatsCommandesID, id_ville = @_VilleID, id_employe = @_EmployeID WHERE id = @id", QueryTypes.UPDATE)
 
              .addRoute(BaseRoutes.CBO)
                  .addRouteQuery("SELECT c.id, CONCAT(c.NumeroFacture, ' - ', cli.prenom, ' ', cli.nom) FROM commandes INNER JOIN clients AS cli ON cli.id = c.id_clients", QueryTypes.CBO)
@@ -766,6 +794,10 @@ namespace APIDynamic
                .addCBOInfo("ProduitID", "Produits", "Produit")
                .addCBOInfo("FormatID", "Formats", "Format")
             ;
+            await controllers["FormatsProduitsCommandes"]
+               .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
+               .addCBOInfo("FormatID", "Formats", "Format")
+            ;
             await controllers["ImagesProduits"]
                .addCBOInfo("ProduitID", "Produits", "Produit")
                .addCBOInfo("ImageID", "Images", "URL")
@@ -774,10 +806,11 @@ namespace APIDynamic
                 .addCBOInfo("AffectationPrixID", "AffectationsPrix", "Taxe")
             ;
             await controllers["ProduitsParCommande"]
-                .addCBOInfo("ProduitID", "Produits", "Produit")
-                .addCBOInfo("FormatChoisiID", "Formats", "FormatChoisi")
-                .addCBOInfo("CommandeID", "Commandes", "Commande")
-                .addMapperGenerator("Taxes", "AffectationsPrixLorsCommande", CSharpTypes.REFERENCE.Link("ID", "ProduitParCommandeID"))
+                .addCBOInfo("id_produit", "Produits", "nom")
+                .addCBOInfo("id_commande", "Commandes", "Commande")
+                //.addCBOInfo("FormatChoisiID", "Formats", "FormatChoisi")
+                .addMapperGenerator("taxes", "AffectationsPrixLorsCommande", CSharpTypes.REFERENCE.Link("id", "ProduitParCommandeID"))
+                .addMapperGenerator("format", "FormatsProduitsCommandes", CSharpTypes.REFERENCE.Link("id", "ProduitParCommandeID"))
             ;
             await controllers["AffectationsPrixLorsCommande"]
                 .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
@@ -793,10 +826,10 @@ namespace APIDynamic
             ;
             await controllers["Commandes"]
                 .addCBOInfo("EmployeID", "Employes", "Employe")
-                .addCBOInfo("VilleID", "Villes", "Ville")
-                .addCBOInfo("EtatsCommandesID", "EtatsCommandes", "EtatsCommandes")
+                .addCBOInfo("VilleID", "Villes", "ville")
+                .addCBOInfo("EtatsCommandesID", "EtatsCommandes", "etat")
                 .addCBOInfo("ClientID", "Clients", "Client")
-                .addMapperGenerator("Produits", "ProduitsParCommande", CSharpTypes.REFERENCE.Link("ID", "CommandeID"))
+                .addMapperGenerator("produitsAchetes", "ProduitsParCommande", CSharpTypes.REFERENCE.Link("id", "CommandeID"))
             ;
 
             await controllers["Clients"]
