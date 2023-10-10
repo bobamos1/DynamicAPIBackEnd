@@ -59,14 +59,14 @@ namespace DynamicStructureObjects
             await task[controllerName].addMapperGenerator(ProprietyName, ControllerToLinkName, linkers);
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addAuthorizedRouteRole(this Dictionary<string, DynamicController> task, string controllerName, string routeName, long RoleID)
+        public async static Task<Dictionary<string, DynamicController>> Authorize(this Dictionary<string, DynamicController> task, string controllerName, string routeName, long RoleID)
         {
-            await task[controllerName].addAuthorizedRouteRole(routeName, RoleID);
+            await task[controllerName].Authorize(routeName, RoleID);
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addAuthorizedProprietyRole(this Dictionary<string, DynamicController> task, string controllerName, string ProprietyName, long RoleID, bool CanModify)
+        public async static Task<Dictionary<string, DynamicController>> Authorize(this Dictionary<string, DynamicController> task, string controllerName, string ProprietyName, long RoleID, bool CanModify)
         {
-            await task[controllerName].addAuthorizedProprietyRole(ProprietyName, RoleID, CanModify);
+            await task[controllerName].Authorize(ProprietyName, RoleID, CanModify);
             return task;
         }
 
@@ -116,13 +116,13 @@ namespace DynamicStructureObjects
         {
             return await (await task).addMapperGenerator(controllerName, ProprietyName, ControllerToLinkName, linkers);
         }
-        public async static Task<Dictionary<string, DynamicController>> addAuthorizedRouteRole(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, long RoleID)
+        public async static Task<Dictionary<string, DynamicController>> Authorize(this Task<Dictionary<string, DynamicController>> task, string controllerName, string routeName, long RoleID)
         {
-            return await (await task).addAuthorizedRouteRole(controllerName, routeName, RoleID);
+            return await (await task).Authorize(controllerName, routeName, RoleID);
         }
-        public async static Task<Dictionary<string, DynamicController>> addAuthorizedProprietyRole(this Task<Dictionary<string, DynamicController>> task, string controllerName, string ProprietyName, long RoleID, bool CanModify)
+        public async static Task<Dictionary<string, DynamicController>> Authorize(this Task<Dictionary<string, DynamicController>> task, string controllerName, string ProprietyName, long RoleID, bool CanModify)
         {
-            return await (await task).addAuthorizedProprietyRole(controllerName, ProprietyName, RoleID, CanModify);
+            return await (await task).Authorize(controllerName, ProprietyName, RoleID, CanModify);
         }
 
 
@@ -229,21 +229,21 @@ namespace DynamicStructureObjects
         {
             return await (await task).addCBOInfo(ControllerName, value, linkers);
         }
-        public async static Task<DynamicController> addAuthorizedRouteRole(this Task<DynamicController> task, string routeName, long RoleID)
+        public async static Task<DynamicController> Authorize(this Task<DynamicController> task, string routeName, long RoleID)
         {
-            return await (await task).addAuthorizedRouteRole(routeName, RoleID);
+            return await (await task).Authorize(routeName, RoleID);
         }
-        public async static Task<DynamicController> addAuthorizedRouteRoles(this Task<DynamicController> task, params long[] roles)
+        public async static Task<DynamicController> Authorize(this Task<DynamicController> task, params long[] roles)
         {
-            return await (await task).addAuthorizedRouteRoles(roles);
+            return await (await task).Authorize(roles);
         }
-        public async static Task<DynamicController> addAuthorizedProprietyRole(this Task<DynamicController> task, string ProprietyName, long RoleID, bool CanModify)
+        public async static Task<DynamicController> Authorize(this Task<DynamicController> task, string ProprietyName, long RoleID, bool CanModify)
         {
-            return await (await task).addAuthorizedProprietyRole(ProprietyName, RoleID, CanModify);
+            return await (await task).Authorize(ProprietyName, RoleID, CanModify);
         }
-        public async static Task<DynamicController> addAuthorizedProprietyRoles(this Task<DynamicController> task, params KeyValuePair<long, bool>[] roles)
+        public async static Task<DynamicController> Authorize(this Task<DynamicController> task, params KeyValuePair<long, bool>[] roles)
         {
-            return await (await task).addAuthorizedProprietyRoles(roles);
+            return await (await task).Authorize(roles);
         }
         public async static Task<DynamicController> Anonymous(this Task<DynamicController> task, string ProprietyName)
         {
