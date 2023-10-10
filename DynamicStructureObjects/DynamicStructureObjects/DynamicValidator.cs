@@ -75,7 +75,7 @@ namespace DynamicStructureObjects
                 case ValidatorTypes.MINOREQUAL:
                     return value.To<double>() >= Value.To<double>();
                 case ValidatorTypes.REGEX:
-                    return Value.To<Regex>().IsMatch(value.To<string>());
+                    return Regex.IsMatch(value.To<string>(), Value.To<Regex>().To<string>());
                 default:
                     return false;
             }

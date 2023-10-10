@@ -10,6 +10,7 @@ namespace APIDynamic
             var minOrEqualZeroBundle = ValidatorTypes.MINOREQUAL.SetValue("0", "Must be greater or equal to 0");
             var isEmail = ValidatorTypes.REGEX.SetValue(@"/^[\w-.]+@([\w-]+.)+[\w-]{2,3}$/", "");
             var isDate = ValidatorTypes.REGEX.SetValue("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$", "");
+            var isTelephone = ValidatorTypes.REGEX.SetValue("*", "");
             var controllers = new Dictionary<string, DynamicController>();
             await controllers
                 .addController("Categories", true)
@@ -184,7 +185,7 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id, nom FROM types_valeur", QueryTypes.CBO)
             ;
             await controllers["EtatsCommandes"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
 
@@ -438,8 +439,8 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
-                .addPropriety("Email", true, true, ShowTypes.STRING,
-                    isEmail
+                .addPropriety("Email", true, true, ShowTypes.STRING//,
+                    //isEmail
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
@@ -504,7 +505,7 @@ namespace APIDynamic
 
             await controllers["ReseauxSociaux"]
                 
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
@@ -519,19 +520,19 @@ namespace APIDynamic
 
             await controllers["Collaborateurs"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Prenom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Telephone", true, true, ShowTypes.INT).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Email", true, true, ShowTypes.STRING,
                     isEmail
                 ).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("CompagnieID", true, true, ShowTypes.CBO).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
 
 
                 .addRoute(BaseRoutes.GETALL)
