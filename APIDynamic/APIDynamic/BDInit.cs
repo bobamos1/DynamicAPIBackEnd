@@ -127,6 +127,9 @@ namespace APIDynamic
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Affectations", true ,true, ShowTypes.Ref)
+                    .Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
 
 
                 .addRoute(BaseRoutes.GETALL)
