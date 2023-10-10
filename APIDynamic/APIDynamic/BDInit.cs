@@ -25,6 +25,7 @@ namespace APIDynamic
                 .addController("FormatsProduits", false)
                 .addController("Taxes", false)
                 .addController("AffectationsPrix", false)
+                .addController("AffectationsPrixLorsCommande", false)
                 .addController("Clients", true)
                 .addController("ReseauxSociaux", false)
                 .addController("CollaborateursReseauxSociaux", false)
@@ -39,6 +40,8 @@ namespace APIDynamic
                 .addController("Media", false)
                 .addController("Images", false)
                 .addController("TypeFormats", false)
+                .addController("TypeValeurs", false)
+                .addController("TypeAffectations", false)
                 ;
             
             await controllers["Categories"]
@@ -152,6 +155,35 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id, nom FROM villes", QueryTypes.CBO)
             ;
 
+            await controllers["TypeValeurs"]
+
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Description FROM types_valeur WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id, nom FROM types_valeur", QueryTypes.CBO)
+            ;
+            await controllers["TypeAffectations"]
+
+                .addPropriety("ID", true, true, ShowTypes.INT,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("FacteurAffectation", true, true, ShowTypes.INT).Anonymous()
+
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Description, facteur_affectation AS FacteurAffectation FROM types_affectation WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id, nom FROM types_valeur", QueryTypes.CBO)
+            ;
             await controllers["EtatsCommandes"]
                 .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
@@ -225,7 +257,21 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
 
             ;
+            await controllers["AffectationsPrixLorsCommande"]
+                .addPropriety("AffectationPrixID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
+                .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("Nom", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("TypeValeur", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("TypeAffectation", true, true, ShowTypes.STRING).Anonymous()
 
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT ppc.id AS ProduitParCommandeID, p.nom AS ProduitParCommande, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur FROM affectation_prix_lors_commande aplc INNER JOIN affectation_prix ap ON ap.id = aplc.id_affectation_prix INNER JOIN produits_par_commande ppc ON ppc.id = aplc.id_produit_par_commande INNER JOIN produits p ON p.id = ppc.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_ID AND ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id, nom FROM affectation_prix", QueryTypes.CBO)
+            ;
             await controllers["Taxes"]
                 .addPropriety("ProduitID", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
@@ -261,10 +307,12 @@ namespace APIDynamic
                     isDate
                 ).Anonymous()
                 .addPropriety("DateFin", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("TypeValeurID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("TypeAffectationID", true, true, ShowTypes.CBO).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT ap.id AS ID, ap.nom AS Nom, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Descriptions FROM affectation_prix AS ap WHERE ap.id = @_ID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT ap.id AS ID, ap.nom AS Nom, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.id AS TypeAffectationID, ta.nom AS TypeAffectation, tv.id AS TypeValeurID, tv.nom AS TypeValeur FROM affectation_prix AS ap INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM affectation_prix", QueryTypes.CBO)
@@ -278,7 +326,7 @@ namespace APIDynamic
                 .addPropriety("ProduitID", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                .addPropriety("ProduitDescriptions", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("QuantiteRestante", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
                 ).Anonymous()
@@ -295,6 +343,8 @@ namespace APIDynamic
                 .addPropriety("FormatChoisiID", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                .addPropriety("Cout", true, true, ShowTypes.FLOAT).Anonymous()
+                .addPropriety("Taxes", true, true, ShowTypes.Ref)
                 //.addPropriety("Taxes", true, false, ShowTypes.Ref)
                 //.addMapperGenerator("Taxes", CSharpTypes.REFERENCE.Link("TaxeID", "ID"))
                 /*.addPropriety("Images", true, false, ShowTypes.Ref)
@@ -303,7 +353,7 @@ namespace APIDynamic
                 */
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT pc.id AS ID, pro.id AS ProduitID, pro.nom AS Produit, pro.descriptions AS ProduitDescriptions, pro.prix AS PrixCourant, pro.quantite_inventaire AS QuantiteRestante, pc.id_commande AS CommandeID, pc.quantite AS Quantite, pc.prix_unitaire AS PrixPaye, fppc.id_format_choisi AS FormatChoisiID, fppc.format_choisi AS FormatChoisiString, fp.nom AS FormatChoisi, fppc.type_format AS TypeFormat FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id_commande = @_CommandeID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT pc.id AS ID, pro.id AS ProduitID, pro.nom AS Produit, pro.descriptions AS Description, pro.prix AS PrixCourant, pro.quantite_inventaire AS QuantiteRestante, pc.id_commande AS CommandeID, pc.quantite AS Quantite, pc.prix_unitaire AS PrixPaye, fppc.id_format_choisi AS FormatChoisiID, fppc.format_choisi AS FormatChoisiString, fp.nom AS FormatChoisi, fppc.type_format AS TypeFormat, pc.prix_unitaire AS Cout FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id_commande = @_CommandeID", QueryTypes.SELECT)
 
                 .addRoute("InsertProduit", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) VALUES (@ProduitID, @CommandeID, @Quantite, @PrixUnitaire)", QueryTypes.INSERT)
@@ -321,6 +371,8 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE produits_par_commande SET id_produit = @_ProduitID, id_commande = @_CommandeID, quantite = @_Quantite, prix_unitaire = @_PrixUnitaire WHERE id = @ID", QueryTypes.UPDATE)
                 */
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT ppc.id, p.nom FROM produits_par_commande ppc INNER JOIN produits p ON p.id = ppc.id_produit", QueryTypes.CBO)
                 ;
 
             await controllers["Commandes"]
@@ -602,6 +654,15 @@ namespace APIDynamic
                 .addCBOInfo("ProduitID", "Produits", "Produit")
                 .addCBOInfo("FormatChoisiID", "Formats", "FormatChoisi")
                 .addCBOInfo("CommandeID", "Commandes", "Commande")
+                .addMapperGenerator("Taxes", "AffectationsPrixLorsCommande", CSharpTypes.REFERENCE.Link("ID", "ProduitParCommandeID"))
+            ;
+            await controllers["AffectationsPrixLorsCommande"]
+                .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
+                .addCBOInfo("AffectationPrixID", "AffectationsPrix", "AffectationPrix")
+            ;
+            await controllers["AffectationsPrix"]
+                .addCBOInfo("TypeValeurID", "TypeValeurs", "TypeValeur")
+                .addCBOInfo("TypeAffectationID", "TypeAffectations", "TypeAffectation")
             ;
             await controllers["Commandes"]
                 .addCBOInfo("EmployeID", "Employes", "Employe")
