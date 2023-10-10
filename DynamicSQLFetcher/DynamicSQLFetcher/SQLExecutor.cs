@@ -233,6 +233,8 @@ namespace DynamicSQLFetcher
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
                 result = await connection.QueryFirstOrDefaultAsync(query.Parse(authorizedColumns), query.getParameters());
+                if (result is null)
+                    return null;
                 await getDetails(connection, result as IDictionary<string, object>, mappers);
             }
             return result;

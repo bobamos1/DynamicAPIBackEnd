@@ -1,4 +1,6 @@
-﻿namespace DynamicStructureObjects
+﻿using System.Reflection.Metadata.Ecma335;
+
+namespace DynamicStructureObjects
 {
     public enum ShowTypes : long
     {
@@ -11,6 +13,15 @@
         [Value("Int")]
         INT = 4,
         [Value("Float")]
-        FLOAT = 5
+        FLOAT = 5,
+        [Value("CBOID")]
+        CBOID = 6,
+        [Value("ID")]
+        ID = 7
+    }
+    public static class ShowTypesHelper
+    {
+        public static bool IsCBO(this ShowTypes validatorType) => validatorType == ShowTypes.CBO || validatorType == ShowTypes.CBOID;
+        public static bool IsRef(this ShowTypes validatorType) => validatorType == ShowTypes.Ref;
     }
 }
