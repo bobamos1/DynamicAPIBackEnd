@@ -477,6 +477,9 @@ namespace APIDynamic
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
+                .addPropriety("DateTransaction", true, false, ShowTypes.STRING
+                ).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("EmployeID", false, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
@@ -509,15 +512,15 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
 
              .addRoute(BaseRoutes.GETALL, "ClientID")
-                 .addRouteQuery("SELECT c.id AS ID, c.numero_facture AS NumeroFacture, c.montant_brut AS MontantBrut, c.no_civique_livraison AS NumeroCiviqueLivraison, c.rue_livraison AS RueLivraison, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, c.id_etat_commande AS EtatsCommandesID, ec.nom AS EtatsCommandes, c.id_ville AS VilleID, v.nom AS Ville, pro.id AS ProvinceID, pro.nom AS Province, c.id_employe AS EmployeID, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_ID AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_NumeroCiviqueLivraison AND c.id_etat_commande = @_EtatsCommandesID ORDER BY @&SortByCol", QueryTypes.SELECT)
+                 .addRouteQuery("SELECT c.id AS ID, c.numero_facture AS NumeroFacture, c.date_heure_transaction AS DateTransaction, c.montant_brut AS MontantBrut, c.no_civique_livraison AS NumeroCiviqueLivraison, c.rue_livraison AS RueLivraison, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, c.id_etat_commande AS EtatsCommandesID, ec.nom AS EtatsCommandes, c.id_ville AS VilleID, v.nom AS Ville, pro.id AS ProvinceID, pro.nom AS Province, c.id_employe AS EmployeID, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_ID AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_NumeroCiviqueLivraison AND c.id_etat_commande = @_EtatsCommandesID ORDER BY @&SortByCol", QueryTypes.SELECT)
             
              .addRoute(BaseRoutes.INSERT)
                  .Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                 .addRouteQuery("INSERT INTO commandes (numero_facture, montant_brut, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (@NumeroFacture, @MontantBrut, @NumeroCiviqueLivraison, @RueLivraison, @ClientID, @EtatsCommandesID, @VilleID, @EmployeID)", QueryTypes.INSERT)
+                 .addRouteQuery("INSERT INTO commandes (numero_facture, montant_brut, date_heure_transaction, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (@NumeroFacture, @MontantBrut, @DateTransaction, @NumeroCiviqueLivraison, @RueLivraison, @ClientID, @EtatsCommandesID, @VilleID, @EmployeID)", QueryTypes.INSERT)
 
              .addRoute(BaseRoutes.UPDATE)
                  .Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                 .addRouteQuery("UPDATE commandes SET numero_facture = @_NumeroFacture, montant_brut = @_MontantBrut, no_civique_livraison = @_NumeroCiviqueLivraison, rue_livraison = @_RueLivraison, id_client = @_ClientID, id_etat_commande = @_EtatsCommandesID, id_ville = @_VilleID, id_employe = @_EmployeID WHERE id = @ID", QueryTypes.UPDATE)
+                 .addRouteQuery("UPDATE commandes SET numero_facture = @_NumeroFacture, date_heure_transaction = @_DateTransaction, montant_brut = @_MontantBrut, no_civique_livraison = @_NumeroCiviqueLivraison, rue_livraison = @_RueLivraison, id_client = @_ClientID, id_etat_commande = @_EtatsCommandesID, id_ville = @_VilleID, id_employe = @_EmployeID WHERE id = @ID", QueryTypes.UPDATE)
 
              .addRoute(BaseRoutes.CBO)
                  .addRouteQuery("SELECT c.id, CONCAT(c.NumeroFacture, ' - ', cli.prenom, ' ', cli.nom) FROM commandes INNER JOIN clients AS cli ON cli.id = c.id_clients", QueryTypes.CBO)
