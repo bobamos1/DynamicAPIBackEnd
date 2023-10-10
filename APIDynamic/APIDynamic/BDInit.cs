@@ -397,10 +397,12 @@ namespace APIDynamic
                     .addRouteQuery("SELECT pc.id AS ID, pro.id AS ProduitID, pro.nom AS Produit, pro.descriptions AS Description, pro.prix AS PrixCourant, pro.quantite_inventaire AS QuantiteRestante, pc.id_commande AS CommandeID, pc.quantite AS Quantite, pc.prix_unitaire AS PrixPaye, fppc.id_format_choisi AS FormatChoisiID, fppc.format_choisi AS FormatChoisiString, fp.nom AS FormatChoisi, fppc.type_format AS TypeFormat, pc.prix_unitaire AS Cout FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id_commande = @_CommandeID", QueryTypes.SELECT)
 
                 .addRoute("InsertPanier", RouteTypes.POST, "ClientID")
+                    //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @ClientID AND c.id_etat_commande = 5", QueryTypes.INSERT)
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
                 .addRoute("InsertWishList", RouteTypes.POST, "ClientID")
+                    //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.INSERT)
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
