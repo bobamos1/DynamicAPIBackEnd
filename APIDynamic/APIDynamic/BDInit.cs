@@ -8,7 +8,7 @@ namespace APIDynamic
         public async static Task InitDB()
         {
             var minOrEqualZeroBundle = ValidatorTypes.MINOREQUAL.SetValue("0", "Must be greater or equal to 0");
-            var isEmail = ValidatorTypes.REGEX.SetValue("/^[\\w-.]+@([\\w-]+.)+[\\w-]{2,3}$/", "");
+            var isEmail = ValidatorTypes.REGEX.SetValue(@"/^[\w-.]+@([\w-]+.)+[\w-]{2,3}$/", "");
             var isDate = ValidatorTypes.REGEX.SetValue("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$", "");
             var controllers = new Dictionary<string, DynamicController>();
             await controllers
