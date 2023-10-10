@@ -35,6 +35,7 @@ namespace APIDynamic
                 .addController("PreferencesGraphiques", false)
                 .addController("TypesMedia", false)
                 .addController("Media", false)
+                .addController("Images", false)
                 ;
             
             await controllers["Categories"]
@@ -97,9 +98,12 @@ namespace APIDynamic
                 .addPropriety("EtatProduitID", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                .addPropriety("ImageID", true, true, ShowTypes.Ref,
+                .addPropriety("ImageID", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                .addPropriety("Images", true, true, ShowTypes.Ref,
+                    minOrEqualZeroBundle
+                )
 
 
                 .addRoute(BaseRoutes.GETALL)
@@ -431,11 +435,12 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM reseaux_sociaux WHERE ID = @_ID", QueryTypes.SELECT)
+
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO reseaux_sociaux (nom) VALUES (@Nom)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
-                    .addRouteQuery("UPDATE reseaux_sociaux SET nom = @_Nom WHERE id = @_ID", QueryTypes.UPDATE)
+                    .addRouteQuery("UPDATE reseaux_sociaux SET nom = @_Nom WHERE id = @ID", QueryTypes.UPDATE)
                 ;
 
             await controllers["Collaborateurs"]
@@ -508,20 +513,26 @@ namespace APIDynamic
                     .addRouteQuery("SELECT crs.id_collaborateur AS CollaborateurID, CONCAT(coll.prenom,' ', coll.nom) AS CollaborateurNom, crs.id_reseaux_sociaux AS ReseauxSociauxID, rs.nom AS ReseauxSociauxNom FROM collaborateurs_reseaux_sociaux AS crs LEFT JOIN collaborateurs AS coll ON coll.id = crs.id_collaborateur LEFT JOIN reseaux_sociaux AS rs ON rs.id = crs.id_reseaux_sociaux WHERE crs.id_collaborateur = @_CollaborateurID AND crs.id_reseaux_sociaux = @_ReseauxSociauxID", QueryTypes.SELECT)
 
             ;
-
+            await controllers["Images"]
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("URL", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT ip.id AS ID, ip.url AS URL, ip.descriptions AS Description FROM images_produit ip LEFT JOIN images_produit_produits ipp ON ipp.id_image_produit = ip.id WHERE id = @_ID AND ipp.id_produit = @_ProduitID", QueryTypes.SELECT)
+            ;
             await controllers["ImagesProduit"]
 
                 .addPropriety("ImageID", true, true, ShowTypes.INT).Anonymous()
-                    .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .addAuthorizedProprietyRoles(Roles.Admin.CanModify())
                 .addPropriety("URL", true, true, ShowTypes.Ref).Anonymous()
-                    .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .addAuthorizedProprietyRoles(Roles.Admin.CanModify())
                 .addPropriety("ProduitID", true, true, ShowTypes.INT).Anonymous()
-                    .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .addAuthorizedProprietyRoles(Roles.Admin.CanModify())
                 .addPropriety("ImageDescriptions", true, true, ShowTypes.STRING).Anonymous()
-                    .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .addAuthorizedProprietyRoles(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT ip.id AS ID, ip.url AS URL FROM images_produit_produits AS ipp INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE ipp.id_produit = @ProduitID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT ip.id AS ImageID, ip.url AS URL FROM images_produit_produits AS ipp INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE ipp.id_produit = @ProduitID", QueryTypes.SELECT)
             /*
             .addRoute(BaseRoutes.INSERT)
                 .addRouteQuery("INSERT INTO ")*/
@@ -535,7 +546,7 @@ namespace APIDynamic
             await controllers["Produits"]
                 .addCBOInfo("CategorieID", "Categories", "Categorie")
                 .addCBOInfo("EtatProduitID", "EtatsProduit", "EtatProduit")
-                //.addMapperGenerator("Images", "ImagesProduit", CSharpTypes.REFERENCE.Link("ID", "ImageID"))
+                .addMapperGenerator("Images", "Images", CSharpTypes.REFERENCE.Link("ID", "ProduitID"))
             ;
             await controllers["Villes"]
                 .addCBOInfo("ProvinceID", "Provinces", "Province")
