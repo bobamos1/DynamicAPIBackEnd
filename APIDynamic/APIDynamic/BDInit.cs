@@ -48,15 +48,15 @@ namespace APIDynamic
                 
                 .addPropriety("ID", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
-                ).Anonymous()
+                )
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING)
                     .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("Description", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.INT)
                       .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("CategorieMereID", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
-                ).Anonymous()
+                )
                       .addAuthorizedProprietyRoles(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
@@ -75,7 +75,7 @@ namespace APIDynamic
                 ;
             
             await controllers["EtatsProduit"]
-                .addPropriety("ID", true, true, ShowTypes.INT)
+                .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle)
                 .addPropriety("Nom", true, true, ShowTypes.STRING)
                 .addPropriety("Descriptions", true, true, ShowTypes.STRING)
                 .addRoute(BaseRoutes.GETALL)
