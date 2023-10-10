@@ -21,6 +21,7 @@ namespace APIDynamic
                 .addController("Commandes", true)
                 .addController("ProduitsParCommande", true)
                 .addController("Formats", false)
+                .addController("FormatsProduits", false)
                 .addController("Taxes", false)
                 .addController("AffectationsPrix", false)
                 .addController("Clients", true)
@@ -29,13 +30,14 @@ namespace APIDynamic
                 .addController("Collaborateurs", true)
                 .addController("Compagnies", true)
                 .addController("Employes", true)
-                .addController("ImagesProduit", false)
+                .addController("ImagesProduits", false)
                 .addController("TypesPreferencesGraphique", false)
                 .addController("Couleurs", false)
                 .addController("PreferencesGraphiques", false)
                 .addController("TypesMedia", false)
                 .addController("Media", false)
                 .addController("Images", false)
+                .addController("TypeFormats", false)
                 ;
             
             await controllers["Categories"]
@@ -98,10 +100,10 @@ namespace APIDynamic
                 .addPropriety("EtatProduitID", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                .addPropriety("ImageID", true, true, ShowTypes.INT,
-                    minOrEqualZeroBundle
-                ).Anonymous()
                 .addPropriety("Images", true, true, ShowTypes.Ref,
+                    minOrEqualZeroBundle
+                )
+                .addPropriety("Formats", true, true, ShowTypes.Ref,
                     minOrEqualZeroBundle
                 )
 
@@ -192,15 +194,35 @@ namespace APIDynamic
                     minOrEqualZeroBundle
                 ).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("ProduitID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("TypeFormatID", true, true, ShowTypes.CBO).Anonymous()
 
                 .addRoute("FormatDispoProduits", RouteTypes.GET)
                     .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT p.id AS ProduitID, fp.nom AS Nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit INNER JOIN formats_produit_produits AS fpp ON fpp.id_format_produit = fp.id INNER JOIN produits AS p ON p.id = fpp.id_produit WHERE fpp.id_produit = @_ProduitID AND fp.id = @_ID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT fp.id AS ID, fp.nom AS Nom, fp.descriptions AS Description, tfp.id = TypeFormatID, tfp.nom AS TypeFormat FROM formats_produit fp LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit LEFT JOIN formats_produit_produits AS fpp ON fpp.id_format_produit = fp.id WHERE fpp.id_produit = @_ProduitID AND fp.id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
-                    
+
+            ;
+            await controllers["FormatsProduits"]
+                .addPropriety("ProduitID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("FormatID", true, true, ShowTypes.CBO,
+                    minOrEqualZeroBundle
+                ).Anonymous()
+                .addPropriety("Format", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("TypeFormat", true, false, ShowTypes.STRING).Anonymous()
+
+                .addRoute(BaseRoutes.GETALL)
+                    .addAuthorizedRouteRoles(Roles.Client.ID(), Roles.Admin.ID())
+                    .addRouteQuery("SELECT fpp.id_format_produit AS FormatID, fp.nom AS Format, fpp.id_produit AS ProduitID, p.nom AS Produit, fp.descriptions AS Description, tfp.nom AS TypeFormat FROM formats_produit_produits fpp INNER JOIN formats_produit fp ON fp.id = fpp.id_format_produit LEFT JOIN produits AS p ON fpp.id_produit = p.id LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE fpp.id_produit = @_ProduitID AND fp.id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
+
             ;
 
             await controllers["Taxes"]
@@ -513,26 +535,36 @@ namespace APIDynamic
                     .addRouteQuery("SELECT crs.id_collaborateur AS CollaborateurID, CONCAT(coll.prenom,' ', coll.nom) AS CollaborateurNom, crs.id_reseaux_sociaux AS ReseauxSociauxID, rs.nom AS ReseauxSociauxNom FROM collaborateurs_reseaux_sociaux AS crs LEFT JOIN collaborateurs AS coll ON coll.id = crs.id_collaborateur LEFT JOIN reseaux_sociaux AS rs ON rs.id = crs.id_reseaux_sociaux WHERE crs.id_collaborateur = @_CollaborateurID AND crs.id_reseaux_sociaux = @_ReseauxSociauxID", QueryTypes.SELECT)
 
             ;
+            await controllers["TypeFormats"]
+                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom FROM types_format_produit WHERE id = @_ID", QueryTypes.SELECT)
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom FROM types_format_produit WHERE id = @_ID", QueryTypes.CBO)
+            ;
             await controllers["Images"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
                 .addPropriety("URL", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT ip.id AS ID, ip.url AS URL, ip.descriptions AS Description FROM images_produit ip LEFT JOIN images_produit_produits ipp ON ipp.id_image_produit = ip.id WHERE id = @_ID AND ipp.id_produit = @_ProduitID", QueryTypes.SELECT)
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id, url FROM images_produit", QueryTypes.CBO)
             ;
-            await controllers["ImagesProduit"]
+            await controllers["ImagesProduits"]
 
-                .addPropriety("ImageID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ImageID", true, true, ShowTypes.CBO).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Admin.CanModify())
-                .addPropriety("URL", true, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("URL", true, false, ShowTypes.Ref).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Admin.CanModify())
-                .addPropriety("ProduitID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ProduitID", true, true, ShowTypes.CBO).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Admin.CanModify())
-                .addPropriety("ImageDescriptions", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
                     .addAuthorizedProprietyRoles(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT ip.id AS ImageID, ip.url AS URL FROM images_produit_produits AS ipp INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit WHERE ipp.id_produit = @ProduitID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT ip.id AS ImageID, ip.url AS URL, p.id AS ProduitID, p.nom AS Produit, ip.descriptions AS Description FROM images_produit_produits AS ipp INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit INNER JOIN produits p ON p.id = ipp.id_produit WHERE ipp.id_produit = @_ProduitID", QueryTypes.SELECT)
             /*
             .addRoute(BaseRoutes.INSERT)
                 .addRouteQuery("INSERT INTO ")*/
@@ -546,15 +578,24 @@ namespace APIDynamic
             await controllers["Produits"]
                 .addCBOInfo("CategorieID", "Categories", "Categorie")
                 .addCBOInfo("EtatProduitID", "EtatsProduit", "EtatProduit")
-                .addMapperGenerator("Images", "Images", CSharpTypes.REFERENCE.Link("ID", "ProduitID"))
+                .addMapperGenerator("Images", "ImagesProduits", CSharpTypes.REFERENCE.Link("ID", "ProduitID"))
+                .addMapperGenerator("Formats", "FormatsProduits", CSharpTypes.REFERENCE.Link("ID", "ProduitID"))
             ;
             await controllers["Villes"]
                 .addCBOInfo("ProvinceID", "Provinces", "Province")
             ;
-            /*
+            
             await controllers["Formats"]
+               .addCBOInfo("TypeFormatID", "TypeFormats", "TypeFormat")
+            ;
+            await controllers["FormatsProduits"]
                .addCBOInfo("ProduitID", "Produits", "Produit")
-            ;*/
+               .addCBOInfo("FormatID", "Formats", "Format")
+            ;
+            await controllers["ImagesProduits"]
+               .addCBOInfo("ProduitID", "Produits", "Produit")
+               .addCBOInfo("ImageID", "Images", "URL")
+            ;
             await controllers["Taxes"]
                 .addCBOInfo("AffectationPrixID", "AffectationsPrix", "Taxe")
             ;

@@ -48,7 +48,8 @@ namespace DynamicStructureObjects
         }
         internal DynamicMapper updateMapper(params string[] authorizedColumns)
         {
-            return this.Mapper.updateQuery(query.Parse(authorizedColumns));
+            query.setParams(parametersToLink.ToDictionary(param => param.Key, param => (object)0));
+            return this.Mapper.updateQuery(query.addParams(baseParameters).Parse(authorizedColumns));
         }
         internal async static Task<DynamicMapperGenerator> addMapperGenerator(string ControllerName, long ProprietyID, bool ForCBO, params ParamLinker[] linkers)
         {
