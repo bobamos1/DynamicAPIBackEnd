@@ -37,12 +37,12 @@ namespace DynamicStructureObjects
                         .setParam("ProprietyID", propriety.id)
                     )
                 ).ToList();
-            if (propriety.ShowType == ShowTypes.Ref || propriety.ShowType == ShowTypes.CBO)
+            if (propriety.ShowType.IsRef() || propriety.ShowType.IsCBO())
             {
                 propriety.MapperGenerator =
                     await DynamicController.executor.SelectSingle<DynamicMapperGenerator>(
                         getMapperGenerator
-                            .setParam("BaseRouteID", propriety.ShowType == ShowTypes.Ref ? (long)BaseRoutes.GETALL : (long)BaseRoutes.CBO)
+                            .setParam("BaseRouteID", propriety.ShowType.IsRef() ? (long)BaseRoutes.GETALL : (long)BaseRoutes.CBO)
                             .setParam("ProprietyID", propriety.id)
                         );
                 if (propriety.MapperGenerator is not null)
@@ -54,7 +54,7 @@ namespace DynamicStructureObjects
                         .setParam("ProprietyID", propriety.id)
                     )
                 );
-            if (propriety.ShowType == ShowTypes.Ref && !propriety.roles.Any())//!propriety.roles.ContainsKey(AnonymousRoleID))
+            if (propriety.ShowType.IsRef() && !propriety.roles.Any())//!propriety.roles.ContainsKey(AnonymousRoleID))
                 propriety.roles[AnonymousRoleID] = false;
             return propriety;
         }
@@ -83,14 +83,14 @@ namespace DynamicStructureObjects
         }
         public async Task<DynamicPropriety> addMapperGenerator(string ControllerName, params ParamLinker[] linkers)
         {
-            if (ShowType != ShowTypes.Ref)
+            if (!ShowType.IsRef())
                 throw new Exception("cannot add mapper on not ref proprety");
             MapperGenerator = await DynamicMapperGenerator.addMapperGenerator(ControllerName, id, false, linkers);
             return this;
         }
         public async Task<DynamicPropriety> addCBOInfo(string ControllerName, string value, params ParamLinker[] linkers)
         {
-            if (ShowType != ShowTypes.CBO)
+            if (!ShowType.IsCBO())
                 throw new Exception("cannot add cboInfo on not cbo proprety");
             MapperGenerator = await DynamicMapperGenerator.addMapperGenerator(ControllerName, id, value, linkers);
             return this;
