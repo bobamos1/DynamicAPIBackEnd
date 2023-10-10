@@ -72,6 +72,45 @@ namespace APIDynamic
                     return Results.Forbid();
                 }
             );
+            controllers["ProduitsParCommande"].mapRoute("InsertPanier",
+                async (queries, bodyData) =>
+                {
+                    try
+                    {
+                        var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
+                        var idChoisi = bodyData.SafeGet<long>("FormatChoisiID");
+                        if (idChoisi != default)
+                        {
+                            await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatChoisiID", bodyData.Get<long>("FormatChoisiID")).setParam("ProduitCommandeID", produitParCommandeID));
+                        }
+                        return Results.Ok();
+                    }
+                    catch(Exception e)
+                    {
+                        return Results.Forbid();
+                    }
+                }
+                );
+            controllers["ProduitsParCommande"].mapRoute("InsertWishList",
+                async (queries, bodyData) =>
+                {
+                    try
+                    {
+                        var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
+                        var idChoisi = bodyData.SafeGet<long>("FormatChoisiID");
+                        if(idChoisi != default)
+                        {
+                            await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatChoisiID", bodyData.Get<long>("FormatChoisiID")).setParam("ProduitCommandeID", produitParCommandeID));
+                        }
+
+                        return Results.Ok();
+                    }
+                    catch (Exception e)
+                    {
+                        return Results.Forbid();
+                    }
+                }
+                );
 
             /*
             controllers["Clients"].addRouteAPI("CreateUser",

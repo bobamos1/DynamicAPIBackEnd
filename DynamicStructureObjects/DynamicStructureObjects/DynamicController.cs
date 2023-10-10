@@ -88,7 +88,7 @@ namespace DynamicStructureObjects
             controllers.Remove("NULL");
             return controllers;
         }
-        public static async Task resetStructureData()
+        public static async Task resetStructureData(bool resetEnum)
         {
             List<KeyValuePair<string, bool>> tablesToDeleteContent = new List<KeyValuePair<string, bool>>()
                 .Add("ValidatorProprietyValues", false)
@@ -111,14 +111,18 @@ namespace DynamicStructureObjects
                 if (table.Value)
                     queriesToRun.Add($"DBCC CHECKIDENT ('{table.Key}', RESEED, 0)");
             }
+            await executor.ExecuteQueryWithTransaction(queriesToRun.ToArray());
+            if (resetEnum)
+                await EnumHelper.populateBDEnums(executor);
+            queriesToRun.Clear();
             queriesToRun.Add("INSERT Controllers (name, isMain) VALUES ('NULL', 0)");
             queriesToRun.Add("INSERT Proprieties (name, isMain, id_ShowType, id_controller, isUpdatable) VALUES ('NULL', 0, 1, 1, 0)");
             await executor.ExecuteQueryWithTransaction(queriesToRun.ToArray());
         }
-        public static async Task resetStructureData(SQLExecutor executor)
+        public static async Task resetStructureData(SQLExecutor executor, bool resetEnum)
         {
             DynamicController.executor = executor;
-            await resetStructureData();
+            await resetStructureData(resetEnum);
         }
         #region adds
         public async static Task<DynamicController> addController(string Name, bool IsMain)
@@ -326,7 +330,7 @@ namespace DynamicStructureObjects
         }
         public IEnumerable<string> getCBOKeyValues(IEnumerable<DynamicPropriety> proprieties)
         {
-            return proprieties.Where(prop => prop.ShowType == ShowTypes.CBO).Select(prop => prop.MapperGenerator.parametersToLink[SQLExecutor.VALUE_FOR_CBO]);
+            return proprieties.Where(prop => prop.ShowType.IsCBO()).Select(prop => prop.MapperGenerator.parametersToLink[SQLExecutor.VALUE_FOR_CBO]);
         }
         public IEnumerable<DynamicPropriety> getAuthorizedProprieties(bool onlyModify, IEnumerable<long> roles)
         {
@@ -609,7 +613,7 @@ namespace DynamicStructureObjects
         }
         public IEnumerable<DynamicMapper> getMappersGenerated(Dictionary<string, DynamicController> controllers, IEnumerable<long> roles, params string[] authorizedColumns)
         {
-            return Proprieties.Where(propriety => authorizedColumns.Contains(propriety.Name) && propriety.ShowType == ShowTypes.Ref).Select(propriety => propriety.MapperGenerator.updateMapper(controllers[propriety.MapperGenerator.controllerName].getAuthorizedProprieties(false, roles).Select(prop => prop.Name).ToArray()));
+            return Proprieties.Where(propriety => authorizedColumns.Contains(propriety.Name) && propriety.ShowType.IsRef()).Select(propriety => propriety.MapperGenerator.updateMapper(controllers[propriety.MapperGenerator.controllerName].getAuthorizedProprieties(false, roles).Select(prop => prop.Name).ToArray()));
         }
         internal bool hasRoute(string routeName)
         {

@@ -27,6 +27,7 @@ namespace APIDynamic
                 .addController("Taxes", false)
                 .addController("AffectationsPrix", false)
                 .addController("AffectationsPrixLorsCommande", false)
+                .addController("AffectationsPrixProduits", false)
                 .addController("Clients", true)
                 .addController("ReseauxSociaux", false)
                 .addController("CollaborateursReseauxSociaux", false)
@@ -326,9 +327,23 @@ namespace APIDynamic
 
             ;
             #endregion
+            #region AffectationsPrixProduits
+            await controllers["AffectationsPrixProduits"]
+                .addPropriety("AffectationPrixID", true, true, ShowTypes.CBOID).Anonymous()
+                .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
+                .addPropriety("ProduitID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("Nom", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("TypeValeur", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("TypeAffectation", true, true, ShowTypes.STRING).Anonymous()
+
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS Produit, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_produits apro INNER JOIN affectation_prix ap ON ap.id = apro.id_affectation_prix INNER JOIN produits p ON p.id = apro.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_ID AND p.id = @_ProduitID", QueryTypes.SELECT)
+            ;
+            #endregion
             #region AffectationsPrixLorsCommande
             await controllers["AffectationsPrixLorsCommande"]
-                .addPropriety("AffectationPrixID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("AffectationPrixID", true, true, ShowTypes.CBOID).Anonymous()
                 .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
                 .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBO)
                 .addPropriety("Nom", true, false, ShowTypes.STRING).Anonymous()
@@ -341,10 +356,7 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT ppc.id AS ProduitParCommandeID, p.nom AS ProduitParCommande, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur FROM affectation_prix_lors_commande aplc INNER JOIN affectation_prix ap ON ap.id = aplc.id_affectation_prix INNER JOIN produits_par_commande ppc ON ppc.id = aplc.id_produit_par_commande INNER JOIN produits p ON p.id = ppc.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_ID AND ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
-
-                .addRoute(BaseRoutes.CBO)
-                    .addRouteQuery("SELECT id, nom FROM affectation_prix", QueryTypes.CBO)
+                    .addRouteQuery("SELECT ppc.id AS ProduitParCommandeID, p.nom AS ProduitParCommande, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_lors_commande aplc INNER JOIN affectation_prix ap ON ap.id = aplc.id_affectation_prix INNER JOIN produits_par_commande ppc ON ppc.id = aplc.id_produit_par_commande INNER JOIN produits p ON p.id = ppc.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_ID AND ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
             ;
             #endregion
             #region Taxes
@@ -397,6 +409,8 @@ namespace APIDynamic
 
             #endregion
             #region ProduitsParCommande
+            var queryInsertPanierDiffEtat = "INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) SELECT @ProduitID, c.id, @Quantite, 0 FROM commandes AS c";
+            var queryInsertFormat = "INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT fp.id, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatChoisiID";
             await controllers["ProduitsParCommande"]
 
                 .addPropriety("ID", true, true, ShowTypes.INT,
@@ -434,13 +448,15 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT pc.id AS ID, pro.id AS ProduitID, pro.nom AS Produit, pro.descriptions AS Description, pro.prix AS PrixCourant, pro.quantite_inventaire AS QuantiteRestante, pc.id_commande AS CommandeID, pc.quantite AS Quantite, pc.prix_unitaire AS PrixPaye, fppc.id_format_choisi AS FormatChoisiID, fppc.format_choisi AS FormatChoisiString, fp.nom AS FormatChoisi, fppc.type_format AS TypeFormat, pc.prix_unitaire AS Cout FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id_commande = @_CommandeID", QueryTypes.SELECT)
 
-                .addRoute("InsertProduit", RouteTypes.POST)
-                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) VALUES (@ProduitID, @CommandeID, @Quantite, @PrixUnitaire)", QueryTypes.INSERT)
+                .addRoute("InsertPanier", RouteTypes.POST, "ClientID")
+                    //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @ClientID AND c.id_etat_commande = 5", QueryTypes.INSERT)
+                    .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
-                .addRoute(BaseRoutes.INSERT)
-                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) VALUES (@ProduitID, @CommandeID, @Quantite, p.prix)", QueryTypes.INSERT)
-                    .addRouteQuery("INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT @FormatChoisiID, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatChoisiID", QueryTypes.INSERT)
-                        .addSQLParam("FormatID")
+                .addRoute("InsertWishList", RouteTypes.POST, "ClientID")
+                    //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.INSERT)
+                    .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.DELETE)
                     .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @ID", QueryTypes.DELETE)
@@ -492,7 +508,7 @@ namespace APIDynamic
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
 
-             .addRoute(BaseRoutes.GETALL)
+             .addRoute(BaseRoutes.GETALL, "ClientID")
                  .addRouteQuery("SELECT c.id AS ID, c.numero_facture AS NumeroFacture, c.montant_brut AS MontantBrut, c.no_civique_livraison AS NumeroCiviqueLivraison, c.rue_livraison AS RueLivraison, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, c.id_etat_commande AS EtatsCommandesID, ec.nom AS EtatsCommandes, c.id_ville AS VilleID, v.nom AS Ville, pro.id AS ProvinceID, pro.nom AS Province, c.id_employe AS EmployeID, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_ID AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_NumeroCiviqueLivraison AND c.id_etat_commande = @_EtatsCommandesID ORDER BY @&SortByCol", QueryTypes.SELECT)
             
              .addRoute(BaseRoutes.INSERT)
@@ -623,7 +639,7 @@ namespace APIDynamic
 
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT coll.id AS ID, coll.nom AS Nom, coll.prenom AS Prenom, coll.telephone AS Telephone, coll.adresse_courriel AS AdresseCourriel, coll.id_compagnie AS CompagnieID, comp.nom AS CompagnieNom FROM collaborateurs AS coll LEFT JOIN compagnies AS comp ON comp.id = coll.id_compagnie WHERE coll.id = @_ID AND coll.id_compagnie = @_CompagnieID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT coll.id AS ID, coll.nom AS Nom, coll.prenom AS Prenom, coll.telephone AS Telephone, coll.adresse_courriel AS AdresseCourriel, coll.id_compagnie AS CompagnieID, comp.nom AS Compagnie FROM collaborateurs AS coll LEFT JOIN compagnies AS comp ON comp.id = coll.id_compagnie WHERE coll.id = @_ID AND coll.id_compagnie = @_CompagnieID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO collaborateurs (nom, prenom, telephone, adresse_courriel, id_compagnie) VALUES (@Nom, @Prenom, @Telephone, @Email, @CompagnieID)", QueryTypes.INSERT)
@@ -731,6 +747,7 @@ namespace APIDynamic
                 .addCBOInfo("EtatProduitID", "EtatsProduit", "EtatProduit")
                 .addMapperGenerator("Images", "ImagesProduits", CSharpTypes.REFERENCE.Link("ID", "ProduitID"))
                 .addMapperGenerator("Formats", "FormatsProduits", CSharpTypes.REFERENCE.Link("ID", "ProduitID"))
+                .addMapperGenerator("Affectations", "AffectationsPrixProduits", CSharpTypes.REFERENCE.Link("ID", "ProduitID"))
             ;
             await controllers["Villes"]
                 .addCBOInfo("ProvinceID", "Provinces", "Province")
@@ -758,6 +775,10 @@ namespace APIDynamic
             ;
             await controllers["AffectationsPrixLorsCommande"]
                 .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
+                .addCBOInfo("AffectationPrixID", "AffectationsPrix", "AffectationPrix")
+            ;
+            await controllers["AffectationsPrixProduits"]
+                .addCBOInfo("ProduitID", "Produits", "Produit")
                 .addCBOInfo("AffectationPrixID", "AffectationsPrix", "AffectationPrix")
             ;
             await controllers["AffectationsPrix"]

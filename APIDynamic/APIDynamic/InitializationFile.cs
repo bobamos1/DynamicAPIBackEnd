@@ -7,10 +7,9 @@ namespace APIDynamic
     {
         public async static Task InitDB(SQLExecutor executor, bool resetRoles)
         {
-            await DynamicController.resetStructureData(executor);
+            await DynamicController.resetStructureData(executor, true);
             if (resetRoles)
                 await DynamicController.InsertEnum(executor, "INSERT INTO Roles (id, name) VALUES ({0}, '{1}')", "Roles", typeof(Roles));
-            //await EnumHelper.populateBDEnums(executor);
             await BDInit.InitDB();
         }
         public static Dictionary<string, string> LoadConnectionStrings(IConfiguration configuration)
