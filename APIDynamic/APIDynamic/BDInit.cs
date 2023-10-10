@@ -66,7 +66,7 @@ namespace APIDynamic
                     .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID", QueryTypes.SELECT)
                 
                 .addRoute(BaseRoutes.INSERT)
-                    .Authorize(Roles.Admin.ID())
+                    //.Authorize(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO categories (nom, descriptions, id_categorie_mere) VALUES (@Nom, @Description, @CategorieMereID)", QueryTypes.INSERT)             
                 .addRoute(BaseRoutes.UPDATE)
                     //.Authorize(Roles.Admin.ID())
@@ -136,8 +136,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS CategorieID, c.nom AS Categorie, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatsProduitNom FROM produits AS p LEFT JOIN categories AS c ON c.id = p.id_categorie LEFT JOIN etats_produit AS ep ON ep.id = p.id_etat_produit WHERE p.id = @_ID AND p.id_categorie = @_CategorieID AND p.id_etat_produit = @_EtatProduitID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
-                    .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@Nom, @Descriptions, @Prix, @CategorieID, @EtatProduitID", QueryTypes.INSERT)
+                    //.Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@Nom, @Descriptions, @Prix, @CategorieID, @EtatProduitID)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
