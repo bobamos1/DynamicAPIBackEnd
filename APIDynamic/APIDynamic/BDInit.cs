@@ -385,14 +385,11 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT pc.id AS ID, pro.id AS ProduitID, pro.nom AS Produit, pro.descriptions AS Description, pro.prix AS PrixCourant, pro.quantite_inventaire AS QuantiteRestante, pc.id_commande AS CommandeID, pc.quantite AS Quantite, pc.prix_unitaire AS PrixPaye, fppc.id_format_choisi AS FormatChoisiID, fppc.format_choisi AS FormatChoisiString, fp.nom AS FormatChoisi, fppc.type_format AS TypeFormat, pc.prix_unitaire AS Cout FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id_commande = @_CommandeID", QueryTypes.SELECT)
 
-                .addRoute("InsertProduit", RouteTypes.POST)
-                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) VALUES (@ProduitID, @CommandeID, @Quantite, @PrixUnitaire)", QueryTypes.INSERT)
-
-                .addRoute(BaseRoutes.INSERT)
-                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) VALUES (@ProduitID, @CommandeID, @Quantite, p.prix)", QueryTypes.INSERT)
-                    .addRouteQuery("INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT @FormatChoisiID, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatChoisiID", QueryTypes.INSERT)
-                        .addSQLParam("FormatID")
-
+                .addRoute("InsertPanier", RouteTypes.POST, "ClientID")
+                    .addRouteQuery("INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) SELECT @ProduitID, c.id, @Quantite, 0 FROM commandes AS c WHERE c.id_client = @ClientID AND c.id_etat_commande = 5", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT fp.id, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatChoisiID", QueryTypes.INSERT)
+                        .setNotRequired("ProduitCommandeID")
+                
                 .addRoute(BaseRoutes.DELETE)
                     .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @ID", QueryTypes.DELETE)
 
