@@ -289,17 +289,17 @@ namespace DynamicStructureObjects
             await Proprieties.Last().addCBOInfo(ControllerName, value, linkers);
             return this;
         }
-        public async Task<DynamicController> addAuthorizedRouteRole(string routeName, long RoleID)
+        public async Task<DynamicController> Authorize(string routeName, long RoleID)
         {
             await Routes.First(route => route.Name == routeName).addAuthorizedRole(RoleID);
             return this;
         }
-        public async Task<DynamicController> addAuthorizedRouteRoles(params long[] roles)
+        public async Task<DynamicController> Authorize(params long[] roles)
         {
             await Routes.Last().addAuthorizedRoles(roles);
             return this;
         }
-        public async Task<DynamicController> addAuthorizedProprietyRole(string ProprietyName, long RoleID, bool CanModify)
+        public async Task<DynamicController> Authorize(string ProprietyName, long RoleID, bool CanModify)
         {
             await Proprieties.First(propriety => propriety.Name == ProprietyName).addAuthorizedRole(RoleID, CanModify);
             return this;
@@ -314,7 +314,7 @@ namespace DynamicStructureObjects
             await Proprieties.Last().Anonymous();
             return this;
         }
-        public async Task<DynamicController> addAuthorizedProprietyRoles(params KeyValuePair<long, bool>[] roles)
+        public async Task<DynamicController> Authorize(params KeyValuePair<long, bool>[] roles)
         {
             await Proprieties.Last().addAuthorizedRoles(roles);
             return this;
