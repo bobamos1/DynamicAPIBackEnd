@@ -192,10 +192,5 @@ namespace DynamicStructureObjects
         {
             return Queries.All(query => query.validateParams(bodyData));
         }
-
-        internal static Task<DynamicRoute> addRoute(long id, BaseRoutes baseRoute, bool v, object value1, object value2)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

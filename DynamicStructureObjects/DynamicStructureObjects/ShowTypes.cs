@@ -22,6 +22,7 @@ namespace DynamicStructureObjects
     public static class ShowTypesHelper
     {
         public static bool IsCBO(this ShowTypes validatorType) => validatorType == ShowTypes.CBO || validatorType == ShowTypes.CBOID;
+        public static bool IsID(this ShowTypes validatorType) => validatorType == ShowTypes.ID || validatorType == ShowTypes.CBOID;
         public static bool IsRef(this ShowTypes validatorType) => validatorType == ShowTypes.Ref;
     }
 }

@@ -59,13 +59,15 @@ namespace DynamicStructureObjects
                 await DynamicPropriety.init(propriety);
 
             var getAllRoute = controller.Routes.FirstOrDefault(route => route.Name == BaseRoutes.GETALL.Value());
+            var ids = controller.GetIDProprieties();
             if (getAllRoute is not null)
             {
                 if (!controller.hasRoute(BaseRoutes.GETALLDETAILED.Value()))
                     controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETALLDETAILED));
                 if (!controller.hasRoute(BaseRoutes.GET.Value()))
                 {
-                    if (getAllRoute.Queries.First().ParamsInfos.ContainsKey("ID"))
+                    var paramInfos = getAllRoute.Queries.First().ParamsInfos;
+                    if (ids.Any() && ids.All(id => paramInfos.ContainsKey(id)))
                     {
                         controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GET, true));
                         if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
@@ -87,6 +89,10 @@ namespace DynamicStructureObjects
                 controllers.Add(controller.Name, await init(controller));
             controllers.Remove("NULL");
             return controllers;
+        }
+        internal IEnumerable<string> GetIDProprieties()
+        {
+            return Proprieties.Where(p => p.ShowType.IsID()).Select(p => p.Name);
         }
         public static async Task resetStructureData(bool resetEnum)
         {

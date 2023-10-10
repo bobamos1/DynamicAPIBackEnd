@@ -45,12 +45,12 @@ namespace APIDynamic
                 .addController("TypeValeurs", false)
                 .addController("TypeAffectations", false)
                 .addController("FormatsProduitsCommandes", false)
-                ;
+            ;
             #endregion
             #region Categories
             await controllers["Categories"]
                 
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("ID", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 )
                     .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
@@ -80,7 +80,7 @@ namespace APIDynamic
             #endregion
             #region EtatsProduit
             await controllers["EtatsProduit"]
-                .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.ID, minOrEqualZeroBundle).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
 
@@ -94,7 +94,7 @@ namespace APIDynamic
             #endregion
             #region Produits
             await controllers["Produits"]
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("ID", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
@@ -151,7 +151,7 @@ namespace APIDynamic
             #endregion
             #region Provinces
             await controllers["Provinces"]
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("ID", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
@@ -170,7 +170,7 @@ namespace APIDynamic
             #region Villes
             await controllers["Villes"]
 
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("ID", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -192,7 +192,7 @@ namespace APIDynamic
             #region TypeValeurs
             await controllers["TypeValeurs"]
 
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("ID", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -211,7 +211,7 @@ namespace APIDynamic
             #region TypeAffectations
             await controllers["TypeAffectations"]
 
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("ID", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
@@ -231,7 +231,7 @@ namespace APIDynamic
             #endregion
             #region EtatsCommandes
             await controllers["EtatsCommandes"]
-                .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.ID, minOrEqualZeroBundle).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
@@ -248,7 +248,7 @@ namespace APIDynamic
             #endregion
             #region Employes
             await controllers["Employes"]
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("ID", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 )
                 .addPropriety("Nom", true, true, ShowTypes.STRING)
@@ -287,7 +287,7 @@ namespace APIDynamic
             #region Formats
 
             await controllers["Formats"]
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("ID", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
@@ -309,11 +309,11 @@ namespace APIDynamic
             #endregion
             #region FormatsProduits
             await controllers["FormatsProduits"]
-                .addPropriety("ProduitID", true, true, ShowTypes.CBO,
+                .addPropriety("ProduitID", true, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 )
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("FormatID", true, true, ShowTypes.CBO,
+                .addPropriety("FormatID", true, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
@@ -334,11 +334,11 @@ namespace APIDynamic
             #endregion
             #region FormatsProduitsCommandes
             await controllers["FormatsProduitsCommandes"]
-                .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBO,
+                .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 )
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("FormatID", true, true, ShowTypes.CBO,
+                .addPropriety("FormatID", true, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -362,7 +362,7 @@ namespace APIDynamic
             await controllers["AffectationsPrixProduits"]
                 .addPropriety("AffectationPrixID", true, true, ShowTypes.CBOID).Anonymous()
                 .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
-                .addPropriety("ProduitID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("ProduitID", true, true, ShowTypes.CBOID).Anonymous()
                 .addPropriety("Nom", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("TypeValeur", true, true, ShowTypes.STRING).Anonymous()
@@ -376,7 +376,7 @@ namespace APIDynamic
             await controllers["AffectationsPrixLorsCommande"]
                 .addPropriety("AffectationPrixID", true, true, ShowTypes.CBOID).Anonymous()
                 .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
-                .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBO)
+                .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBOID)
                 .addPropriety("Nom", true, false, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
                 .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
@@ -392,10 +392,10 @@ namespace APIDynamic
             #endregion
             #region Taxes
             await controllers["Taxes"]
-                .addPropriety("ProduitID", true, true, ShowTypes.INT,
+                .addPropriety("ProduitID", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                .addPropriety("AffectationPrixID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("AffectationPrixID", true, true, ShowTypes.CBOID).Anonymous()
                 .addPropriety("Taxe", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("Descriptions", true, false, ShowTypes.STRING).Anonymous()
                 .addPropriety("Montant", true, false, ShowTypes.STRING).Anonymous()
@@ -419,7 +419,7 @@ namespace APIDynamic
             #region AffectationsPrix
             await controllers["AffectationsPrix"]
 
-                .addPropriety("ID", true, true, ShowTypes.INT,
+                .addPropriety("ID", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
@@ -450,7 +450,7 @@ namespace APIDynamic
                 .addPropriety("id_produit", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                .addPropriety("id", true, true, ShowTypes.INT,
+                .addPropriety("id", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                 .addPropriety("description", true, true, ShowTypes.STRING).Anonymous()
@@ -502,7 +502,7 @@ namespace APIDynamic
             #endregion
             #region Commandes
             await controllers["Commandes"]
-                .addPropriety("id", true, true, ShowTypes.INT,
+                .addPropriety("id", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                 .addPropriety("MontantBrut", true, true, ShowTypes.FLOAT,
@@ -564,7 +564,7 @@ namespace APIDynamic
             string updateToken = "UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID";
             string updatePassword = "UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID";
             await controllers["Clients"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
@@ -640,7 +640,7 @@ namespace APIDynamic
             #region ReseauxSociaux
             await controllers["ReseauxSociaux"]
                 
-                .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.ID, minOrEqualZeroBundle).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
@@ -651,12 +651,14 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE reseaux_sociaux SET nom = @_Nom WHERE id = @ID", QueryTypes.UPDATE)
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id, nom FROM reseaux_sociaux", QueryTypes.CBO)
             ;
 
             #endregion
             #region Collaborateurs
             await controllers["Collaborateurs"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -680,11 +682,13 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE collaborateurs SET nom = @_Nom, prenom = @_Prenom, telephone = @_Telephone, adresse_courriel = @_Email, id_compagnie = @_CompagnieID WHERE id = @ID", QueryTypes.UPDATE)
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom, ' - ', adresse_courriel) FROM collaborateurs", QueryTypes.CBO)
             ;
             #endregion
             #region Compagnies
             await controllers["Compagnies"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -716,13 +720,9 @@ namespace APIDynamic
             #region CollaborateursReseauxSociaux
             await controllers["CollaborateursReseauxSociaux"]
 
-                .addPropriety("ReseauxSociauxID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ReseauxSociauxID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("ReseauxSociaux", true, true, ShowTypes.Ref).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("CollaborateurID", true, true, ShowTypes.INT).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("Collaborateur", true, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("CollaborateurID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
@@ -732,7 +732,7 @@ namespace APIDynamic
             #endregion
             #region TypeFormats
             await controllers["TypeFormats"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM types_format_produit WHERE id = @_ID", QueryTypes.SELECT)
@@ -742,7 +742,7 @@ namespace APIDynamic
             #endregion
             #region Images
             await controllers["Images"]
-                .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
                 .addPropriety("URL", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
                 .addRoute(BaseRoutes.GETALL)
@@ -754,11 +754,11 @@ namespace APIDynamic
             #region ImagesProduits
             await controllers["ImagesProduits"]
 
-                .addPropriety("ImageID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("ImageID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("URL", true, false, ShowTypes.Ref).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("ProduitID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("ProduitID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -793,6 +793,10 @@ namespace APIDynamic
             await controllers["FormatsProduits"]
                .addCBOInfo("ProduitID", "Produits", "Produit")
                .addCBOInfo("FormatID", "Formats", "Format")
+            ;
+            await controllers["CollaborateursReseauxSociaux"]
+               .addCBOInfo("ReseauxSociauxID", "ReseauxSociaux", "ReseauxSociaux")
+               .addCBOInfo("CollaborateurID", "Collaborateurs", "Collaborateur")
             ;
             await controllers["FormatsProduitsCommandes"]
                .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
@@ -840,10 +844,6 @@ namespace APIDynamic
 
             await controllers["Collaborateurs"]
                 .addCBOInfo("CompagnieID", "Compagnies", "Compagnie")
-            ;
-            await controllers["CollaborateursReseauxSociaux"]
-                .addMapperGenerator("Collaborateur", "Collaborateurs", CSharpTypes.REFERENCE.Link("CollaborateurID", "ID"))
-                .addMapperGenerator("ReseauxSociaux", "ReseauxSociaux", CSharpTypes.REFERENCE.Link("ReseauxSociauxID", "ID"))
             ;
             #endregion
 
