@@ -12,6 +12,7 @@ namespace APIDynamic
             var isDate = ValidatorTypes.REGEX.SetValue("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$", "");
             var isTelephone = ValidatorTypes.REGEX.SetValue("*", "");
             var controllers = new Dictionary<string, DynamicController>();
+            #region AddControllers
             await controllers
                 .addController("Categories", true)
                 .addController("EtatsProduit", false)
@@ -43,7 +44,8 @@ namespace APIDynamic
                 .addController("TypeValeurs", false)
                 .addController("TypeAffectations", false)
                 ;
-            
+            #endregion
+            #region Categories
             await controllers["Categories"]
                 
                 .addPropriety("ID", true, true, ShowTypes.INT,
@@ -73,7 +75,9 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM categories", QueryTypes.CBO)
                 ;
-            
+
+            #endregion
+            #region EtatsProduit
             await controllers["EtatsProduit"]
                 .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle)
                 .addPropriety("Nom", true, true, ShowTypes.STRING)
@@ -85,6 +89,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM etats_produit", QueryTypes.CBO)
                 ;
 
+            #endregion
+            #region Produits
             await controllers["Produits"]
                 .addPropriety("ID", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
@@ -125,6 +131,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id, nom FROM produits", QueryTypes.CBO)
             ;
 
+            #endregion
+            #region Provinces
             await controllers["Provinces"]
                 .addPropriety("ID", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
@@ -138,6 +146,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id, nom FROM provinces", QueryTypes.CBO)
             ;
 
+            #endregion
+            #region Villes
             await controllers["Villes"]
 
                 .addPropriety("ID", true, true, ShowTypes.INT,
@@ -155,6 +165,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id, nom FROM villes", QueryTypes.CBO)
             ;
 
+            #endregion
+            #region TypeValeurs
             await controllers["TypeValeurs"]
 
                 .addPropriety("ID", true, true, ShowTypes.INT,
@@ -169,6 +181,8 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM types_valeur", QueryTypes.CBO)
             ;
+            #endregion
+            #region TypeAffectations
             await controllers["TypeAffectations"]
 
                 .addPropriety("ID", true, true, ShowTypes.INT,
@@ -184,6 +198,8 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM types_valeur", QueryTypes.CBO)
             ;
+            #endregion
+            #region EtatsCommandes
             await controllers["EtatsCommandes"]
                 .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
@@ -194,8 +210,10 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM etats_commandes", QueryTypes.CBO)
-                ;
+            ;
 
+            #endregion
+            #region Employes
             await controllers["Employes"]
                 .addPropriety("ID", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
@@ -220,7 +238,9 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM employes", QueryTypes.CBO)
-                ;
+            ;
+            #endregion
+            #region Formats
 
             await controllers["Formats"]
                 .addPropriety("ID", true, true, ShowTypes.INT,
@@ -238,6 +258,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
 
             ;
+            #endregion
+            #region FormatsProduits
             await controllers["FormatsProduits"]
                 .addPropriety("ProduitID", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
@@ -257,6 +279,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
 
             ;
+            #endregion
+            #region AffectationsPrixLorsCommande
             await controllers["AffectationsPrixLorsCommande"]
                 .addPropriety("AffectationPrixID", true, true, ShowTypes.CBO).Anonymous()
                 .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
@@ -272,6 +296,8 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM affectation_prix", QueryTypes.CBO)
             ;
+            #endregion
+            #region Taxes
             await controllers["Taxes"]
                 .addPropriety("ProduitID", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
@@ -297,6 +323,8 @@ namespace APIDynamic
                 //.addRoute(BaseRoutes.GET) ->Si j'en veux une pcq y'a pas de ID unique à la table on utilise un "combo id"
             ;
 
+            #endregion
+            #region AffectationsPrix
             await controllers["AffectationsPrix"]
 
                 .addPropriety("ID", true, true, ShowTypes.INT,
@@ -318,6 +346,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id, nom FROM affectation_prix", QueryTypes.CBO)
             ;
 
+            #endregion
+            #region ProduitsParCommande
             await controllers["ProduitsParCommande"]
 
                 .addPropriety("ID", true, true, ShowTypes.INT,
@@ -373,8 +403,10 @@ namespace APIDynamic
                 */
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT ppc.id, p.nom FROM produits_par_commande ppc INNER JOIN produits p ON p.id = ppc.id_produit", QueryTypes.CBO)
-                ;
+            ;
 
+            #endregion
+            #region Commandes
             await controllers["Commandes"]
                 .addPropriety("ID", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
@@ -427,6 +459,8 @@ namespace APIDynamic
 
 
             ;
+            #endregion
+            #region Clients
             string selectUserInfoStart = "SELECT cli.id AS userID, cli.adresse_courriel AS username, cli.adresse_courriel AS Email, cli.mdp as passwordHash, cli.sel AS passwordSalt FROM clients AS cli ";
             string updateToken = "UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID";
             string updatePassword = "UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID";
@@ -503,6 +537,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom) FROM clients", QueryTypes.CBO)
             ;
 
+            #endregion
+            #region ReseauxSociaux
             await controllers["ReseauxSociaux"]
                 
                 .addPropriety("ID", true, true, ShowTypes.INT, minOrEqualZeroBundle).Anonymous()
@@ -516,8 +552,10 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE reseaux_sociaux SET nom = @_Nom WHERE id = @ID", QueryTypes.UPDATE)
-                ;
+            ;
 
+            #endregion
+            #region Collaborateurs
             await controllers["Collaborateurs"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -543,7 +581,9 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.UPDATE)
                     .addRouteQuery("UPDATE collaborateurs SET nom = @_Nom, prenom = @_Prenom, telephone = @_Telephone, adresse_courriel = @_Email, id_compagnie = @_CompagnieID WHERE id = @ID", QueryTypes.UPDATE)
-                ;
+            ;
+            #endregion
+            #region Compagnies
             await controllers["Compagnies"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -571,8 +611,10 @@ namespace APIDynamic
                 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM compagnies", QueryTypes.CBO)
-                ;
+            ;
 
+            #endregion
+            #region CollaborateursReseauxSociaux
             await controllers["CollaborateursReseauxSociaux"]
 
                 .addPropriety("ReseauxSociauxID", true, true, ShowTypes.INT).Anonymous()
@@ -588,6 +630,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT crs.id_collaborateur AS CollaborateurID, CONCAT(coll.prenom,' ', coll.nom) AS CollaborateurNom, crs.id_reseaux_sociaux AS ReseauxSociauxID, rs.nom AS ReseauxSociauxNom FROM collaborateurs_reseaux_sociaux AS crs LEFT JOIN collaborateurs AS coll ON coll.id = crs.id_collaborateur LEFT JOIN reseaux_sociaux AS rs ON rs.id = crs.id_reseaux_sociaux WHERE crs.id_collaborateur = @_CollaborateurID AND crs.id_reseaux_sociaux = @_ReseauxSociauxID", QueryTypes.SELECT)
 
             ;
+            #endregion
+            #region TypeFormats
             await controllers["TypeFormats"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
@@ -596,6 +640,8 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM types_format_produit WHERE id = @_ID", QueryTypes.CBO)
             ;
+            #endregion
+            #region Images
             await controllers["Images"]
                 .addPropriety("ID", true, true, ShowTypes.INT).Anonymous()
                 .addPropriety("URL", true, true, ShowTypes.STRING).Anonymous()
@@ -605,6 +651,8 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, url FROM images_produit", QueryTypes.CBO)
             ;
+            #endregion
+            #region ImagesProduits
             await controllers["ImagesProduits"]
 
                 .addPropriety("ImageID", true, true, ShowTypes.CBO).Anonymous()
@@ -623,8 +671,9 @@ namespace APIDynamic
                 .addRouteQuery("INSERT INTO ")*/
             ;
 
-            /*GÉNÉRATION DE CBO ET MAPGENERATORS*/
 
+            #endregion
+            #region GÉNÉRATION DE CBO ET MAPGENERATORS
             await controllers["Categories"]
                 .addCBOInfo("CategorieMereID", "Categories", "CategorieMere")
             ;
@@ -687,6 +736,7 @@ namespace APIDynamic
                 .addMapperGenerator("Collaborateur", "Collaborateurs", CSharpTypes.REFERENCE.Link("CollaborateurID", "ID"))
                 .addMapperGenerator("ReseauxSociaux", "ReseauxSociaux", CSharpTypes.REFERENCE.Link("ReseauxSociauxID", "ID"))
             ;
+            #endregion
 
             //await controllers["TypesPreferencesGraphique"]
             //    .addRoute(BaseRoutes.GETALL)
