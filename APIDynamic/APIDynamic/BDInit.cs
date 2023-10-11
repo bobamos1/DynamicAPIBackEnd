@@ -45,7 +45,8 @@ namespace APIDynamic
                 .addController("TypeValeurs", false)
                 .addController("TypeAffectations", false)
                 .addController("FormatsProduitsCommandes", false)
-            ;
+                .addController("Roles", false)
+                ;
             #endregion
             #region Categories
             await controllers["Categories"]
@@ -67,7 +68,7 @@ namespace APIDynamic
                     .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID", QueryTypes.SELECT)
                 
                 .addRoute(BaseRoutes.INSERT)
-                    .Authorize(Roles.Admin.ID())
+                    //.Authorize(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO categories (nom, descriptions, id_categorie_mere) VALUES (@Nom, @Description, @CategorieMereID)", QueryTypes.INSERT)             
                 .addRoute(BaseRoutes.UPDATE)
                     //.Authorize(Roles.Admin.ID())
@@ -137,8 +138,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS CategorieID, c.nom AS Categorie, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatsProduitNom FROM produits AS p LEFT JOIN categories AS c ON c.id = p.id_categorie LEFT JOIN etats_produit AS ep ON ep.id = p.id_etat_produit WHERE p.id = @_ID AND p.id_categorie = @_CategorieID AND p.id_etat_produit = @_EtatProduitID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
-                    .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@Nom, @Descriptions, @Prix, @CategorieID, @EtatProduitID", QueryTypes.INSERT)
+                    //.Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@Nom, @Descriptions, @Prix, @CategorieID, @EtatProduitID)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
@@ -542,8 +543,8 @@ namespace APIDynamic
                 .addPropriety("Province", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
 
-             .addRoute(BaseRoutes.GETALL, "id_client")// c.code_postal AS code_postal,
-                 .addRouteQuery("SELECT c.id AS id, c.montant_brut AS MontantBrut, c.date_heure_transaction AS dateCreation, c.id_etat_commande AS EtatsCommandesID, ec.nom AS etat, c.no_civique_livraison AS no_civique, c.rue_livraison AS rue, c.id_ville AS VilleID, v.nom AS ville, c.numero_facture AS numero_facture, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, pro.nom AS Province, c.id_employe AS EmployeID, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_id AND c.id_client = @_id_client AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_no_civique AND c.id_etat_commande = @_EtatsCommandesID ORDER BY @&SortByCol", QueryTypes.SELECT)
+             .addRoute(BaseRoutes.GETALL, "ClientID")// c.code_postal AS code_postal,
+                 .addRouteQuery("SELECT c.id AS id, c.montant_brut AS MontantBrut, c.date_heure_transaction AS dateCreation, c.id_etat_commande AS EtatsCommandesID, ec.nom AS etat, c.no_civique_livraison AS no_civique, c.rue_livraison AS rue, c.id_ville AS VilleID, v.nom AS ville, c.numero_facture AS numero_facture, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, pro.nom AS Province, c.id_employe AS EmployeID, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_id AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_no_civique AND c.id_etat_commande = @_EtatsCommandesID ORDER BY @&SortByCol", QueryTypes.SELECT)
             
              .addRoute(BaseRoutes.INSERT)
                  .Authorize(Roles.Client.ID(), Roles.Admin.ID())
@@ -771,6 +772,24 @@ namespace APIDynamic
             ;
 
 
+            #endregion
+            #region Roles
+            await controllers["Roles"]
+                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("", QueryTypes.UPDATE)
+
+                .addRoute(BaseRoutes.DELETE)
+                    .addRouteQuery("", QueryTypes.DELETE)
+            ;
             #endregion
             #region GÉNÉRATION DE CBO ET MAPGENERATORS
             await controllers["Categories"]
