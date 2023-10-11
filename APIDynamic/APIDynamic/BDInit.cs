@@ -248,41 +248,81 @@ namespace APIDynamic
 
             #endregion
             #region Employes
+            string selectUserInfoStartEmployes = "SELECT emp.id AS userID, emp.adresse_courriel AS username, emp.adresse_courriel AS Email, emp.mdp as passwordHash, emp.sel AS passwordSalt FROM employes AS emp ";
+            string updateTokenEmployes = "UPDATE employes SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID";
+            string updatePasswordEmployes = "UPDATE employes SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID";
             await controllers["Employes"]
-                .addPropriety("ID", true, true, ShowTypes.ID,
-                    minOrEqualZeroBundle
-                )
-                .addPropriety("Nom", true, true, ShowTypes.STRING)
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Prenom", true, true, ShowTypes.STRING)
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("DateNaissance", true, true, ShowTypes.STRING)
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Email", true, true, ShowTypes.STRING)
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("MDP", true, true, ShowTypes.STRING)
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Token", true, true, ShowTypes.STRING)
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Sel", true, true, ShowTypes.STRING)
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Actif", true, true, ShowTypes.INT)
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
+                .addPropriety("Prenom", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
+                .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
+                .addPropriety("Email", true, true, ShowTypes.STRING//,
+                                                                   //isEmail
+                ).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
+                .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
+                .addPropriety("Token", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
+                .addPropriety("Sel", false, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
+                .addPropriety("Actif", true, true, ShowTypes.INT).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
+                .addPropriety("ExpirationToken", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
 
-                .addRoute(BaseRoutes.GETALL)
-                    .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("SELECT id AS ID, nom AS, prenom AS Prenom, date_naissance AS DateNaissance, adresse_courriel AS Email, actif AS Actif FROM employes WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.GETALL, "ID")
+                    .addRouteQuery("SELECT emp.id AS ID, emp.nom AS Nom, emp.prenom AS Prenom, emp.date_naissance AS DateNaissance, emp.adresse_courriel AS Email, emp.actif AS Actif FROM employes AS emp WHERE emp.id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
-                .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email,  @Actif)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, actif) VALUES (@ID, @Nom, @Prenom, @DateNaissance, @Email, @Actif)", QueryTypes.INSERT)
 
-                .addRoute(BaseRoutes.UPDATE)
-                .Authorize(Roles.Admin.ID())
+                .addRoute(BaseRoutes.UPDATE, "ID")
+                    .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("UPDATE employes SET nom = @_Nom, prenom = @_Prenom, date_naissance = @_DateNaissance, adresse_courriel = @_Email, actif = @_Actif WHERE id = @ID", QueryTypes.UPDATE)
 
+
+                .addRoute("ConnexionStepOne", RouteTypes.POST)
+                    .addRouteQuery(selectUserInfoStartEmployes + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
+                        .addParam("Password")
+                    .addRouteQueryNoVar(updateTokenEmployes, QueryTypes.UPDATE, true)
+
+                .addRoute("ConnexionStepTwo", RouteTypes.POST)
+                    .addRouteQuery(selectUserInfoStartEmployes + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
+
+                .addRoute("InscriptionClient", RouteTypes.POST)
+                    .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
+                        .setNotRequired("MDP", "Sel", "Token")
+                        .addParam("Password")
+
+
+                .addRoute("RecuperationStepOne", RouteTypes.POST)
+                    .addRouteQuery("SELECT id FROM employes WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
+                    .addRouteQueryNoVar(updateTokenEmployes, QueryTypes.UPDATE, true)
+
+                .addRoute("RecuperationStepTwo", RouteTypes.POST)
+                    .addRouteQuery(selectUserInfoStartEmployes + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
+                        .addParam("NewPassword")
+                    .addRouteQueryNoVar(updatePasswordEmployes, QueryTypes.UPDATE, true)
+
+                .addRoute("ChangePassword", RouteTypes.PUT)
+                    .Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .addRouteQuery(selectUserInfoStartEmployes + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
+                        .addParam("NewPassword")
+                        .addParam("Password")
+                    .addRouteQueryNoVar(updatePasswordEmployes, QueryTypes.UPDATE, true)
+
+                .addRoute("CheckEmail", RouteTypes.GET)
+                    .addRouteQuery("SELECT COUNT(*) FROM employes WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
+
                 .addRoute(BaseRoutes.CBO)
-                    .addRouteQuery("SELECT id, nom FROM employes", QueryTypes.CBO)
+                    .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom) FROM employes", QueryTypes.CBO)
+
             ;
             #endregion
             #region Formats
@@ -766,31 +806,37 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT ip.id AS ImageID, ip.url AS URL, p.id AS ProduitID, p.nom AS Produit, ip.descriptions AS Description FROM images_produit_produits AS ipp INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit INNER JOIN produits p ON p.id = ipp.id_produit WHERE ipp.id_produit = @_ProduitID", QueryTypes.SELECT)
-            /*
+            
             .addRoute(BaseRoutes.INSERT)
-                .addRouteQuery("INSERT INTO ")*/
+                .Authorize(Roles.Admin.ID())
+                .addRouteQuery("INSERT INTO images_produit (url, descriptions) VALUES (@URL, @Descriptions)", QueryTypes.INSERT)
+                .addRouteQuery("INSERT INTO images_produit_produits (id_image_produit, id_produit) VALUES (@ImageID, @ProduitID)", QueryTypes.INSERT)
+
+            /*.addRoute(BaseRoutes.UPDATE)
+                .addRouteQuery("UPDATE image_produit SET ")*/
+
             ;
 
 
             #endregion
-            #region Roles
-            await controllers["Roles"]
-                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
-                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+            //#region Roles
+            //await controllers["Roles"]
+            //    .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+            //    .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
 
-                .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("", QueryTypes.SELECT)
+            //    .addRoute(BaseRoutes.GETALL)
+            //        .addRouteQuery("", QueryTypes.SELECT)
 
-                .addRoute(BaseRoutes.INSERT)
-                    .addRouteQuery("", QueryTypes.INSERT)
+            //    .addRoute(BaseRoutes.INSERT)
+            //        .addRouteQuery("", QueryTypes.INSERT)
 
-                .addRoute(BaseRoutes.UPDATE)
-                    .addRouteQuery("", QueryTypes.UPDATE)
+            //    .addRoute(BaseRoutes.UPDATE)
+            //        .addRouteQuery("", QueryTypes.UPDATE)
 
-                .addRoute(BaseRoutes.DELETE)
-                    .addRouteQuery("", QueryTypes.DELETE)
-            ;
-            #endregion
+            //    .addRoute(BaseRoutes.DELETE)
+            //        .addRouteQuery("", QueryTypes.DELETE)
+            //;
+            //#endregion
             #region GÉNÉRATION DE CBO ET MAPGENERATORS
             await controllers["Categories"]
                 .addCBOInfo("CategorieMereID", "Categories", "CategorieMere")

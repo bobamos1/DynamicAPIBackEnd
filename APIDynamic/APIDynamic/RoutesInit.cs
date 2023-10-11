@@ -72,6 +72,70 @@ namespace APIDynamic
                     return Results.Forbid();
                 }
             );
+
+
+            //Connection Employes
+            controllers["Employes"].mapRoute("ConnexionStepOne",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"));
+                }
+            );
+            controllers["Employes"].mapRoute("ConnexionStepTwo",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Admin.ID());
+                }
+            );
+            controllers["Employes"].mapRoute("InscriptionClient",
+                async (queries, bodyData) =>
+                {
+                    var nom = bodyData.Get<string>("Nom");
+                    var email = bodyData.Get<string>("Email");
+                    var userInfo = DynamicConnection.CreatePasswordHash(nom, email, bodyData.Get<string>("Password"));
+                    var id = await executorData.ExecuteInsertWithLastID(queries[0]
+                        .setParams(bodyData)
+                        .setParam("MDP", userInfo.passwordHash)
+                        .setParam("Token", "")
+                        .setParam("Sel", userInfo.passwordSalt)
+                    //.setParam("Password", bodyData.Get<bool>("Password"))
+                    );
+                    return Results.Ok(DynamicConnection.CreateToken(id, userInfo));
+                }
+            );
+            controllers["Employes"].mapRoute("RecuperationStepOne",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeRecuperationStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"));
+                }
+            );
+            controllers["Employes"].mapRoute("CheckEmail",
+                async (queries, bodyData) =>
+                {
+                    var result = await executorData.SelectValue<int>(queries[0].setParam("Email", bodyData["Email"]));
+                    if (result == 0)
+                        return Results.Ok();
+                    return Results.Problem("", "", 410);
+                }
+            );
+            controllers["Employes"].mapRoute("RecuperationStepTwo",
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), false, Roles.Admin.ID());
+                }
+            );
+            controllers["Employes"].mapRoute("ChangePassword",
+                async (queries, bodyData) =>
+                {
+                    var userInfo = await DynamicConnection.checkUserInfo(bodyData.Get<string>("Email"), bodyData.Get<string>("Password"), queries[0], executorData);
+                    if (userInfo is null)
+                        return Results.Forbid();
+                    if (await DynamicConnection.ChangePassword(executorData, queries[1], userInfo.userID, bodyData.Get<string>("NewPassword")))
+                        return Results.Ok();
+                    return Results.Forbid();
+                }
+            );
+            //Routes
             controllers["ProduitsParCommande"].mapRoute("InsertPanier",
                 async (queries, bodyData) =>
                 {
