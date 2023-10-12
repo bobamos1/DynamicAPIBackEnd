@@ -520,6 +520,7 @@ namespace APIDynamic
 
                 .addRoute("InsertPanier", RouteTypes.POST, "id_client")
                     //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .addRouteQuery("SELECT id FROM clients WHERE token = @Token", QueryTypes.SELECT)
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 5", QueryTypes.INSERT)
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 

@@ -21,7 +21,9 @@ namespace APIDynamic
             controllers["Clients"].mapRoute("ConnexionStepTwo",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID());
+                    var connexionResults = DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID());
+                    var clientID = bodyData.Get<long>("userID");
+                    return (connexionResults);
                 }
             );
             controllers["Clients"].mapRoute("InscriptionClient",
@@ -141,11 +143,12 @@ namespace APIDynamic
                 {
                     try
                     {
-                        var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
+                        var clientID = await executorData.ExecuteQueryWithTransaction(queries[0].clearParams().setParam("Token", bodyData.SafeGet<string>("Token")));
+                        var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[1].setParams(bodyData));
                         var idChoisi = bodyData.SafeGet<long>("FormatChoisiID");
                         if (idChoisi != default)
                         {
-                            await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatChoisiID", bodyData.Get<long>("FormatChoisiID")).setParam("ProduitCommandeID", produitParCommandeID));
+                            await executorData.ExecuteQueryWithTransaction(queries[2].clearParams().setParam("FormatChoisiID", bodyData.Get<long>("FormatChoisiID")).setParam("ProduitCommandeID", produitParCommandeID));
                         }
                         return Results.Ok();
                     }
