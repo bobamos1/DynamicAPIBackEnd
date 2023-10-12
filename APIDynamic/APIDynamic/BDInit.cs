@@ -854,6 +854,8 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Image", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Prenom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Telephone", true, true, ShowTypes.INT).Anonymous()
@@ -862,22 +864,21 @@ namespace APIDynamic
                     isEmail
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("CompagnieID", false, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("CompagnieID", true, true, ShowTypes.CBO).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Reseau", false, true, ShowTypes.Ref).Anonymous()
 
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT coll.id AS ID, coll.nom AS Nom, coll.prenom AS Prenom, coll.telephone AS Telephone, coll.adresse_courriel AS Email, coll.id_compagnie AS CompagnieID, comp.nom AS Compagnie FROM collaborateurs AS coll LEFT JOIN compagnies AS comp ON comp.id = coll.id_compagnie WHERE coll.id = @_ID AND coll.id_compagnie = @_CompagnieID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT coll.id AS ID, coll.nom AS Nom, coll.prenom AS Prenom, coll.telephone AS Telephone, coll.adresse_courriel AS Email,coll.descriptions AS Description, coll.images AS Image, coll.id_compagnie AS CompagnieID, comp.nom AS Compagnie FROM collaborateurs AS coll LEFT JOIN compagnies AS comp ON comp.id = coll.id_compagnie WHERE coll.id = @_ID AND coll.id_compagnie = @_CompagnieID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
-                    .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("INSERT INTO collaborateurs (nom, prenom, telephone, adresse_courriel, id_compagnie) VALUES (@Nom, @Prenom, @Telephone, @Email, @CompagnieID)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO collaborateurs (nom, prenom, telephone, adresse_courriel, images, descriptions, id_compagnie) VALUES (@Nom, @Prenom, @Telephone, @Email, @_Image, @_Description, @CompagnieID)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
-                    .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("UPDATE collaborateurs SET nom = @_Nom, prenom = @_Prenom, telephone = @_Telephone, adresse_courriel = @_Email, id_compagnie = @_CompagnieID WHERE id = @ID", QueryTypes.UPDATE)
-
+                    .addRouteQuery("UPDATE collaborateurs SET nom = @_Nom, prenom = @_Prenom, telephone = @_Telephone, adresse_courriel = @_Email, images = @_Image,descriptions=@_Description, id_compagnie = @_CompagnieID WHERE id = @ID", QueryTypes.UPDATE)
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom, ' - ', adresse_courriel) FROM collaborateurs", QueryTypes.CBO)
             ;
