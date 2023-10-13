@@ -507,7 +507,7 @@ namespace APIDynamic
                 .addPropriety("format", true, true, ShowTypes.Ref).Anonymous()
                 .addPropriety("taxes", true, true, ShowTypes.Ref).Anonymous()
                 .addPropriety("cout", true, true, ShowTypes.FLOAT).Anonymous()
-                //.addPropriety("image", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("image", true, true, ShowTypes.Ref).Anonymous()
                 //.addPropriety("Taxes", true, false, ShowTypes.Ref)
                 //.addMapperGenerator("Taxes", CSharpTypes.REFERENCE.Link("TaxeID", "ID"))
                 /*.addPropriety("Images", true, false, ShowTypes.Ref)
@@ -714,6 +714,7 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("CompagnieID", true, true, ShowTypes.CBO).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Reseau", true, true, ShowTypes.Ref).Anonymous()
 
 
                 .addRoute(BaseRoutes.GETALL)
@@ -766,9 +767,11 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("CollaborateurID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                .addPropriety("Liens", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT crs.id_collaborateur AS CollaborateurID, CONCAT(coll.prenom,' ', coll.nom) AS CollaborateurNom, crs.id_reseaux_sociaux AS ReseauxSociauxID, rs.nom AS ReseauxSociauxNom FROM collaborateurs_reseaux_sociaux AS crs LEFT JOIN collaborateurs AS coll ON coll.id = crs.id_collaborateur LEFT JOIN reseaux_sociaux AS rs ON rs.id = crs.id_reseaux_sociaux WHERE crs.id_collaborateur = @_CollaborateurID AND crs.id_reseaux_sociaux = @_ReseauxSociauxID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT crs.id_collaborateur AS CollaborateurID, CONCAT(coll.prenom,' ', coll.nom) AS CollaborateurNom, crs.id_reseaux_sociaux AS ReseauxSociauxID, rs.nom AS ReseauxSociauxNom, crs.liens AS Liens FROM collaborateurs_reseaux_sociaux AS crs LEFT JOIN collaborateurs AS coll ON coll.id = crs.id_collaborateur LEFT JOIN reseaux_sociaux AS rs ON rs.id = crs.id_reseaux_sociaux WHERE crs.id_collaborateur = @_CollaborateurID AND crs.id_reseaux_sociaux = @_ReseauxSociauxID", QueryTypes.SELECT)
 
             ;
             #endregion
@@ -881,6 +884,7 @@ namespace APIDynamic
                 //.addCBOInfo("FormatChoisiID", "Formats", "FormatChoisi")
                 .addMapperGenerator("taxes", "AffectationsPrixLorsCommande", CSharpTypes.REFERENCE.Link("id", "ProduitParCommandeID"))
                 .addMapperGenerator("format", "FormatsProduitsCommandes", CSharpTypes.REFERENCE.Link("id", "ProduitParCommandeID"))
+                .addMapperGenerator("image", "ImagesProduits", CSharpTypes.REFERENCE.Link("id", "ProduitID"))
             ;
             await controllers["AffectationsPrixLorsCommande"]
                 .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
@@ -910,6 +914,7 @@ namespace APIDynamic
 
             await controllers["Collaborateurs"]
                 .addCBOInfo("CompagnieID", "Compagnies", "Compagnie")
+                .addMapperGenerator("Reseau", "CollaborateursReseauxSociaux", CSharpTypes.REFERENCE.Link("ID", "CollaborateurID"))
             ;
             #endregion
 
