@@ -21,9 +21,7 @@ namespace APIDynamic
             controllers["Clients"].mapRoute("ConnexionStepTwo",
                 (queries, bodyData) =>
                 {
-                    var connexionResults = DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID());
-                    var clientID = bodyData.Get<long>("userID");
-                    return (connexionResults);
+                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID());
                 }
             );
             controllers["Clients"].mapRoute("InscriptionClient",
@@ -89,7 +87,7 @@ namespace APIDynamic
                     return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Admin.ID());
                 }
             );
-            controllers["Employes"].mapRoute("InscriptionClient",
+            controllers["Employes"].mapRoute("InscriptionEmploye",
                 async (queries, bodyData) =>
                 {
                     var nom = bodyData.Get<string>("Nom");

@@ -295,7 +295,7 @@ namespace APIDynamic
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
 
-                .addRoute("InscriptionClient", RouteTypes.POST)
+                .addRoute("InscriptionEmploye", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
                         .setNotRequired("MDP", "Sel", "Token")
                         .addParam("Password")
