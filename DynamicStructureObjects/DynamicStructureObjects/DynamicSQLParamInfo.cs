@@ -5,20 +5,24 @@ namespace DynamicStructureObjects
 {
     public class DynamicSQLParamInfo
     {
-        internal long id { get; set; }
-        internal long ProprietyID { get; set; }
-        internal string VarAffected { get; set; }
-        internal bool isRequired { get; set; }
+        public long id { get; internal set; }
+        public long ProprietyID { get; internal set; }
+        public string VarAffected { get; internal set; }
+        public bool isRequired { get; internal set; }
+        public ShowTypes showType { get; internal set; }
+        public int ind { get; internal set; }
         internal List<DynamicValidator> Validators { get; set; }
         internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @SQLParamInfoID UNION ALL SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true);
-        internal static readonly Query insertSQLParamInfo = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO SQLParamInfos (id_Propriety, id_RouteQuery, varAffected) VALUES (@PropretyID, @RouteQueryID, @VarAffected)", true);
-        internal DynamicSQLParamInfo(long id, string VarAffected, long ProprietyID)
+        internal static readonly Query insertSQLParamInfo = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO SQLParamInfos (id_Propriety, id_RouteQuery, varAffected, id_ShowType, ind) VALUES (@PropretyID, @RouteQueryID, @VarAffected, @ShowTypeID, @ind)", true);
+        internal DynamicSQLParamInfo(long id, string VarAffected, long ProprietyID, long showTypeID, int ind)
         {
             this.id = id;
             this.VarAffected = VarAffected;
             this.ProprietyID = ProprietyID;
             this.Validators = new List<DynamicValidator>();
             this.isRequired = false;
+            this.showType = (ShowTypes)showTypeID;
+            this.ind = ind;
         }
         internal DynamicSQLParamInfo(DynamicSQLParamInfo paramInfo, bool isRequired)
         {
@@ -48,7 +52,7 @@ namespace DynamicStructureObjects
             }
             return paramInfo;
         }
-        public async static Task<DynamicSQLParamInfo> addSQLParam(string VarAffected, long ProprietyID, long RouteQueryID, ShowTypes? showType)
+        public async static Task<DynamicSQLParamInfo> addSQLParam(string VarAffected, long ProprietyID, long RouteQueryID, ShowTypes? showType, int ind)
         {
             return new DynamicSQLParamInfo(
                 await DynamicController.executor.ExecuteInsertWithLastID(
@@ -56,10 +60,13 @@ namespace DynamicStructureObjects
                         .setParam("PropretyID", ProprietyID)
                         .setParam("RouteQueryID", RouteQueryID)
                         .setParam("VarAffected", VarAffected)
-                        //.setParam("ShowTypeID", showType is null ? ShowTypes.NONE : (long)showType)
+                        .setParam("ShowTypeID", showType is null ? ShowTypes.NONE : (long)showType)
+                        .setParam("ind", ind)
                     )
                 , VarAffected
                 , ProprietyID
+                , (long)showType
+                , ind
             );
         }
         public async Task<DynamicSQLParamInfo> addValidator(string Value, ValidatorTypes ValidatorType)

@@ -282,14 +282,15 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, actif) VALUES (@ID, @Nom, @Prenom, @DateNaissance, @Email, @Actif)", QueryTypes.INSERT)
 
-                .addRoute(BaseRoutes.UPDATE, "ID")
+                .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("UPDATE employes SET nom = @_Nom, prenom = @_Prenom, date_naissance = @_DateNaissance, adresse_courriel = @_Email, actif = @_Actif WHERE id = @ID", QueryTypes.UPDATE)
+                        .bindParamToUserID("ID")
 
 
                 .addRoute("ConnexionStepOne", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
-                        .addParam("Password", ShowTypes.NONE)
+                        .addParam("Password", ShowTypes.NONE, 0)
                     .addRouteQueryNoVar(updateTokenEmployes, QueryTypes.UPDATE, true)
 
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
@@ -298,7 +299,7 @@ namespace APIDynamic
                 .addRoute("InscriptionEmploye", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
                         .setNotRequired("MDP", "Sel", "Token")
-                        .addParam("Password", ShowTypes.NONE)
+                        .addParam("Password", ShowTypes.NONE, 0)
 
 
                 .addRoute("RecuperationStepOne", RouteTypes.POST)
@@ -307,14 +308,14 @@ namespace APIDynamic
 
                 .addRoute("RecuperationStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
-                        .addParam("NewPassword", ShowTypes.NONE)
+                        .addParam("NewPassword", ShowTypes.NONE, 0)
                     .addRouteQueryNoVar(updatePasswordEmployes, QueryTypes.UPDATE, true)
 
                 .addRoute("ChangePassword", RouteTypes.PUT)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
-                        .addParam("NewPassword", ShowTypes.NONE)
-                        .addParam("Password", ShowTypes.NONE)
+                        .addParam("NewPassword", ShowTypes.NONE, 0)
+                        .addParam("Password", ShowTypes.NONE, 1)
                     .addRouteQueryNoVar(updatePasswordEmployes, QueryTypes.UPDATE, true)
 
                 .addRoute("CheckEmail", RouteTypes.GET)
@@ -533,13 +534,13 @@ namespace APIDynamic
                 .addRoute("InsertPanier", RouteTypes.POST)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 4", QueryTypes.INSERT)
-                        .setNotRequired("id_client")
+                        .bindParamToUserID("id_client")
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
                 .addRoute("InsertWishList", RouteTypes.POST)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 5", QueryTypes.INSERT)
-                        .setNotRequired("id_client")
+                        .bindParamToUserID("id_client")
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
                 .addRoute("DeletePanier", RouteTypes.DELETE)
@@ -548,7 +549,7 @@ namespace APIDynamic
                     .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @id", QueryTypes.DELETE)
                 .addRoute("MoveToPanier", RouteTypes.PUT)
                     .addRouteQuery("UPDATE produits_par_commande SET id_commande = (SELECT TOP(1) id FROM commandes WHERE id_client = @ClientID AND id_etat_commande = 4) WHERE id = @id", QueryTypes.UPDATE)
-                        .setNotRequired("ClientID")
+                        .bindParamToUserID("ClientID")
 
                 /*
                  * Checker ce qui peut être modifié dans cette table là, dans le fonctionnement, tu ne peux pas changer un produit, mais au lieu l'enlever de la commande et ajouter / DOnc 1 delete et 1 insert au lieu d'un update
@@ -600,8 +601,9 @@ namespace APIDynamic
                 .addPropriety("Province", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
 
-             .addRoute(BaseRoutes.GETALL, "ClientID")// c.code_postal AS code_postal,
-                 .addRouteQuery("SELECT c.id AS id, c.montant_brut AS MontantBrut, c.date_heure_transaction AS dateCreation, c.id_etat_commande AS EtatsCommandesID, ec.nom AS etat, c.no_civique_livraison AS no_civique, c.rue_livraison AS rue, c.id_ville AS VilleID, v.nom AS ville, c.numero_facture AS numero_facture, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, pro.nom AS Province, c.id_employe AS EmployeID, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_id AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_no_civique AND c.id_etat_commande = @_EtatsCommandesID ORDER BY @&SortByCol", QueryTypes.SELECT)
+             .addRoute(BaseRoutes.GETALL)
+                .addRouteQuery("SELECT c.id AS id, c.montant_brut AS MontantBrut, c.date_heure_transaction AS dateCreation, c.id_etat_commande AS EtatsCommandesID, ec.nom AS etat, c.no_civique_livraison AS no_civique, c.rue_livraison AS rue, c.id_ville AS VilleID, v.nom AS ville, c.numero_facture AS numero_facture, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, pro.nom AS Province, c.id_employe AS EmployeID, c.code_postal AS code_postal, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_id AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_no_civique AND c.id_etat_commande = @_EtatsCommandesID ORDER BY @&SortByCol", QueryTypes.SELECT)
+                    .bindParamToUserID("ClientID")
             
              .addRoute(BaseRoutes.INSERT)
                  .Authorize(Roles.Client.ID(), Roles.Admin.ID())
@@ -646,20 +648,22 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Commandes", true, true, ShowTypes.Ref)//.Anonymous()
 
-                .addRoute(BaseRoutes.GETALL, "ID")
+                .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT cli.id AS ID, cli.nom AS Nom, cli.prenom AS Prenom, cli.date_naissance AS DateNaissance, cli.adresse_courriel AS Email, cli.actif AS Actif FROM clients AS cli WHERE cli.id = @_ID", QueryTypes.SELECT)
+                        .bindParamToUserID("ID")
                         
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, actif) VALUES (@ID, @Nom, @Prenom, @DateNaissance, @Email, @Actif)", QueryTypes.INSERT)
 
-                .addRoute(BaseRoutes.UPDATE, "ID")
+                .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("UPDATE clients SET nom = @_Nom, prenom = @_Prenom, date_naissance = @_DateNaissance, adresse_courriel = @_Email, actif = @_Actif WHERE id = @ID", QueryTypes.UPDATE)
+                        .bindParamToUserID("ID")
 
 
                 .addRoute("ConnexionStepOne", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStart + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
-                        .addParam("Password", ShowTypes.NONE)
+                        .addParam("Password", ShowTypes.NONE, 0)
                     .addRouteQueryNoVar(updateToken, QueryTypes.UPDATE, true)
 
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
@@ -668,7 +672,7 @@ namespace APIDynamic
                 .addRoute("InscriptionClient", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
                         .setNotRequired("MDP", "Sel", "Token")
-                        .addParam("Password", ShowTypes.NONE)
+                        .addParam("Password", ShowTypes.NONE, 0)
                 
 
                 .addRoute("RecuperationStepOne", RouteTypes.POST)
@@ -677,14 +681,14 @@ namespace APIDynamic
 
                 .addRoute("RecuperationStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStart + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
-                        .addParam("NewPassword", ShowTypes.NONE)
+                        .addParam("NewPassword", ShowTypes.NONE, 0)
                     .addRouteQueryNoVar(updatePassword, QueryTypes.UPDATE, true)
 
                 .addRoute("ChangePassword", RouteTypes.PUT)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(selectUserInfoStart + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
-                        .addParam("NewPassword", ShowTypes.NONE)
-                        .addParam("Password", ShowTypes.NONE)
+                        .addParam("NewPassword", ShowTypes.NONE, 0)
+                        .addParam("Password", ShowTypes.NONE, 1)
                     .addRouteQueryNoVar(updatePassword, QueryTypes.UPDATE, true)
 
                 .addRoute("CheckEmail", RouteTypes.GET)

@@ -87,7 +87,7 @@ namespace APIDynamic
             controllers["Employes"].mapRoute("ConnexionStepTwo",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Admin.ID());
+                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), true);
                 }
             );
             controllers["Employes"].mapRoute("InscriptionEmploye",
@@ -124,7 +124,7 @@ namespace APIDynamic
             controllers["Employes"].mapRoute("RecuperationStepTwo",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), false, Roles.Admin.ID());
+                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), true);
                 }
             );
             controllers["Employes"].mapRoute("ChangePassword",
@@ -169,8 +169,7 @@ namespace APIDynamic
             controllers["ProduitsParCommande"].mapRoute("MoveToPanier",
                 async (queries, bodyData) =>
                 {
-                    var idClient = bodyData.UserID();
-                    queries[0].setParam("ClientID", idClient).setParam("id", bodyData.Get<long>("id"));
+                    queries[0].setParam("ClientID", bodyData.Get<long>("ClientID")).setParam("id", bodyData.Get<long>("id"));
                     if ((await executorData.ExecuteQueryWithTransaction(queries[0])) == 0)
                         return Results.Forbid();
                     return Results.Ok();
@@ -288,7 +287,6 @@ namespace APIDynamic
         {
             try
             {
-                bodyData["id_client"] = bodyData[DynamicController.USERIDKEY];
                 var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
                 if (produitParCommandeID == 0)
                     return Results.Forbid();

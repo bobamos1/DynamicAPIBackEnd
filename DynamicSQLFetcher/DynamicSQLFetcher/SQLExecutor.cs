@@ -226,7 +226,7 @@ namespace DynamicSQLFetcher
         public async static Task<int> ExecuteStoreProcedure(string connectionString, string query, DynamicParameters parameters)
         {
             using (IDbConnection cnn = new SqlConnection(connectionString))
-                return await cnn.ExecuteAsync("spMagicProc", parameters, commandType: CommandType.StoredProcedure);
+                return await cnn.ExecuteAsync(query, parameters, commandType: CommandType.StoredProcedure);
         }
         public async static Task<IEnumerable<T>> SelectQuery<T>(string connectionString, string query, DynamicParameters parameters)
         {
