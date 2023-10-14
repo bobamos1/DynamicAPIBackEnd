@@ -563,7 +563,7 @@ namespace DynamicStructureObjects
                 if (controller.Value.hasRoute(BaseRoutes.UPDATE.Value()))
                     controller.Value.mapRoute(BaseRoutes.UPDATE, async (queries, bodyData) =>
                     {
-                        var authorizedCols = bodyData.AuthProprieties();
+                        var authorizedCols = bodyData.AuthProprieties().Concat(queries.SelectMany(query => query.variablesInQuery.Where(var => var.Value).Select(var => var.Key)));
                         var authorizedVariables = bodyData
                             .Where(kv => authorizedCols.Contains(kv.Key));
                         foreach (var query in queries)

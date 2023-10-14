@@ -397,9 +397,9 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("UPDATE format_produit_produits_commande SET id_produit_commande = @_ProduitParCommandeIDNew, id_format_choisi = @_FormatIDNew, format_choisi = @_format_selected, type_format AS @_type_format_selected WHERE id_produit_commande = @ProduitParCommandeID AND id_format_choisi = @FormatID", QueryTypes.UPDATE)
-                    .setSQLParam("FormatIDNew", "FormatID")
-                    .setSQLParam("ProduitParCommandeIDNew", "ProduitParCommandeID")
+                    .addRouteQuery("UPDATE format_produit_produits_commande SET id_produit_commande = @_ProduitParCommandeID, id_format_choisi = @_FormatID, format_choisi = @_format_selected, type_format AS @_type_format_selected WHERE id_produit_commande = @ProduitParCommandeIDOld AND id_format_choisi = @FormatIDOld", QueryTypes.UPDATE)
+                    .setSQLParam("FormatIDOld", "FormatID")
+                    .setSQLParam("ProduitParCommandeIDOld", "ProduitParCommandeID")
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
