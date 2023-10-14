@@ -14,6 +14,10 @@ namespace DynamicSQLFetcher
         {
             return enumerable.Select(value => new KeyValuePair<TK, TV>(getKey(value), getValue(value)));
         }
+        public static IEnumerable<KeyValuePair<string, DynamicParameters>> toOrderedPairs(this IEnumerable<Query> queries)
+        {
+            return queries.toOrderedPairs(query => query.Parse(), query => query.getParameters());
+        }
     }
     public class SQLExecutor
     {
