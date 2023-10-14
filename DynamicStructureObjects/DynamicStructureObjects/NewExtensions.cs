@@ -51,20 +51,13 @@ namespace DynamicStructureObjects
         }
         public static T Get<T>(this Dictionary<string, object> data, string key)
         {
-            return (T)data[key];
+            return data[key].To<T>();
         }
         public static T SafeGet<T>(this Dictionary<string, object> data, string key, T defaultVal = default(T))
         {
-            object result = null;
-            try
-            {
-                result = data[key];
-                return (T)result;
-            }
-            catch (Exception ex)
-            {
-                return result.To<T>(defaultVal);
-            }
+            object result;
+            if (data.TryGetValue(key, out result))
+                return result.To<T>();
             return defaultVal;
         }
         public static readonly QueryTypes[] authQueries = new[] { QueryTypes.INSERT, QueryTypes.DELETE, QueryTypes.UPDATE }; 

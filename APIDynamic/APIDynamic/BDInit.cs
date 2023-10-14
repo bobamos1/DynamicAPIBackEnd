@@ -378,7 +378,7 @@ namespace APIDynamic
                 .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 )
-                    .Authorize(Roles.Admin.CanModify())
+                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("FormatID", true, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 ).Anonymous()
@@ -497,6 +497,7 @@ namespace APIDynamic
                 .addPropriety("id", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
                 .addPropriety("description", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("quantite", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle

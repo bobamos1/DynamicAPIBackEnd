@@ -454,7 +454,7 @@ namespace DynamicStructureObjects
             var userID = DynamicConnection.ParseUserID(token);
             bodyData[USERIDKEY] = userID;
             bodyData[ROLESKEY] = roles;
-            if (route.proprietyToBindUserID != 1 && !bodyData.ContainsKey(route.proprietyName))
+            if (route.proprietyToBindUserID != 1 && roles.Length == 1 && roles[0] == 1)
                 bodyData[route.proprietyName] = userID;
             if (route.getAuthorizedCols)
             {
