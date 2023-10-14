@@ -154,15 +154,15 @@ namespace APIDynamic
             controllers["ProduitsParCommande"].mapRoute("DeletePanier",
                 async(queries, bodyData) =>
                 {
-                    var idProduitParCommande = bodyData.Get<long>("id");
+                    var idProduitParCommande = bodyData.Get<int>("id");
                     queries[0].setParam("id", idProduitParCommande);
                     queries[1].setParam("id", idProduitParCommande);
                     queries[2].setParam("id", idProduitParCommande);             
 
                     if ((await executorData.ExecuteQueryWithTransaction(queries.toOrderedPairs())) == 0)
-                        return Results.Ok();
+                        return Results.Forbid();
 
-                    return Results.Forbid();
+                    return Results.Ok();
                 }
 
             );
