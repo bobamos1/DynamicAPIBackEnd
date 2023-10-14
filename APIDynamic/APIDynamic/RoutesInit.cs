@@ -165,14 +165,37 @@ namespace APIDynamic
                     return Results.Ok();
                 }
             );
-            /*
-            controllers["ProduitsParCommande"].mapRoute("CheckoutPanier",
-                (queries, bodyData) =>
+            
+            controllers["Commandes"].mapRoute("CheckoutPanier",
+                async (queries, bodyData) =>
                 {
-                    
+                    var idClient = bodyData.UserID();
+                    using (IDbConnection connection = new SqlConnection())
+                    var idCommande = await executorData.SelectValue<long>(queries[0].setParam("id_client", idClient));
+
+                    var ProduitsParCommande = await executorData.SelectArray<long>(queries[1].setParam("idCommande", idCommande));
+
+                    /*Faire ceci pour tous les produits*/
+
+                    foreach (long idProduitParCommande in ProduitsParCommande)
+                    {
+                        queries[2].setParam("id", idProduitParCommande);
+                        var montantTaxe = await executorData.SelectArray<double>(queries[2]);
+                        double totalProduit = 0;
+                        foreach (double taxe in montantTaxe)
+                        {
+                            totalProduit = totalProduit * (taxe + 1);
+                        }
+
+                        await executorData.ExecuteQueryWithTransaction(queries[3].setParam("prix_unitaire", totalProduit).setParam("id", idProduitParCommande));
+
+                        return Results.Ok();
+                    }
+
+                    return Results.Forbid();
                 }
-                
-            );*/
+
+            );
 
 
             /*
