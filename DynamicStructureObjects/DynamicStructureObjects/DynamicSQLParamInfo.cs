@@ -48,7 +48,7 @@ namespace DynamicStructureObjects
             }
             return paramInfo;
         }
-        public async static Task<DynamicSQLParamInfo> addSQLParamInfo(string VarAffected, long ProprietyID, long RouteQueryID)
+        public async static Task<DynamicSQLParamInfo> addSQLParam(string VarAffected, long ProprietyID, long RouteQueryID, ShowTypes? showType)
         {
             return new DynamicSQLParamInfo(
                 await DynamicController.executor.ExecuteInsertWithLastID(
@@ -56,6 +56,7 @@ namespace DynamicStructureObjects
                         .setParam("PropretyID", ProprietyID)
                         .setParam("RouteQueryID", RouteQueryID)
                         .setParam("VarAffected", VarAffected)
+                        //.setParam("ShowTypeID", showType is null ? ShowTypes.NONE : (long)showType)
                     )
                 , VarAffected
                 , ProprietyID
