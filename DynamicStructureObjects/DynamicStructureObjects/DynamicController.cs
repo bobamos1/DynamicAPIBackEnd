@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using System.Linq;
 
 namespace DynamicStructureObjects
 {
@@ -20,8 +21,9 @@ namespace DynamicStructureObjects
         public readonly static int DEFAULTSTEP = 25; 
         public readonly static int DEFAULTPAGE = 1;
         public readonly static string PAGEKEY = "Page";
-        public readonly static string USERIDKEY = "CurrentUserID";
+        public readonly static string USERIDKEY = "CurrentUserID"; 
         public readonly static string PROPRETYKEY = "AuthorizedProprieties";
+        public readonly static string IDParamsKey = "IDParams";
         public readonly static string ROLESKEY = "CurrentUserRoles";
         public long id { get; internal set; }
         public string Name { get; internal set; }
@@ -411,6 +413,7 @@ namespace DynamicStructureObjects
         public void mapRoute(string routeName, Func<List<Query>, Dictionary<string, object>, Task<IResult>> function)
         {
             DynamicRoute route = getRoute(routeName);
+            var idsParams = Proprieties.Where(propriety => propriety.ShowType.IsID()).Select(propriety => propriety.Name).ToArray();
             if (route is null)
                 throw new Exception();
             List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();
@@ -424,6 +427,8 @@ namespace DynamicStructureObjects
                     return Results.Forbid();
                 if (!route.validateParams(bodyData))
                     return Results.Forbid();
+                if (route.onlyModify)
+                    bodyData[IDParamsKey] = idsParams;
                 return await function(queries, bodyData);
             };
             var routeBuilder = app.MapRoute(route.RouteType, $"/{Name}/{routeName}", delegateMethod).WithName($"{Name}{routeName}").WithGroupName(Name);
@@ -447,23 +452,27 @@ namespace DynamicStructureObjects
                 if (route.requireAuthorization)
                     return false;
                 authorizedProprieties = getAuthorizedProprieties(route.onlyModify);
-                bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
+                setAuthorizedProprieties(bodyData, authorizedProprieties);
                 return true;
             }
             var roles = DynamicConnection.ParseRoles(token).ToArray();
             var userID = DynamicConnection.ParseUserID(token);
             bodyData[USERIDKEY] = userID;
             bodyData[ROLESKEY] = roles;
-            if (route.proprietyToBindUserID != 1 && !bodyData.ContainsKey(route.proprietyName))
+            if (route.proprietyToBindUserID != 1 && roles.Length == 1 && roles[0] == 1)
                 bodyData[route.proprietyName] = userID;
             if (route.getAuthorizedCols)
             {
                 authorizedProprieties = getAuthorizedProprieties(route.onlyModify, roles);
-                bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
+                setAuthorizedProprieties(bodyData, authorizedProprieties);
             }
             if (route.requireAuthorization)
                 return route.CanUse(roles);
             return true;
+        }
+        public void setAuthorizedProprieties(Dictionary<string, object> bodyData, IEnumerable<DynamicPropriety> authorizedProprieties)
+        {
+            bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.ShowType.IsID() ? $"{prop.Name}New" : prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
         }
         public static void QueryCollectionToDictionary(IQueryCollection queryParameters, Dictionary<string, object> dictionary)
         {
@@ -563,7 +572,8 @@ namespace DynamicStructureObjects
                 if (controller.Value.hasRoute(BaseRoutes.UPDATE.Value()))
                     controller.Value.mapRoute(BaseRoutes.UPDATE, async (queries, bodyData) =>
                     {
-                        var authorizedCols = bodyData.AuthProprieties();
+
+                        var authorizedCols = bodyData.AuthProprieties().Concat((string[])bodyData[IDParamsKey]);
                         var authorizedVariables = bodyData
                             .Where(kv => authorizedCols.Contains(kv.Key));
                         foreach (var query in queries)
