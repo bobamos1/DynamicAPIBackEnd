@@ -482,7 +482,7 @@ namespace APIDynamic
             #endregion
             #region ProduitsParCommande
             var queryInsertPanierDiffEtat = "INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) SELECT @id_produit, c.id, @quantite, 0 FROM commandes AS c";
-            var queryInsertFormat = "INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT fp.id, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatChoisiID";
+            var queryInsertFormat = "INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT fp.id, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatID";
             await controllers["ProduitsParCommande"]
 
                 .addPropriety("id_commande", true, true, ShowTypes.CBO,

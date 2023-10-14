@@ -143,11 +143,11 @@ namespace APIDynamic
                     {
                         //var clientID = await executorData.ExecuteQueryWithTransaction(queries[0].clearParams().setParam("Token", bodyData.SafeGet<string>("Token")));
                         var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
-                        var idFormatChoisi = bodyData.SafeGet<long[]>("FormatChoisiID");
+                        var idFormatChoisi = bodyData.SafeGet<long[]>("FormatID");
                         if (idFormatChoisi != default)
                         {
                             foreach (long i in idFormatChoisi)
-                                await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatChoisiID", i).setParam("ProduitCommandeID", produitParCommandeID));
+                                await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatID", i).setParam("ProduitCommandeID", produitParCommandeID));
                         }
                         return Results.Ok();
                     }
@@ -163,10 +163,11 @@ namespace APIDynamic
                     try
                     {
                         var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
-                        var idChoisi = bodyData.SafeGet<long>("FormatChoisiID");
-                        if(idChoisi != default)
+                        var idFormatChoisi = bodyData.SafeGet<long[]>("FormatID");
+                        if (idFormatChoisi != default)
                         {
-                            await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatChoisiID", bodyData.Get<long>("FormatChoisiID")).setParam("ProduitCommandeID", produitParCommandeID));
+                            foreach (long i in idFormatChoisi)
+                                await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatID", i).setParam("ProduitCommandeID", produitParCommandeID));
                         }
 
                         return Results.Ok();
