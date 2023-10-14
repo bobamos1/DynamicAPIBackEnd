@@ -276,7 +276,7 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify())
 
 
-                .addRoute(BaseRoutes.GETALL, "ID")
+                .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT emp.id AS ID, emp.nom AS Nom, emp.prenom AS Prenom, emp.date_naissance AS DateNaissance, emp.adresse_courriel AS Email, emp.actif AS Actif FROM employes AS emp WHERE emp.id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
@@ -765,6 +765,8 @@ namespace APIDynamic
 
                 .addPropriety("ReseauxSociauxID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                .addPropriety("ReseauxSociauxNom", true, true, ShowTypes.STRING).Anonymous()
+
                 .addPropriety("CollaborateurID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("Liens", true, true, ShowTypes.STRING).Anonymous()
@@ -864,8 +866,9 @@ namespace APIDynamic
                .addCBOInfo("FormatID", "Formats", "Format")
             ;
             await controllers["CollaborateursReseauxSociaux"]
-               .addCBOInfo("ReseauxSociauxID", "ReseauxSociaux", "ReseauxSociaux")
+               .addCBOInfo("ReseauxSociauxID", "ReseauxSociaux", "ReseauxSociauxNom")
                .addCBOInfo("CollaborateurID", "Collaborateurs", "Collaborateur")
+               //.addCBOInfo("ReseauxSociauxNom", "ReseauxSociaux", "Nom")
             ;
             await controllers["FormatsProduitsCommandes"]
                .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
@@ -881,7 +884,6 @@ namespace APIDynamic
             await controllers["ProduitsParCommande"]
                 .addCBOInfo("id_produit", "Produits", "nom")
                 .addCBOInfo("id_commande", "Commandes", "Commande")
-                //.addCBOInfo("FormatChoisiID", "Formats", "FormatChoisi")
                 .addMapperGenerator("taxes", "AffectationsPrixLorsCommande", CSharpTypes.REFERENCE.Link("id", "ProduitParCommandeID"))
                 .addMapperGenerator("format", "FormatsProduitsCommandes", CSharpTypes.REFERENCE.Link("id", "ProduitParCommandeID"))
                 .addMapperGenerator("image", "ImagesProduits", CSharpTypes.REFERENCE.Link("id", "ProduitID"))
@@ -916,6 +918,7 @@ namespace APIDynamic
                 .addCBOInfo("CompagnieID", "Compagnies", "Compagnie")
                 .addMapperGenerator("Reseau", "CollaborateursReseauxSociaux", CSharpTypes.REFERENCE.Link("ID", "CollaborateurID"))
             ;
+
             #endregion
 
         }
