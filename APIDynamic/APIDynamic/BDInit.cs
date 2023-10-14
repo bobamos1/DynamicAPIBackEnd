@@ -537,11 +537,10 @@ namespace APIDynamic
                     .addRouteQuery("DELETE FROM affectation_prix_lors_commande WHERE id_produit_par_commande = @id", QueryTypes.DELETE)
                     .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @id", QueryTypes.DELETE)
 
-                /*
-                 * Checker ce qui peut être modifié dans cette table là, dans le fonctionnement, tu ne peux pas changer un produit, mais au lieu l'enlever de la commande et ajouter / DOnc 1 delete et 1 insert au lieu d'un update
+
                 .addRoute(BaseRoutes.UPDATE)
-                    .addRouteQuery("UPDATE produits_par_commande SET id_produit = @_ProduitID, id_commande = @_CommandeID, quantite = @_Quantite, prix_unitaire = @_PrixUnitaire WHERE id = @ID", QueryTypes.UPDATE)
-                */
+                    .addRouteQuery("UPDATE produits_par_commande SET id_produit = @_ProduitID, id_commande = @_CommandeID, quantite = @_Quantite, prix_unitaire = @_PrixUnitaire WHERE id = @id", QueryTypes.UPDATE)
+                
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT ppc.id, p.nom FROM produits_par_commande ppc INNER JOIN produits p ON p.id = ppc.id_produit", QueryTypes.CBO)
             ;
@@ -619,8 +618,7 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
-                .addPropriety("Email", true, true, ShowTypes.STRING//,
-                    //isEmail
+                .addPropriety("Email", true, true, ShowTypes.STRING
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()

@@ -164,8 +164,15 @@ namespace APIDynamic
 
                     return Results.Forbid();
                 }
-
             );
+            /*
+            controllers["ProduitsParCommande"].mapRoute("CheckoutPanier",
+                (queries, bodyData) =>
+                {
+                    
+                }
+                
+            );*/
 
 
             /*
