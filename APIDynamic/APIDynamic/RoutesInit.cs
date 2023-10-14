@@ -1,5 +1,7 @@
-﻿using DynamicSQLFetcher;
+﻿using Dapper;
+using DynamicSQLFetcher;
 using DynamicStructureObjects;
+using ParserLib;
 using Stripe;
 using System;
 
@@ -137,45 +139,15 @@ namespace APIDynamic
             );
             //Routes
             controllers["ProduitsParCommande"].mapRoute("InsertPanier",
-                async (queries, bodyData) =>
+                (queries, bodyData) =>
                 {
-                    try
-                    {
-                        //var clientID = await executorData.ExecuteQueryWithTransaction(queries[0].clearParams().setParam("Token", bodyData.SafeGet<string>("Token")));
-                        var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
-                        var idFormatChoisi = bodyData.SafeGet<long[]>("FormatID");
-                        if (idFormatChoisi != default)
-                        {
-                            foreach (long i in idFormatChoisi)
-                                await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatID", i).setParam("ProduitCommandeID", produitParCommandeID).setParam("id_client", bodyData.SafeGet<long>("CurrentUserID")));
-                        }
-                        return Results.Ok();
-                    }
-                    catch(Exception e)
-                    {
-                        return Results.Forbid();
-                    }
+                    return insertProduitParCommande(executorData, queries, bodyData);
                 }
                 );
             controllers["ProduitsParCommande"].mapRoute("InsertWishList",
-                async (queries, bodyData) =>
+                (queries, bodyData) =>
                 {
-                    try
-                    {
-                        var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
-                        var idFormatChoisi = bodyData.SafeGet<long>("FormatID");
-                        
-                        if( idFormatChoisi != default) {
-
-                            await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatChoisiID", idFormatChoisi).setParam("ProduitCommandeID", produitParCommandeID));
-                        }
-
-                        return Results.Ok();
-                    }
-                    catch (Exception e)
-                    {
-                        return Results.Forbid();
-                    }
+                    return insertProduitParCommande(executorData, queries, bodyData);
                 }
                 );
 
@@ -285,6 +257,38 @@ namespace APIDynamic
                     return Results.NotFound();
                 });
             */
+        }
+        public static async Task<IResult> insertProduitParCommande(SQLExecutor executorData, List<Query> queries, Dictionary<string, object> bodyData)
+        {
+            try
+            {
+                bodyData["id_client"] = bodyData[DynamicController.USERIDKEY];
+                var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
+                if (produitParCommandeID == 0)
+                    return Results.Forbid();
+                var formatChoisis = bodyData.SafeGet<IEnumerable<object>>("FormatID");
+                if (formatChoisis.Any())
+                {
+                    queries[1].clearParams();
+                    Dictionary<string, DynamicParameters> queriesToRun = new Dictionary<string, DynamicParameters>();
+                    foreach (object formatID in formatChoisis)
+                        queriesToRun.Add(queries[1].setParam("FormatID", formatID.To<long>()).setParam("ProduitCommandeID", produitParCommandeID).Parse(), queries[1].getParameters());
+                    if ((await executorData.ExecuteQueryWithTransaction(queriesToRun)) == 0)
+                        return Results.Forbid();
+                }
+                return Results.Ok();
+            }
+            catch (Exception e)
+            {
+                return Results.Forbid();
+            }
+        }
+        public static Dictionary<string, DynamicParameters> getDictionaryToRun<TS, TM>(Query query, string paramNameChanging, string paramNameStatic, TS staticValue, IEnumerable<TM> multiplesValues)
+        {
+            Dictionary<string, DynamicParameters> queriesToRun = new Dictionary<string, DynamicParameters>();
+            foreach (TM formatID in multiplesValues)
+                queriesToRun.Add(query.setParam(paramNameChanging, formatID).setParam(paramNameStatic, staticValue).Parse(), query.getParameters());
+            return queriesToRun;
         }
     }
 }

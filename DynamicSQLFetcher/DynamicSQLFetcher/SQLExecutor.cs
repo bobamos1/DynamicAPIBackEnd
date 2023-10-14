@@ -204,6 +204,10 @@ namespace DynamicSQLFetcher
         {
             return ExecuteInsertWithLastID(_connectionString, query.Parse(), query.getParameters());
         }
+        public Task<int> ExecuteQueryWithTransaction(Dictionary<string, DynamicParameters> queries)
+        {
+            return ExecuteQueryWithTransaction(_connectionString, queries);
+        }
         public async static Task<IEnumerable<T>> SelectQuery<T>(string connectionString, string query, DynamicParameters parameters)
         {
             using (IDbConnection cnn = new SqlConnection(connectionString))

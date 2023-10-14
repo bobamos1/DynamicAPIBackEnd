@@ -507,7 +507,9 @@ namespace APIDynamic
                 .addPropriety("format", true, true, ShowTypes.Ref).Anonymous()
                 .addPropriety("taxes", true, true, ShowTypes.Ref).Anonymous()
                 .addPropriety("cout", true, true, ShowTypes.FLOAT).Anonymous()
-                .addPropriety("image", true, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("coutProduit", true, false, ShowTypes.FLOAT).Anonymous()
+                .addPropriety("Images", true, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("TaxesProduit", true, true, ShowTypes.Ref).Anonymous()
                 //.addPropriety("Taxes", true, false, ShowTypes.Ref)
                 //.addMapperGenerator("Taxes", CSharpTypes.REFERENCE.Link("TaxeID", "ID"))
                 /*.addPropriety("Images", true, false, ShowTypes.Ref)
@@ -516,17 +518,18 @@ namespace APIDynamic
                 */
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT pc.id_commande AS id_commande, pro.id AS id_produit, pc.id AS id, pro.nom AS nom, pro.descriptions AS description, pc.quantite AS quantite, pro.quantite_inventaire AS quantite_restante, pc.prix_unitaire AS cout FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id = @_id AND pc.id_commande = @_id_commande", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT pc.id_commande AS id_commande, pro.id AS id_produit, pc.id AS id, pro.nom AS nom, pro.descriptions AS description, pc.quantite AS quantite, pro.quantite_inventaire AS quantite_restante, pc.prix_unitaire AS cout, pro.prix AS coutProduit FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id = @_id AND pc.id_commande = @_id_commande", QueryTypes.SELECT)
 
                 .addRoute("InsertPanier", RouteTypes.POST)
-                    //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                    //.addRouteQuery("SELECT id FROM clients WHERE token = @Token", QueryTypes.SELECT)
+                    .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 4", QueryTypes.INSERT)
+                        .setNotRequired("id_client")
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
                 .addRoute("InsertWishList", RouteTypes.POST)
-                    //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @_id_client AND c.id_etat_commande = 5", QueryTypes.INSERT)
+                    .Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 5", QueryTypes.INSERT)
+                        .setNotRequired("id_client")
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
                 .addRoute("DeletePanier", RouteTypes.DELETE)
@@ -861,24 +864,24 @@ namespace APIDynamic
             ;
             
             await controllers["Formats"]
-               .addCBOInfo("TypeFormatID", "TypeFormats", "TypeFormat")
+                .addCBOInfo("TypeFormatID", "TypeFormats", "TypeFormat")
             ;
             await controllers["FormatsProduits"]
-               .addCBOInfo("ProduitID", "Produits", "Produit")
-               .addCBOInfo("FormatID", "Formats", "Format")
+                .addCBOInfo("ProduitID", "Produits", "Produit")
+                .addCBOInfo("FormatID", "Formats", "Format")
             ;
             await controllers["CollaborateursReseauxSociaux"]
-               .addCBOInfo("ReseauxSociauxID", "ReseauxSociaux", "ReseauxSociauxNom")
-               .addCBOInfo("CollaborateurID", "Collaborateurs", "Collaborateur")
-               //.addCBOInfo("ReseauxSociauxNom", "ReseauxSociaux", "Nom")
+                .addCBOInfo("ReseauxSociauxID", "ReseauxSociaux", "ReseauxSociauxNom")
+                .addCBOInfo("CollaborateurID", "Collaborateurs", "Collaborateur")
+                //.addCBOInfo("ReseauxSociauxNom", "ReseauxSociaux", "Nom")
             ;
             await controllers["FormatsProduitsCommandes"]
-               .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
-               .addCBOInfo("FormatID", "Formats", "Format")
+                .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
+                .addCBOInfo("FormatID", "Formats", "Format")
             ;
             await controllers["ImagesProduits"]
-               .addCBOInfo("ProduitID", "Produits", "Produit")
-               .addCBOInfo("ImageID", "Images", "URL")
+                .addCBOInfo("ProduitID", "Produits", "Produit")
+                .addCBOInfo("ImageID", "Images", "URL")
             ;
             await controllers["Taxes"]
                 .addCBOInfo("AffectationPrixID", "AffectationsPrix", "Taxe")
@@ -888,7 +891,8 @@ namespace APIDynamic
                 .addCBOInfo("id_commande", "Commandes", "Commande")
                 .addMapperGenerator("taxes", "AffectationsPrixLorsCommande", CSharpTypes.REFERENCE.Link("id", "ProduitParCommandeID"))
                 .addMapperGenerator("format", "FormatsProduitsCommandes", CSharpTypes.REFERENCE.Link("id", "ProduitParCommandeID"))
-                .addMapperGenerator("image", "ImagesProduits", CSharpTypes.REFERENCE.Link("id", "ProduitID"))
+                .addMapperGenerator("Images", "ImagesProduits", CSharpTypes.REFERENCE.Link("id_produit", "ProduitID"))
+                .addMapperGenerator("TaxesProduit", "AffectationsPrixProduits", CSharpTypes.REFERENCE.Link("id_produit", "ProduitID"))
             ;
             await controllers["AffectationsPrixLorsCommande"]
                 .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
