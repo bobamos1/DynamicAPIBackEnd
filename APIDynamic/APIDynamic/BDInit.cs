@@ -520,6 +520,9 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT pc.id_commande AS id_commande, pro.id AS id_produit, pc.id AS id, pro.nom AS nom, pro.descriptions AS description, pc.quantite AS quantite, pro.quantite_inventaire AS quantite_restante, pc.prix_unitaire AS cout, pro.prix AS coutProduit FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id = @_id AND pc.id_commande = @_id_commande", QueryTypes.SELECT)
 
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE produits_par_commande SET id_produit = @_id_produit, id_commande = @_id_commande, quantite = @_quantite, prix_unitaire = @_cout WHERE id = @id", QueryTypes.UPDATE)
+
                 .addRoute("InsertPanier", RouteTypes.POST)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 4", QueryTypes.INSERT)
@@ -539,9 +542,7 @@ namespace APIDynamic
 
                 /*
                  * Checker ce qui peut être modifié dans cette table là, dans le fonctionnement, tu ne peux pas changer un produit, mais au lieu l'enlever de la commande et ajouter / DOnc 1 delete et 1 insert au lieu d'un update
-                .addRoute(BaseRoutes.UPDATE)
-                    .addRouteQuery("UPDATE produits_par_commande SET id_produit = @_ProduitID, id_commande = @_CommandeID, quantite = @_Quantite, prix_unitaire = @_PrixUnitaire WHERE id = @ID", QueryTypes.UPDATE)
-                */
+                 */
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT ppc.id, p.nom FROM produits_par_commande ppc INNER JOIN produits p ON p.id = ppc.id_produit", QueryTypes.CBO)
             ;
