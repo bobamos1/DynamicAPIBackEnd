@@ -395,6 +395,9 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT fp.id AS FormatID, fp.nom AS Format, ppc.id_produit AS ProduitParCommandeID, p.nom AS ProduitParCommande, fp.descriptions AS Description, tfp.nom AS TypeFormat, fppc.format_choisi AS format_selected, fppc.type_format AS type_format_selected FROM format_produit_produits_commande fppc INNER JOIN formats_produit fp ON fp.id = fppc.id_format_choisi INNER JOIN produits_par_commande AS ppc ON ppc.id = fppc.id_produit_commande INNER JOIN produits AS p ON ppc.id_produit = p.id LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
 
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE format_produit_produits_commande SET id_produit_commande = @_ProduitParCommandeID, id_format_choisi = @_FormatID, format_choisi = @_format_selected, type_format AS @_type_format_selected WHERE id_produit_commande = @ProduitParCommandeID AND id_format_choisi = @FormatID", QueryTypes.UPDATE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
             ;
@@ -498,6 +501,7 @@ namespace APIDynamic
                 .addPropriety("quantite", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
                 .addPropriety("quantite_restante", true, true, ShowTypes.INT,
                     minOrEqualZeroBundle
                 ).Anonymous()/*
