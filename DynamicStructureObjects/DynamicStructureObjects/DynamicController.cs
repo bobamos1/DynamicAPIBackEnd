@@ -184,11 +184,13 @@ namespace DynamicStructureObjects
         {
             await Routes.Last().addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
             var lastRouteQuery = Routes.Last().Queries.Last();
+            var ind = 0;
             foreach (var paramInfo in lastRouteQuery.ParamsInfos)
             {
                 var bindedProprietyId = GetProprietyID(paramInfo.Key);
                 if (bindedProprietyId > -1)
-                    await lastRouteQuery.setValidator(paramInfo.Key, bindedProprietyId, true);
+                    await lastRouteQuery.setSQLParam(paramInfo.Key, bindedProprietyId, true, null, ind);
+                ind++;
             }
             return this;
         }
@@ -227,17 +229,27 @@ namespace DynamicStructureObjects
             await Routes.Last().addSQLParam(ParamName, 1, showType, ind).addValidator(ParamName, addRequired, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicController> setSQLParam(string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> setSQLParam(string VarAffected, string ProprietyName, int? ind, params ValidatorBundle[] ValidatorBundles)
         {
             long proprietyID = 1;
             if (ProprietyName is not null)
                 proprietyID = Proprieties.First(propriety => propriety.Name == ProprietyName).id;
-            await Routes.Last().setValidator(VarAffected, proprietyID, ValidatorBundles);
+            await Routes.Last().setSQLParam(VarAffected, proprietyID, null, ind, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicController> setSQLParam(string VarAffected, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> setSQLParam(string VarAffected, ShowTypes? showType, int? ind, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().setValidator(VarAffected, ValidatorBundles);
+            await Routes.Last().setSQLParam(VarAffected, showType, ind, ValidatorBundles);
+            return this;
+        }
+        public async Task<DynamicController> setSQLParam(string VarAffected, int? ind, params ValidatorBundle[] ValidatorBundles)
+        {
+            await Routes.Last().setSQLParam(VarAffected, null, ind, ValidatorBundles);
+            return this;
+        }
+        public async Task<DynamicController> setSQLParamShowType(string VarAffected, ShowTypes? showType, int? ind)
+        {
+            await Routes.Last().setSQLParam(VarAffected, showType, ind);
             return this;
         }
         public async Task<DynamicController> setNotRequired(params string[] VarsAffected)

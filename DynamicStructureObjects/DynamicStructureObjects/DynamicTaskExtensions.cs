@@ -155,13 +155,13 @@ namespace DynamicStructureObjects
         {
             return await (await task).setNotRequired(VarsAffected);
         }
-        public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, string ProprietyName, int? ind, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).setSQLParam(VarAffected, ProprietyName, ValidatorBundles);
+            return await (await task).setSQLParam(VarAffected, ProprietyName, ind, ValidatorBundles);
         }
-        public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, int? ind, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).setSQLParam(VarAffected, ValidatorBundles);
+            return await (await task).setSQLParam(VarAffected, ind, ValidatorBundles);
         }
         public async static Task<DynamicController> addParam(this Task<DynamicController> task, string VarAffected, ShowTypes? showType, int ind, params ValidatorBundle[] ValidatorBundles)
         {

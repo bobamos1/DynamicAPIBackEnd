@@ -127,14 +127,14 @@ namespace DynamicStructureObjects
             return this;
         }
 
-        public async Task<DynamicRoute> setValidator(string VarAffected, long ProprietyID, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicRoute> setSQLParam(string VarAffected, ShowTypes? showType, int? ind, params ValidatorBundle[] ValidatorBundles)
         {
-            await Queries.Last().setValidator(VarAffected, ProprietyID, true, ValidatorBundles);
+            await Queries.Last().setSQLParam(VarAffected, 1, false, showType, ind, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicRoute> setValidator(string VarAffected, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicRoute> setSQLParam(string VarAffected, long ProprietyID, ShowTypes? showType, int? ind, params ValidatorBundle[] ValidatorBundles)
         {
-            await Queries.Last().setValidator(VarAffected, 1, false, ValidatorBundles);
+            await Queries.Last().setSQLParam(VarAffected, ProprietyID, false, showType, ind, ValidatorBundles);
             return this;
         }
         public async Task<DynamicRoute> setNotRequired(params string[] VarsAffected)

@@ -98,6 +98,12 @@ namespace DynamicSQLFetcher
             this.paramsUsed[paramName] = paramValue;
             return this;
         }
+        public Query setValidParam(string paramName, object paramValue)
+        {
+            if (paramValue is not null)
+                this.paramsUsed[paramName] = paramValue;
+            return this;
+        }
         public Query removeParams(string paramName)
         {
             this.paramsUsed.Remove(paramName);
