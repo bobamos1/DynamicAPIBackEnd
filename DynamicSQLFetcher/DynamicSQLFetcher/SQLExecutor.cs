@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Immutable;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
@@ -17,6 +18,11 @@ namespace DynamicSQLFetcher
         public static IEnumerable<KeyValuePair<string, DynamicParameters>> toOrderedPairs(this IEnumerable<Query> queries)
         {
             return queries.toOrderedPairs(query => query.Parse(), query => query.getParameters());
+        }
+        public static IEnumerable<KeyValuePair<string, DynamicParameters>> getDictionaryToRun<TS, TM>(this Query query, string paramNameChanging, string paramNameStatic, TS staticValue, IEnumerable<TM> multiplesValues)
+        {
+            query.clearParams();
+            return multiplesValues.toOrderedPairs(value => query.setParam(paramNameChanging, value).setParam(paramNameStatic, staticValue).Parse(), _ => query.getParameters());
         }
     }
     public class SQLExecutor
