@@ -160,7 +160,9 @@ namespace APIDynamic
                     queries[2].setParam("id", idProduitParCommande);             
 
                     if ((await executorData.ExecuteQueryWithTransaction(getDictionaryToRun(queries))) == 0)
-                        return Results.Forbid();
+                        return Results.Ok();
+
+                    return Results.Forbid();
                 }
 
             );
