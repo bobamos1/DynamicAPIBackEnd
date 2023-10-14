@@ -261,7 +261,10 @@ namespace APIDynamic
         {
             try
             {
+                bodyData["id_client"] = bodyData[DynamicController.USERIDKEY];
                 var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
+                if (produitParCommandeID == 0)
+                    return Results.Forbid();
                 var formatChoisis = bodyData.SafeGet<IEnumerable<object>>("FormatID");
                 if (formatChoisis.Any())
                 {
@@ -269,7 +272,8 @@ namespace APIDynamic
                     Dictionary<string, DynamicParameters> queriesToRun = new Dictionary<string, DynamicParameters>();
                     foreach (object formatID in formatChoisis)
                         queriesToRun.Add(queries[1].setParam("FormatID", formatID.To<long>()).setParam("ProduitCommandeID", produitParCommandeID).Parse(), queries[1].getParameters());
-                    await executorData.ExecuteQueryWithTransaction(queriesToRun);
+                    if ((await executorData.ExecuteQueryWithTransaction(queriesToRun)) == 0)
+                        return Results.Forbid();
                 }
                 return Results.Ok();
             }
