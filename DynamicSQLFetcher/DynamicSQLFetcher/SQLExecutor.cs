@@ -19,7 +19,7 @@ namespace DynamicSQLFetcher
         {
             return queries.toOrderedPairs(query => query.Parse(), query => query.getParameters());
         }
-        public static IEnumerable<KeyValuePair<string, DynamicParameters>> getDictionaryToRun<TS, TM>(this Query query, string paramNameChanging, string paramNameStatic, TS staticValue, IEnumerable<TM> multiplesValues)
+        public static IEnumerable<KeyValuePair<string, DynamicParameters>> toOrderedPairs<TS, TM>(this Query query, string paramNameChanging, string paramNameStatic, TS staticValue, IEnumerable<TM> multiplesValues)
         {
             query.clearParams();
             return multiplesValues.toOrderedPairs(value => query.setParam(paramNameChanging, value).setParam(paramNameStatic, staticValue).Parse(), _ => query.getParameters());

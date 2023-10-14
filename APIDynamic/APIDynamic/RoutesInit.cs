@@ -285,7 +285,7 @@ namespace APIDynamic
                 var formatChoisis = bodyData.SafeGet<IEnumerable<object>>("FormatID");
                 if (formatChoisis.Any())
                 {
-                    if ((await executorData.ExecuteQueryWithTransaction(queries[1].getDictionaryToRun("FormatID", "ProduitCommandeID", produitParCommandeID, formatChoisis))) == 0)
+                    if ((await executorData.ExecuteQueryWithTransaction(queries[1].toOrderedPairs("FormatID", "ProduitCommandeID", produitParCommandeID, formatChoisis))) == 0)
                         return Results.Forbid();
                 }
                 return Results.Ok();
