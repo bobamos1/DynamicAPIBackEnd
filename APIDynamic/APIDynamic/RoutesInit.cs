@@ -147,7 +147,7 @@ namespace APIDynamic
                         if (idFormatChoisi != default)
                         {
                             foreach (long i in idFormatChoisi)
-                                await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatID", i).setParam("ProduitCommandeID", produitParCommandeID));
+                                await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatID", i).setParam("ProduitCommandeID", produitParCommandeID).setParam("id_client", bodyData.SafeGet<long>("CurrentUserID")));
                         }
                         return Results.Ok();
                     }
@@ -167,7 +167,7 @@ namespace APIDynamic
                         if (idFormatChoisi != default)
                         {
                             foreach (long i in idFormatChoisi)
-                                await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatID", i).setParam("ProduitCommandeID", produitParCommandeID));
+                                await executorData.ExecuteQueryWithTransaction(queries[1].clearParams().setParam("FormatID", i).setParam("ProduitCommandeID", produitParCommandeID).setParam("id_client", bodyData.SafeGet<long>("CurrentUserID")));
                         }
 
                         return Results.Ok();
