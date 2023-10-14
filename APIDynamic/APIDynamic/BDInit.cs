@@ -529,7 +529,9 @@ namespace APIDynamic
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @_id_client AND c.id_etat_commande = 5", QueryTypes.INSERT)
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
-                .addRoute(BaseRoutes.DELETE)
+                .addRoute("DeletePanier", RouteTypes.DELETE)
+                    .addRouteQuery("DELETE format_produit_produits_commande WHERE id_produit_commande = @id", QueryTypes.DELETE)
+                    .addRouteQuery("DELETE FROM affectation_prix_lors_commande WHERE id_produit_par_commande = @id", QueryTypes.DELETE)
                     .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @id", QueryTypes.DELETE)
 
                 /*
