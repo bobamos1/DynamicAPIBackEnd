@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using DynamicSQLFetcher;
 using DynamicStructureObjects;
+using ParserLib;
 using Stripe;
 using System;
 
@@ -261,13 +262,13 @@ namespace APIDynamic
             try
             {
                 var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
-                var idFormatChoisi = bodyData.SafeGet<long[]>("FormatID");
-                if (idFormatChoisi.Any())
+                var formatChoisis = bodyData.SafeGet<IEnumerable<object>>("FormatID");
+                if (formatChoisis.Any())
                 {
                     queries[1].clearParams();
                     Dictionary<string, DynamicParameters> queriesToRun = new Dictionary<string, DynamicParameters>();
-                    foreach (long i in idFormatChoisi)
-                        queriesToRun.Add(queries[1].setParam("FormatID", 1).setParam("ProduitCommandeID", produitParCommandeID).Parse(), queries[1].getParameters());
+                    foreach (object i in formatChoisis)
+                        queriesToRun.Add(queries[1].setParam("FormatID", i.To<long>()).setParam("ProduitCommandeID", produitParCommandeID).Parse(), queries[1].getParameters());
                     await executorData.ExecuteQueryWithTransaction(queriesToRun);
                 }
                 return Results.Ok();
