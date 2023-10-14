@@ -4,6 +4,8 @@ namespace DynamicStructureObjects
 {
     public enum ShowTypes : long
     {
+        [Value("None")]
+        NONE = 0,
         [Value("Reference")]
         Ref = 1,
         [Value("CBO")]

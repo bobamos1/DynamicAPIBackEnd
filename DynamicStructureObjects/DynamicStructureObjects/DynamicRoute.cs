@@ -108,22 +108,22 @@ namespace DynamicStructureObjects
             return this;
         }
         
-        public Task<DynamicRoute> addSQLParamInfo(int indexQuery, string varAffected)
+        public Task<DynamicRoute> addSQLParam(int indexQuery, string varAffected, ShowTypes? showType)
         {
-            return addSQLParamInfo(indexQuery, varAffected, 1);
+            return addSQLParam(indexQuery, varAffected, 1, showType);
         }
-        public async Task<DynamicRoute> addSQLParamInfo(int indexQuery, string varAffected, long ProprietyID)
+        public async Task<DynamicRoute> addSQLParam(int indexQuery, string varAffected, long ProprietyID, ShowTypes? showType)
         {
-            await Queries[indexQuery].addSQLParamInfo(varAffected, ProprietyID);
+            await Queries[indexQuery].addSQLParam(varAffected, ProprietyID, showType);
             return this;
         }
-        public Task<DynamicRoute> addSQLParamInfo(string varAffected)
+        public Task<DynamicRoute> addSQLParam(string varAffected, ShowTypes? showType)
         {
-            return addSQLParamInfo(varAffected, 1);
+            return addSQLParam(varAffected, 1, showType);
         }
-        public async Task<DynamicRoute> addSQLParamInfo(string varAffected, long ProprietyID)
+        public async Task<DynamicRoute> addSQLParam(string varAffected, long ProprietyID, ShowTypes? showType)
         {
-            await Queries.Last().addSQLParamInfo(varAffected, ProprietyID);
+            await Queries.Last().addSQLParam(varAffected, ProprietyID, showType);
             return this;
         }
 

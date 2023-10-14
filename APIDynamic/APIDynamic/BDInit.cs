@@ -289,7 +289,7 @@ namespace APIDynamic
 
                 .addRoute("ConnexionStepOne", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
-                        .addParam("Password")
+                        .addParam("Password", ShowTypes.NONE)
                     .addRouteQueryNoVar(updateTokenEmployes, QueryTypes.UPDATE, true)
 
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
@@ -298,7 +298,7 @@ namespace APIDynamic
                 .addRoute("InscriptionEmploye", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
                         .setNotRequired("MDP", "Sel", "Token")
-                        .addParam("Password")
+                        .addParam("Password", ShowTypes.NONE)
 
 
                 .addRoute("RecuperationStepOne", RouteTypes.POST)
@@ -307,14 +307,14 @@ namespace APIDynamic
 
                 .addRoute("RecuperationStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
-                        .addParam("NewPassword")
+                        .addParam("NewPassword", ShowTypes.NONE)
                     .addRouteQueryNoVar(updatePasswordEmployes, QueryTypes.UPDATE, true)
 
                 .addRoute("ChangePassword", RouteTypes.PUT)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
-                        .addParam("NewPassword")
-                        .addParam("Password")
+                        .addParam("NewPassword", ShowTypes.NONE)
+                        .addParam("Password", ShowTypes.NONE)
                     .addRouteQueryNoVar(updatePasswordEmployes, QueryTypes.UPDATE, true)
 
                 .addRoute("CheckEmail", RouteTypes.GET)
@@ -648,7 +648,7 @@ namespace APIDynamic
 
                 .addRoute("ConnexionStepOne", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStart + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
-                        .addParam("Password")
+                        .addParam("Password", ShowTypes.NONE)
                     .addRouteQueryNoVar(updateToken, QueryTypes.UPDATE, true)
 
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
@@ -657,7 +657,7 @@ namespace APIDynamic
                 .addRoute("InscriptionClient", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
                         .setNotRequired("MDP", "Sel", "Token")
-                        .addParam("Password")
+                        .addParam("Password", ShowTypes.NONE)
                 
 
                 .addRoute("RecuperationStepOne", RouteTypes.POST)
@@ -666,14 +666,14 @@ namespace APIDynamic
 
                 .addRoute("RecuperationStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStart + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
-                        .addParam("NewPassword")
+                        .addParam("NewPassword", ShowTypes.NONE)
                     .addRouteQueryNoVar(updatePassword, QueryTypes.UPDATE, true)
 
                 .addRoute("ChangePassword", RouteTypes.PUT)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(selectUserInfoStart + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
-                        .addParam("NewPassword")
-                        .addParam("Password")
+                        .addParam("NewPassword", ShowTypes.NONE)
+                        .addParam("Password", ShowTypes.NONE)
                     .addRouteQueryNoVar(updatePassword, QueryTypes.UPDATE, true)
 
                 .addRoute("CheckEmail", RouteTypes.GET)

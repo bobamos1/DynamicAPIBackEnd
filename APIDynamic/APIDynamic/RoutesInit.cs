@@ -283,11 +283,7 @@ namespace APIDynamic
                 var formatChoisis = bodyData.SafeGet<IEnumerable<object>>("FormatID");
                 if (formatChoisis.Any())
                 {
-                    queries[1].clearParams();
-                    Dictionary<string, DynamicParameters> queriesToRun = new Dictionary<string, DynamicParameters>();
-                    foreach (object formatID in formatChoisis)
-                        queriesToRun.Add(queries[1].setParam("FormatID", formatID.To<long>()).setParam("ProduitCommandeID", produitParCommandeID).Parse(), queries[1].getParameters());
-                    if ((await executorData.ExecuteQueryWithTransaction(queriesToRun)) == 0)
+                    if ((await executorData.ExecuteQueryWithTransaction(getDictionaryToRun(queries[1], "FormatID", "ProduitCommandeID", produitParCommandeID, formatChoisis))) == 0)
                         return Results.Forbid();
                 }
                 return Results.Ok();
@@ -297,12 +293,10 @@ namespace APIDynamic
                 return Results.Forbid();
             }
         }
-        public static Dictionary<string, DynamicParameters> getDictionaryToRun<TS, TM>(Query query, string paramNameChanging, string paramNameStatic, TS staticValue, IEnumerable<TM> multiplesValues)
+        public static IEnumerable<KeyValuePair<string, DynamicParameters>> getDictionaryToRun<TS, TM>(Query query, string paramNameChanging, string paramNameStatic, TS staticValue, IEnumerable<TM> multiplesValues)
         {
-            Dictionary<string, DynamicParameters> queriesToRun = new Dictionary<string, DynamicParameters>();
-            foreach (TM formatID in multiplesValues)
-                queriesToRun.Add(query.setParam(paramNameChanging, formatID).setParam(paramNameStatic, staticValue).Parse(), query.getParameters());
-            return queriesToRun;
+            query.clearParams();
+            return multiplesValues.ToImmutableSortedDictionary(value => query.setParam(paramNameChanging, value).setParam(paramNameStatic, staticValue).Parse(), _ => query.getParameters());
         }
 
         public static IEnumerable<KeyValuePair<string, DynamicParameters>> getDictionaryToRun(IEnumerable<Query> queries)

@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
@@ -7,6 +8,13 @@ using System.Dynamic;
 
 namespace DynamicSQLFetcher
 {
+    public static class EnumerableHelper
+    {
+        public static IEnumerable<KeyValuePair<TK, TV>> toOrderedPairs<T, TK, TV>(this IEnumerable<T> enumerable, Func<T, TK> getKey, Func<T, TV> getValue)
+        {
+            return enumerable.Select(value => new KeyValuePair<TK, TV>(getKey(value), getValue(value)));
+        }
+    }
     public class SQLExecutor
     {
         public static readonly string VALUE_FOR_CBO = "VALUE_FOR_CBO";
@@ -80,7 +88,7 @@ namespace DynamicSQLFetcher
         }
         public Task<int> ExecuteQueryWithTransaction(Query query, params string[] authorizedColumns)
         {
-            return ExecuteQueryWithTransaction(_connectionString, new Dictionary<string, DynamicParameters>() { { query.Parse(authorizedColumns), query.getParameters() } });
+            return ExecuteQueryWithTransaction(_connectionString, new KeyValuePair<string, DynamicParameters>[] { new KeyValuePair<string, DynamicParameters>(query.Parse(authorizedColumns), query.getParameters()) });
         }
         public Task<int> ExecuteQueryWithoutTransaction(List<Tuple<Query, string[]>> queries)
         {
@@ -89,40 +97,25 @@ namespace DynamicSQLFetcher
                 queriesDict.Add(query.Item1.Parse(query.Item2), query.Item1.getParameters());
             return ExecuteQueryWithoutTransaction(_connectionString, queriesDict);
         }
-        public Task<int> ExecuteQueryWithTransaction(List<Tuple<Query, string[]>> queries)
+        public Task<int> ExecuteQueryWithTransaction(IEnumerable<KeyValuePair<Query, string[]>> queries)
         {
-            Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
-            foreach (var query in queries)
-                queriesDict.Add(query.Item1.Parse(query.Item2), query.Item1.getParameters());
-            return ExecuteQueryWithTransaction(_connectionString, queriesDict);
+            return ExecuteQueryWithTransaction(_connectionString, queries.toOrderedPairs(query => query.Key.Parse(query.Value), query => query.Key.getParameters()));
         }
         public Task<int> ExecuteQueryWithTransaction(params Query[] queries)
         {
-            Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
-            foreach (var query in queries)
-                queriesDict.Add(query.Parse(), query.getParameters());
-            return ExecuteQueryWithTransaction(_connectionString, queriesDict);
+            return ExecuteQueryWithTransaction(_connectionString, queries.toOrderedPairs(query => query.Parse(), query => query.getParameters()));
         }
         public Task<int> ExecuteQueryWithTransaction(params KeyValuePair<Query, string[]>[] queries)
         {
-            Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
-            foreach (var query in queries)
-                queriesDict.Add(query.Key.Parse(query.Value), query.Key.getParameters());
-            return ExecuteQueryWithTransaction(_connectionString, queriesDict);
+            return ExecuteQueryWithTransaction(_connectionString, queries.toOrderedPairs(query => query.Key.Parse(query.Value), query => query.Key.getParameters()));
         }
         public Task<int> ExecuteQueryWithTransaction(string[] authorizedColumns, params Query[] queries)
         {
-            Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
-            foreach (var query in queries)
-                queriesDict.Add(query.Parse(authorizedColumns), query.getParameters());
-            return ExecuteQueryWithTransaction(_connectionString, queriesDict);
+            return ExecuteQueryWithTransaction(_connectionString, queries.toOrderedPairs(query => query.Parse(authorizedColumns), query => query.getParameters()));
         }
         public Task<int> ExecuteQueryWithTransaction(params string[] queries)
         {
-            Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
-            foreach (var query in queries)
-                queriesDict.Add(query, new DynamicParameters());
-            return ExecuteQueryWithTransaction(_connectionString, queriesDict);
+            return ExecuteQueryWithTransaction(_connectionString, queries.toOrderedPairs(query => query, _ => new DynamicParameters()));
         }
         public static Task<IEnumerable<dynamic>> SelectQuery(string connectionString, Query query, params string[] authorizedColumns)
         {
@@ -204,7 +197,7 @@ namespace DynamicSQLFetcher
         {
             return ExecuteInsertWithLastID(_connectionString, query.Parse(), query.getParameters());
         }
-        public Task<int> ExecuteQueryWithTransaction(Dictionary<string, DynamicParameters> queries)
+        public Task<int> ExecuteQueryWithTransaction(IEnumerable<KeyValuePair<string, DynamicParameters>> queries)
         {
             return ExecuteQueryWithTransaction(_connectionString, queries);
         }
@@ -299,7 +292,7 @@ namespace DynamicSQLFetcher
             using (IDbConnection connection = new SqlConnection(connectionString))
                 return await connection.ExecuteScalarAsync<T>(query, parameters);
         }
-        public async static Task<int> ExecuteQueryWithTransaction(string connectionString, Dictionary<string, DynamicParameters> queries)
+        public async static Task<int> ExecuteQueryWithTransaction(string connectionString, IEnumerable<KeyValuePair<string, DynamicParameters>> queries)
         {
             int recordsUpdated = 0;
 
@@ -404,7 +397,7 @@ namespace DynamicSQLFetcher
         }
         public static Task<int> ExecuteQueryWithTransaction(string connectionString, string query, DynamicParameters parameter)
         {
-            return ExecuteQueryWithTransaction(connectionString, new Dictionary<string, DynamicParameters>() { { query, parameter } });
+            return ExecuteQueryWithTransaction(connectionString, new KeyValuePair<string, DynamicParameters>[] { new KeyValuePair<string, DynamicParameters>(query, parameter) });
         }
         public static Task<int> ExecuteQueryWithoutTransaction(string connectionString, Query query, params string[] authorizedColumns)
         {
@@ -412,7 +405,7 @@ namespace DynamicSQLFetcher
         }
         public static Task<int> ExecuteQueryWithTransaction(string connectionString, Query query, params string[] authorizedColumns)
         {
-            return ExecuteQueryWithTransaction(connectionString, new Dictionary<string, DynamicParameters>() { { query.Parse(authorizedColumns), query.getParameters() } });
+            return ExecuteQueryWithTransaction(connectionString, new KeyValuePair<string, DynamicParameters>[] { new(query.Parse(authorizedColumns), query.getParameters())});
         }
         public static Task<int> ExecuteQueryWithoutTransaction(string connectionString, List<Tuple<Query, string[]>> queries)
         {
@@ -421,12 +414,9 @@ namespace DynamicSQLFetcher
                 queriesDict.Add(query.Item1.Parse(query.Item2), query.Item1.getParameters());
             return ExecuteQueryWithoutTransaction(connectionString, queriesDict);
         }
-        public static Task<int> ExecuteQueryWithTransaction(string connectionString, List<Tuple<Query, string[]>> queries)
+        public static Task<int> ExecuteQueryWithTransaction(string connectionString, IEnumerable<KeyValuePair<Query, string[]>> queries)
         {
-            Dictionary<string, DynamicParameters> queriesDict = new Dictionary<string, DynamicParameters>();
-            foreach (var query in queries)
-                queriesDict.Add(query.Item1.Parse(query.Item2), query.Item1.getParameters());
-            return ExecuteQueryWithTransaction(connectionString, queriesDict);
+            return ExecuteQueryWithTransaction(connectionString, queries.toOrderedPairs(query => query.Key.Parse(query.Value), query => query.Key.getParameters()));
         }
         public static Task<Dictionary<object, object>> SelectDictionary(string connectionString, Query query, string idCol, string valueCol)
         {
@@ -476,6 +466,5 @@ namespace DynamicSQLFetcher
                 return (await connection.QueryAsync<SingleValueItem<T>>(query, parameters)).Select(val => val.item);
             }
         }
-
     }
 }

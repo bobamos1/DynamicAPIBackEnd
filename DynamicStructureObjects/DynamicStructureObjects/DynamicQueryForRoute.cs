@@ -84,7 +84,7 @@ namespace DynamicStructureObjects
             if (withVar)
                 foreach (var variable in dynamicQueryForRoute.query.variablesInQuery)
                 {
-                    dynamicQueryForRoute.ParamsInfos.Add(variable.Key, await DynamicSQLParamInfo.addSQLParamInfo(variable.Key, 1, dynamicQueryForRoute.id));
+                    dynamicQueryForRoute.ParamsInfos.Add(variable.Key, await DynamicSQLParamInfo.addSQLParam(variable.Key, 1, dynamicQueryForRoute.id, ShowTypes.NONE));
                     if (!variable.Value)
                         await dynamicQueryForRoute.ParamsInfos[variable.Key].addValidator("true", ValidatorTypes.REQUIRED);
                 }
@@ -96,15 +96,15 @@ namespace DynamicStructureObjects
             Filters.Add(await DynamicFilter.addFilter(Filters.Count, name, showType, ParamsInfos[VarAffected].id, VarAffected));
             return this;
         }
-        public async Task<DynamicQueryForRoute> addSQLParamInfo(string varAffected, long ProprietyID)
+        public async Task<DynamicQueryForRoute> addSQLParam(string varAffected, long ProprietyID, ShowTypes? showType)
         {
-            ParamsInfos.Add(varAffected, await DynamicSQLParamInfo.addSQLParamInfo(varAffected, ProprietyID, id));
+            ParamsInfos.Add(varAffected, await DynamicSQLParamInfo.addSQLParam(varAffected, ProprietyID, id, showType));
             lastSQLParamAdded = varAffected;
             return this;
         }
-        public Task<DynamicQueryForRoute> addSQLParamInfo(string varAffected)
+        public Task<DynamicQueryForRoute> addSQLParam(string varAffected, ShowTypes showType)
         {
-            return addSQLParamInfo(varAffected, 1);
+            return addSQLParam(varAffected, 1, showType);
         }
         public async Task<DynamicQueryForRoute> addValidator(string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
