@@ -382,7 +382,7 @@ namespace APIDynamic
                 .addPropriety("FormatID", true, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                    .Authorize(Roles.Admin.CanModify())
+                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("Format", true, false, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Description", true, false, ShowTypes.STRING).Anonymous()
