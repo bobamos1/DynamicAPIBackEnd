@@ -1,6 +1,7 @@
 ﻿using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using ParserLib;
 
 namespace DynamicStructureObjects
 {
@@ -54,9 +55,16 @@ namespace DynamicStructureObjects
         }
         public static T SafeGet<T>(this Dictionary<string, object> data, string key, T defaultVal = default(T))
         {
-            object result;
-            if (data.TryGetValue(key, out result))
+            object result = null;
+            try
+            {
+                result = data[key];
                 return (T)result;
+            }
+            catch (Exception ex)
+            {
+                return result.To<T>(defaultVal);
+            }
             return defaultVal;
         }
         public static readonly QueryTypes[] authQueries = new[] { QueryTypes.INSERT, QueryTypes.DELETE, QueryTypes.UPDATE }; 
