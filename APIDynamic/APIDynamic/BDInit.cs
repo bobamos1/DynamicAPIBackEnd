@@ -548,6 +548,8 @@ namespace APIDynamic
                     .addRouteQuery("DELETE format_produit_produits_commande WHERE id_produit_commande = @id", QueryTypes.DELETE)
                     .addRouteQuery("DELETE FROM affectation_prix_lors_commande WHERE id_produit_par_commande = @id", QueryTypes.DELETE)
                     .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @id", QueryTypes.DELETE)
+                .addRoute("MoveToPanier", RouteTypes.PUT, "ClientID")
+                    .addRouteQuery("UPDATE produits_par_commande SET id_commande = (SELECT TOP(1) id FROM commandes WHERE id_client = @ClientID AND c.id_etat_commande = 4) WHERE id = @id", QueryTypes.UPDATE)
 
                 /*
                  * Checker ce qui peut être modifié dans cette table là, dans le fonctionnement, tu ne peux pas changer un produit, mais au lieu l'enlever de la commande et ajouter / DOnc 1 delete et 1 insert au lieu d'un update
