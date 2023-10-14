@@ -285,7 +285,7 @@ namespace APIDynamic
                 var formatChoisis = bodyData.SafeGet<IEnumerable<object>>("FormatID");
                 if (formatChoisis.Any())
                 {
-                    if ((await executorData.ExecuteQueryWithTransaction(getDictionaryToRun(queries[1], "FormatID", "ProduitCommandeID", produitParCommandeID, formatChoisis))) == 0)
+                    if ((await executorData.ExecuteQueryWithTransaction(queries[1].getDictionaryToRun("FormatID", "ProduitCommandeID", produitParCommandeID, formatChoisis))) == 0)
                         return Results.Forbid();
                 }
                 return Results.Ok();
@@ -294,16 +294,6 @@ namespace APIDynamic
             {
                 return Results.Forbid();
             }
-        }
-        public static IEnumerable<KeyValuePair<string, DynamicParameters>> getDictionaryToRun<TS, TM>(Query query, string paramNameChanging, string paramNameStatic, TS staticValue, IEnumerable<TM> multiplesValues)
-        {
-            query.clearParams();
-            return multiplesValues.ToImmutableSortedDictionary(value => query.setParam(paramNameChanging, value).setParam(paramNameStatic, staticValue).Parse(), _ => query.getParameters());
-        }
-
-        public static IEnumerable<KeyValuePair<string, DynamicParameters>> getDictionaryToRun(IEnumerable<Query> queries)
-        {
-            return queries.toOrderedPairs(query => query.Parse(), query => query.getParameters());
         }
     }
 }
