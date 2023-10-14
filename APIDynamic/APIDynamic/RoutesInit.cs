@@ -166,6 +166,16 @@ namespace APIDynamic
                 }
 
             );
+            controllers["ProduitsParCommande"].mapRoute("MoveToPanier",
+                async (queries, bodyData) =>
+                {
+                    var idClient = bodyData.UserID();
+                    queries[0].setParam("ClientID", idClient).setParam("id", bodyData.Get<long>("id"));
+                    if ((await executorData.ExecuteQueryWithTransaction(queries[0])) == 0)
+                        return Results.Forbid();
+                    return Results.Ok();
+                }
+                );
 
 
             /*
