@@ -507,6 +507,7 @@ namespace APIDynamic
                 .addPropriety("format", true, true, ShowTypes.Ref).Anonymous()
                 .addPropriety("taxes", true, true, ShowTypes.Ref).Anonymous()
                 .addPropriety("cout", true, true, ShowTypes.FLOAT).Anonymous()
+                .addPropriety("coutProduit", true, false, ShowTypes.FLOAT).Anonymous()
                 .addPropriety("Images", true, true, ShowTypes.Ref).Anonymous()
                 .addPropriety("TaxesProduit", true, true, ShowTypes.Ref).Anonymous()
                 //.addPropriety("Taxes", true, false, ShowTypes.Ref)
@@ -517,7 +518,7 @@ namespace APIDynamic
                 */
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT pc.id_commande AS id_commande, pro.id AS id_produit, pc.id AS id, pro.nom AS nom, pro.descriptions AS description, pc.quantite AS quantite, pro.quantite_inventaire AS quantite_restante, pc.prix_unitaire AS cout FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id = @_id AND pc.id_commande = @_id_commande", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT pc.id_commande AS id_commande, pro.id AS id_produit, pc.id AS id, pro.nom AS nom, pro.descriptions AS description, pc.quantite AS quantite, pro.quantite_inventaire AS quantite_restante, pc.prix_unitaire AS cout, p.prix AS coutProduit FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id = @_id AND pc.id_commande = @_id_commande", QueryTypes.SELECT)
 
                 .addRoute("InsertPanier", RouteTypes.POST)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
@@ -860,24 +861,24 @@ namespace APIDynamic
             ;
             
             await controllers["Formats"]
-               .addCBOInfo("TypeFormatID", "TypeFormats", "TypeFormat")
+                .addCBOInfo("TypeFormatID", "TypeFormats", "TypeFormat")
             ;
             await controllers["FormatsProduits"]
-               .addCBOInfo("ProduitID", "Produits", "Produit")
-               .addCBOInfo("FormatID", "Formats", "Format")
+                .addCBOInfo("ProduitID", "Produits", "Produit")
+                .addCBOInfo("FormatID", "Formats", "Format")
             ;
             await controllers["CollaborateursReseauxSociaux"]
-               .addCBOInfo("ReseauxSociauxID", "ReseauxSociaux", "ReseauxSociauxNom")
-               .addCBOInfo("CollaborateurID", "Collaborateurs", "Collaborateur")
-               //.addCBOInfo("ReseauxSociauxNom", "ReseauxSociaux", "Nom")
+                .addCBOInfo("ReseauxSociauxID", "ReseauxSociaux", "ReseauxSociauxNom")
+                .addCBOInfo("CollaborateurID", "Collaborateurs", "Collaborateur")
+                //.addCBOInfo("ReseauxSociauxNom", "ReseauxSociaux", "Nom")
             ;
             await controllers["FormatsProduitsCommandes"]
-               .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
-               .addCBOInfo("FormatID", "Formats", "Format")
+                .addCBOInfo("ProduitParCommandeID", "ProduitsParCommande", "ProduitParCommande")
+                .addCBOInfo("FormatID", "Formats", "Format")
             ;
             await controllers["ImagesProduits"]
-               .addCBOInfo("ProduitID", "Produits", "Produit")
-               .addCBOInfo("ImageID", "Images", "URL")
+                .addCBOInfo("ProduitID", "Produits", "Produit")
+                .addCBOInfo("ImageID", "Images", "URL")
             ;
             await controllers["Taxes"]
                 .addCBOInfo("AffectationPrixID", "AffectationsPrix", "Taxe")
