@@ -4,6 +4,7 @@ using DynamicStructureObjects;
 using ParserLib;
 using Stripe;
 using System;
+using System.Collections.Immutable;
 
 namespace APIDynamic
 {
@@ -150,6 +151,19 @@ namespace APIDynamic
                     return insertProduitParCommande(executorData, queries, bodyData);
                 }
                 );
+            controllers["ProduitsParCommande"].mapRoute("DeletePanier",
+                async(queries, bodyData) =>
+                {
+                    var idProduitParCommande = bodyData.Get<long>("id");
+                    queries[0].setParam("id", idProduitParCommande);
+                    queries[1].setParam("id", idProduitParCommande);
+                    queries[2].setParam("id", idProduitParCommande);             
+
+                    if ((await executorData.ExecuteQueryWithTransaction(getDictionaryToRun(queries))) == 0)
+                        return Results.Forbid();
+                }
+
+            );
 
 
             /*
@@ -289,6 +303,11 @@ namespace APIDynamic
             foreach (TM formatID in multiplesValues)
                 queriesToRun.Add(query.setParam(paramNameChanging, formatID).setParam(paramNameStatic, staticValue).Parse(), query.getParameters());
             return queriesToRun;
+        }
+
+        public static IEnumerable<KeyValuePair<string, DynamicParameters>> getDictionaryToRun(IEnumerable<Query> queries)
+        {
+            return queries.toOrderedPairs(query => query.Parse(), query => query.getParameters());
         }
     }
 }
