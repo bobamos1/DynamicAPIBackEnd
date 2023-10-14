@@ -518,13 +518,13 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT pc.id_commande AS id_commande, pro.id AS id_produit, pc.id AS id, pro.nom AS nom, pro.descriptions AS description, pc.quantite AS quantite, pro.quantite_inventaire AS quantite_restante, pc.prix_unitaire AS cout FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id = @_id AND pc.id_commande = @_id_commande", QueryTypes.SELECT)
 
-                .addRoute("InsertPanier", RouteTypes.POST, "id_client")
+                .addRoute("InsertPanier", RouteTypes.POST)
                     //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT id FROM clients WHERE token = @Token", QueryTypes.SELECT)
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 5", QueryTypes.INSERT)
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
-                .addRoute("InsertWishList", RouteTypes.POST, "id_client")
+                .addRoute("InsertWishList", RouteTypes.POST)
                     //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 4", QueryTypes.INSERT)
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
