@@ -267,8 +267,8 @@ namespace APIDynamic
                 {
                     queries[1].clearParams();
                     Dictionary<string, DynamicParameters> queriesToRun = new Dictionary<string, DynamicParameters>();
-                    foreach (object i in formatChoisis)
-                        queriesToRun.Add(queries[1].setParam("FormatID", i.To<long>()).setParam("ProduitCommandeID", produitParCommandeID).Parse(), queries[1].getParameters());
+                    foreach (object formatID in formatChoisis)
+                        queriesToRun.Add(queries[1].setParam("FormatID", formatID.To<long>()).setParam("ProduitCommandeID", produitParCommandeID).Parse(), queries[1].getParameters());
                     await executorData.ExecuteQueryWithTransaction(queriesToRun);
                 }
                 return Results.Ok();
