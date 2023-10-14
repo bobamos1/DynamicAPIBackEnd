@@ -260,7 +260,6 @@ namespace APIDynamic
         {
             try
             {
-                //var clientID = await executorData.ExecuteQueryWithTransaction(queries[0].clearParams().setParam("Token", bodyData.SafeGet<string>("Token")));
                 var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
                 var idFormatChoisi = bodyData.SafeGet<long[]>("FormatID");
                 if (idFormatChoisi.Any())
