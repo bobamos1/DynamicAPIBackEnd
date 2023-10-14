@@ -278,5 +278,12 @@ namespace APIDynamic
                 return Results.Forbid();
             }
         }
+        public static Dictionary<string, DynamicParameters> getDictionaryToRun<TS, TM>(Query query, string paramNameChanging, string paramNameStatic, TS staticValue, IEnumerable<TM> multiplesValues)
+        {
+            Dictionary<string, DynamicParameters> queriesToRun = new Dictionary<string, DynamicParameters>();
+            foreach (TM formatID in multiplesValues)
+                queriesToRun.Add(query.setParam(paramNameChanging, formatID).setParam(paramNameStatic, staticValue).Parse(), query.getParameters());
+            return queriesToRun;
+        }
     }
 }
