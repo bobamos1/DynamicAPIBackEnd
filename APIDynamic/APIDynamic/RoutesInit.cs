@@ -159,7 +159,7 @@ namespace APIDynamic
                     queries[1].setParam("id", idProduitParCommande);
                     queries[2].setParam("id", idProduitParCommande);             
 
-                    if ((await executorData.ExecuteQueryWithTransaction(getDictionaryToRun(queries))) == 0)
+                    if ((await executorData.ExecuteQueryWithTransaction(queries.toOrderedPairs())) == 0)
                         return Results.Ok();
 
                     return Results.Forbid();
