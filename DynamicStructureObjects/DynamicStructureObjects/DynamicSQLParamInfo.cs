@@ -14,6 +14,7 @@ namespace DynamicStructureObjects
         internal List<DynamicValidator> Validators { get; set; }
         internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @SQLParamInfoID UNION ALL SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true);
         internal static readonly Query insertSQLParamInfo = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO SQLParamInfos (id_Propriety, id_RouteQuery, varAffected, id_ShowType, ind) VALUES (@PropretyID, @RouteQueryID, @VarAffected, @ShowTypeID, @ind)", true);
+        internal static readonly Query getProprietyShowType = Query.fromQueryString(QueryTypes.VALUE, "SELECT id_ShowType FROM Proprieties WHERE id = @ID");
         internal DynamicSQLParamInfo(long id, string VarAffected, long ProprietyID, long showTypeID, int ind)
         {
             this.id = id;
@@ -50,6 +51,8 @@ namespace DynamicStructureObjects
                 paramInfo.isRequired = true;
                 paramInfo.Validators.Remove(requiredItem);
             }
+            if (paramInfo.ProprietyID != 1)
+                paramInfo.showType = (ShowTypes)(await DynamicController.executor.SelectValue<long>(getProprietyShowType.setParam("ID", paramInfo.ProprietyID)));
             return paramInfo;
         }
         public async static Task<DynamicSQLParamInfo> addSQLParam(string VarAffected, long ProprietyID, long RouteQueryID, ShowTypes? showType, int ind)
