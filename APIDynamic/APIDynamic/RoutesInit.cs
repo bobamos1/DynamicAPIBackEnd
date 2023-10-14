@@ -24,7 +24,10 @@ namespace APIDynamic
                 (queries, bodyData) => DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"))
             );
             controllers["Clients"].mapRoute("ConnexionStepTwo",
-                (queries, bodyData) => DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID())
+                (queries, bodyData) =>
+                {
+                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID());
+                }
             );
             controllers["Clients"].mapRoute("InscriptionClient",
                 async (queries, bodyData) =>
