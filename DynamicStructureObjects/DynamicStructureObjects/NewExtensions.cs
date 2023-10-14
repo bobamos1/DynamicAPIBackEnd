@@ -60,7 +60,7 @@ namespace DynamicStructureObjects
                 return result.To<T>();
             return defaultVal;
         }
-        public static readonly QueryTypes[] authQueries = new[] { QueryTypes.INSERT, QueryTypes.DELETE, QueryTypes.UPDATE }; 
+        public static readonly QueryTypes[] authQueries = new[] { QueryTypes.INSERT, QueryTypes.DELETE, QueryTypes.UPDATE, QueryTypes.STOREPROCEDURE }; 
         public static bool CompleteAuth(this QueryTypes queryType)
         {
             return authQueries.Contains(queryType);

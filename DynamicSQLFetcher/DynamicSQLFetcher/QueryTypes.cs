@@ -11,5 +11,6 @@
         CBO = 6,
         INSERT = 7,
         DELETE = 8,
+        STOREPROCEDURE = 9,
     }
 }
