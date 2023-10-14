@@ -378,7 +378,7 @@ namespace APIDynamic
                 .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 )
-                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("FormatID", true, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 ).Anonymous()
@@ -397,9 +397,7 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("UPDATE format_produit_produits_commande SET id_produit_commande = @_ProduitParCommandeID, id_format_choisi = @_FormatID, format_choisi = @_format_selected, type_format AS @_type_format_selected WHERE id_produit_commande = @ProduitParCommandeIDOld AND id_format_choisi = @FormatIDOld", QueryTypes.UPDATE)
-                    .setSQLParam("FormatIDOld", "FormatID")
-                    .setSQLParam("ProduitParCommandeIDOld", "ProduitParCommandeID")
+                    .addRouteQuery("UPDATE format_produit_produits_commande SET id_produit_commande = @_ProduitParCommandeIDNew, id_format_choisi = @_FormatIDNew, format_choisi = @_format_selected, type_format AS @_type_format_selected WHERE id_produit_commande = @ProduitParCommandeID AND id_format_choisi = @FormatID", QueryTypes.UPDATE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
@@ -548,8 +546,8 @@ namespace APIDynamic
                     .addRouteQuery("DELETE format_produit_produits_commande WHERE id_produit_commande = @id", QueryTypes.DELETE)
                     .addRouteQuery("DELETE FROM affectation_prix_lors_commande WHERE id_produit_par_commande = @id", QueryTypes.DELETE)
                     .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @id", QueryTypes.DELETE)
-                .addRoute("MoveToPanier", RouteTypes.PUT, "ClientID")
-                    .addRouteQuery("UPDATE produits_par_commande SET id_commande = (SELECT TOP(1) id FROM commandes WHERE id_client = @ClientID AND c.id_etat_commande = 4) WHERE id = @id", QueryTypes.UPDATE)
+                .addRoute("MoveToPanier", RouteTypes.PUT)
+                    .addRouteQuery("UPDATE produits_par_commande SET id_commande = (SELECT TOP(1) id FROM commandes WHERE id_client = @ClientID AND id_etat_commande = 4) WHERE id = @id", QueryTypes.UPDATE)
                         .setNotRequired("ClientID")
 
                 /*
