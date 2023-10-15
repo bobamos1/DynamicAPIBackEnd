@@ -170,7 +170,7 @@ namespace APIDynamic
                 async (queries, bodyData) =>
                 {
                     var idClient = bodyData.UserID();
-                    var ProduitsParCommande = executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
+                    var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
 
                     foreach (long idProduitParCommande in ProduitsParCommande) {
 
@@ -195,7 +195,7 @@ namespace APIDynamic
                         return Results.Forbid();
                     return Results.Ok();
                 }
-                );
+            );
 
 
             /*
