@@ -462,7 +462,7 @@ namespace DynamicStructureObjects
             var userID = DynamicConnection.ParseUserID(token);
             bodyData[USERIDKEY] = userID;
             bodyData[ROLESKEY] = roles;
-            if (route.paramForUserID is not null && roles.Length == 1 && roles[0] == 1)
+            if (route.paramForUserID is not null && roles.Length <= 1 && roles[0] == 1)
                 bodyData[route.paramForUserID] = userID;
             if (route.getAuthorizedCols)
                 setAuthorizedProprieties(bodyData, route.onlyModify, roles);

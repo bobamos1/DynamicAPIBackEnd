@@ -42,7 +42,7 @@ namespace APIDynamic
                     );
                     if ((await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ClientID", id))) == 0)
                         return Results.Problem();
-                    return Results.Ok(DynamicConnection.CreateToken(id, userInfo));
+                    return Results.Ok(DynamicConnection.CreateToken(id, userInfo, Roles.Client.ID()));
                 }
             );
             controllers["Clients"].mapRoute("RecuperationStepOne",
