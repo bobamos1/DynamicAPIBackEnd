@@ -1,25 +1,23 @@
-﻿using System.Reflection.Metadata.Ecma335;
-
-namespace DynamicStructureObjects
+﻿namespace DynamicStructureObjects
 {
     public enum ShowTypes : long
     {
         [Value("None")]
-        NONE = 0,
+        NONE = 1,
         [Value("Reference")]
-        Ref = 1,
+        Ref = 2,
         [Value("CBO")]
-        CBO = 2,
+        CBO = 3,
         [Value("String")]
-        STRING = 3,
+        STRING = 4,
         [Value("Int")]
-        INT = 4,
+        INT = 5,
         [Value("Float")]
-        FLOAT = 5,
+        FLOAT = 6,
         [Value("CBOID")]
-        CBOID = 6,
+        CBOID = 7,
         [Value("ID")]
-        ID = 7
+        ID = 8
     }
     public static class ShowTypesHelper
     {

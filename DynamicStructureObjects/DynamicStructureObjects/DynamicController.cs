@@ -38,7 +38,7 @@ namespace DynamicStructureObjects
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles");
         internal static readonly Query getControllers = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, name AS Name, isMain AS IsMain FROM Controllers", true);
         internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isUpdatable AS IsUpdatable, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true);
-        internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, CASE WHEN URLRoutes.id_baseRoute = 1 THEN URLRoutes.name ELSE BaseRoutes.name END AS Name, id_routeType AS RouteTypeID, requireAuthorization AS requireAuthorization, getAuthorizedCols AS getAuthorizedCols, onlyModify AS onlyModify, paramForUserID AS paramForUserID FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true);
+        internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, CASE WHEN URLRoutes.id_baseRoute = 1 THEN URLRoutes.name ELSE BaseRoutes.name END AS Name, id_routeType AS RouteTypeID, requireAuthorization AS requireAuthorization, getAuthorizedCols AS getAuthorizedCols, onlyModify AS onlyModify, paramForUserID AS paramForUserID, id_routeDisplayType AS routeDisplayTypeID FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true);
         internal static readonly Query insertController = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Controllers (name, isMain) VALUES (@Name, @IsMain)", true);
         private DynamicController(long id, string Name, bool IsMain)
         {
@@ -160,9 +160,9 @@ namespace DynamicStructureObjects
             Routes.Add(await DynamicRoute.addRoute(id, baseRoute));
             return this;
         }
-        public async Task<DynamicController> addRoute(string Name, RouteTypes routeType, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = false)
+        public async Task<DynamicController> addRoute(string Name, RouteTypes routeType, RouteDisplayTypes routeDisplayType = RouteDisplayTypes.NONE, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = false)
         {
-            Routes.Add(await DynamicRoute.addRoute(id, Name, routeType, getAuthorizedCols, onlyModify, requireAuthorization));
+            Routes.Add(await DynamicRoute.addRoute(id, Name, routeType, routeDisplayType, getAuthorizedCols, onlyModify, requireAuthorization));
             return this;
         }
         public DynamicController addEmptyQuery()

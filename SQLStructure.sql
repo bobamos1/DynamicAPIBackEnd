@@ -77,7 +77,12 @@ CREATE TABLE URLRoutes (
     requireAuthorization BIT,
     getAuthorizedCols BIT,
     onlyModify BIT,
-    paramForUserID VARCHAR(100)
+    paramForUserID VARCHAR(100),
+    id_routeDisplayType BIGINT
+)
+CREATE TABLE RouteDisplayTypes (
+    id BIGINT IDENTITY(1,1),
+    name VARCHAR(100)
 )
 CREATE TABLE RouteQueries (
     id BIGINT IDENTITY(1,1),
@@ -184,6 +189,10 @@ ADD CONSTRAINT PK_RouteTypes PRIMARY KEY (id);
 ALTER TABLE BaseRoutes
 ADD CONSTRAINT PK_BaseRoutes PRIMARY KEY (id);
 
+-- RouteDisplayTypes Table
+ALTER TABLE RouteDisplayTypes
+ADD CONSTRAINT PK_RouteDisplayTypes PRIMARY KEY (id);
+
 -- URLRoutes Table
 ALTER TABLE URLRoutes
 ADD CONSTRAINT PK_Routes PRIMARY KEY (id);
@@ -283,6 +292,10 @@ FOREIGN KEY (id_controller) REFERENCES Controllers(id);
 ALTER TABLE URLRoutes
 ADD CONSTRAINT FK_Routes_RouteTypes
 FOREIGN KEY (id_routeType) REFERENCES RouteTypes(id);
+
+ALTER TABLE URLRoutes
+ADD CONSTRAINT FK_Routes_RouteDisplayTypes
+FOREIGN KEY (id_routeDisplayType) REFERENCES RouteDisplayTypes(id);
 
 -- RouteQueries Table
 ALTER TABLE RouteQueries

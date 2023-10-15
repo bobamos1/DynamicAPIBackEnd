@@ -39,7 +39,7 @@ namespace DynamicStructureObjects
         public static KeyValuePair<TEnum, bool> CannotModify<TEnum>(this TEnum enumEntry) where TEnum : struct, Enum => new KeyValuePair<TEnum, bool>(enumEntry, false);
 
         public static string insertTemplate = "INSERT INTO {0} (id, name) VALUES ({{0}}, '{{1}}')";
-        public static Dictionary<string, Type> enumTables = new Dictionary<string, Type>(){ { "BaseRoutes", typeof(BaseRoutes) }, { "CSharpTypes", typeof(CSharpTypes) }, { "QueryTypes", typeof(QueryTypes) }, { "RouteTypes", typeof(RouteTypes) }, { "ShowTypes", typeof(ShowTypes) }, { "ValidatorTypes", typeof(ValidatorTypes) } };
+        public static Dictionary<string, Type> enumTables = new Dictionary<string, Type>(){ { "BaseRoutes", typeof(BaseRoutes) }, { "CSharpTypes", typeof(CSharpTypes) }, { "QueryTypes", typeof(QueryTypes) }, { "RouteTypes", typeof(RouteTypes) }, { "ShowTypes", typeof(ShowTypes) }, { "ValidatorTypes", typeof(ValidatorTypes) }, { "RouteDisplayTypes", typeof(RouteDisplayTypes) } };
         public static async Task populateBDEnums(SQLExecutor executor)
         {
             var templates = enumTables.ToDictionary(table => table, table => string.Format(insertTemplate, table.Key));

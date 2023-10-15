@@ -846,7 +846,7 @@ namespace APIDynamic
 
 
             #endregion
-            #region Media
+            #region Medias
             await controllers["Medias"]
                 .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
@@ -858,7 +858,7 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id, nom FROM media", QueryTypes.CBO)
             ;
             #endregion
-            #region TypesMedia
+            #region TypesMedias
             await controllers["TypesMedias"]
                 .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
