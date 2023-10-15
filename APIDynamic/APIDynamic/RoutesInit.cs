@@ -16,16 +16,10 @@ namespace APIDynamic
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
             controllers["Clients"].mapRoute("ConnexionStepOne",
-                (queries, bodyData) =>
-                {
-                    return DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"));
-                }
+                (queries, bodyData) =>  DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"))
             );
             controllers["Clients"].mapRoute("ConnexionStepTwo",
-                (queries, bodyData) =>
-                {
-                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID());
-                }
+                (queries, bodyData) =>  DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID())
             );
             controllers["Clients"].mapRoute("InscriptionClient",
                 async (queries, bodyData) =>
@@ -61,10 +55,7 @@ namespace APIDynamic
                 }
             );
             controllers["Clients"].mapRoute("RecuperationStepTwo",
-                (queries, bodyData) =>
-                {
-                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), false, Roles.Client.ID());
-                }
+                (queries, bodyData) => DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), false, Roles.Client.ID())
             );
             controllers["Clients"].mapRoute("ChangePassword",
                 async (queries, bodyData) =>
