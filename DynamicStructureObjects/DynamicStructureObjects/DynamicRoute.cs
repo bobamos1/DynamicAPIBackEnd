@@ -113,33 +113,25 @@ namespace DynamicStructureObjects
             return this;
         }
         
-        public Task<DynamicRoute> addSQLParam(int indexQuery, string varAffected, ShowTypes? showType, int ind)
+        public async Task<DynamicRoute> addSQLParam(int indexQuery, string varAffected, long ProprietyID = 1)
         {
-            return addSQLParam(indexQuery, varAffected, 1, showType, ind);
-        }
-        public async Task<DynamicRoute> addSQLParam(int indexQuery, string varAffected, long ProprietyID, ShowTypes? showType, int ind)
-        {
-            await Queries[indexQuery].addSQLParam(varAffected, ProprietyID, showType, ind);
+            await Queries[indexQuery].addSQLParam(varAffected, ProprietyID);
             return this;
         }
-        public Task<DynamicRoute> addSQLParam(string varAffected, ShowTypes? showType, int ind)
+        public async Task<DynamicRoute> addSQLParam(string varAffected, long ProprietyID = 1)
         {
-            return addSQLParam(varAffected, 1, showType, ind);
-        }
-        public async Task<DynamicRoute> addSQLParam(string varAffected, long ProprietyID, ShowTypes? showType, int ind)
-        {
-            await Queries.Last().addSQLParam(varAffected, ProprietyID, showType, ind);
+            await Queries.Last().addSQLParam(varAffected, ProprietyID);
             return this;
         }
 
-        public async Task<DynamicRoute> setSQLParam(string VarAffected, ShowTypes? showType, int? ind, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicRoute> setSQLParam(string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
-            await Queries.Last().setSQLParam(VarAffected, 1, false, showType, ind, ValidatorBundles);
+            await Queries.Last().setSQLParam(VarAffected, 1, false, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicRoute> setSQLParam(string VarAffected, long ProprietyID, ShowTypes? showType, int? ind, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicRoute> setSQLParam(string VarAffected, long ProprietyID, params ValidatorBundle[] ValidatorBundles)
         {
-            await Queries.Last().setSQLParam(VarAffected, ProprietyID, false, showType, ind, ValidatorBundles);
+            await Queries.Last().setSQLParam(VarAffected, ProprietyID, false, ValidatorBundles);
             return this;
         }
         public async Task<DynamicRoute> setNotRequired(params string[] VarsAffected)

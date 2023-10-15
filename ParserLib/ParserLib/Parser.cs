@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -164,8 +165,12 @@ namespace ParserLib
                         return dateTime;
             }
             return defVal ?? DateTime.MinValue;
-        }
-
+        }/*
+        public static IEnumerable<T> ToArr<T>(IEnumerable<object> arr)
+        {
+            for (int i = 0; i < length; i++)
+                arr[i] = arr[i].To<T>();
+        }*/
         public static T to<T>(object obj, T defVal = default(T))
         {
             if (obj is null)

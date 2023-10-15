@@ -8,9 +8,9 @@ namespace DynamicStructureObjects
         public Query query { get; internal set; }
         public bool CompleteAuth { get; internal set; }
         public Dictionary<string, DynamicSQLParamInfo> ParamsInfos { get; internal set; }
-        internal static readonly Query getSQLParamInfos = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, varAffected AS VarAffected, id_Propriety AS ProprietyID, id_ShowType AS showTypeID, ind AS ind FROM SQLParamInfos WHERE id_RouteQuery = @RouteQueryID", true);
+        internal static readonly Query getSQLParamInfos = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, varAffected AS VarAffected, id_Propriety AS ProprietyID FROM SQLParamInfos WHERE id_RouteQuery = @RouteQueryID", true);
         internal static readonly Query insertRouteQuery = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO RouteQueries (ind, SQLString, id_queryType, id_route, CompleteAuth, CompleteCheck) VALUES (@Index, @SQLString, @QueryTypeID, @RouteID, @CompleteAuth, @CompleteCheck)", true);
-        internal static readonly Query updateSQLParamInfo = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE SQLParamInfos SET id_Propriety = @ProprietyID, ind = @_ind, id_showType = @ShowTypeID WHERE varAffected = @VarAffected AND id_RouteQuery = @RouteQueryID", true, false);
+        internal static readonly Query updateSQLParamInfo = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE SQLParamInfos SET id_Propriety = @ProprietyID WHERE varAffected = @VarAffected AND id_RouteQuery = @RouteQueryID", true, false);
         internal static readonly Query deleteSQLParamInfoRequired = Query.fromQueryString(QueryTypes.DELETE, "DELETE ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @ID AND id_ValidatorType = 1", true);
         private string lastSQLParamAdded;
         internal DynamicQueryForRoute(long id, string queryString, long QueryTypeID, bool CompleteAuth, bool CompleteCheck)
@@ -70,27 +70,25 @@ namespace DynamicStructureObjects
             );
             if (withVar)
             {
-                int ind = 0;
                 foreach (var variable in dynamicQueryForRoute.query.variablesInQuery)
                 {
-                    dynamicQueryForRoute.ParamsInfos.Add(variable.Key, await DynamicSQLParamInfo.addSQLParam(variable.Key, 1, dynamicQueryForRoute.id, ShowTypes.NONE, ind));
+                    dynamicQueryForRoute.ParamsInfos.Add(variable.Key, await DynamicSQLParamInfo.addSQLParam(variable.Key, 1, dynamicQueryForRoute.id));
                     if (!variable.Value)
                         await dynamicQueryForRoute.ParamsInfos[variable.Key].addValidator("true", ValidatorTypes.REQUIRED);
-                    ind++;
                 }
             }
             return dynamicQueryForRoute;
             
         }
-        public async Task<DynamicQueryForRoute> addSQLParam(string varAffected, long ProprietyID, ShowTypes? showType, int ind)
+        public async Task<DynamicQueryForRoute> addSQLParam(string varAffected, long ProprietyID)
         {
-            ParamsInfos.Add(varAffected, await DynamicSQLParamInfo.addSQLParam(varAffected, ProprietyID, id, showType, ind));
+            ParamsInfos.Add(varAffected, await DynamicSQLParamInfo.addSQLParam(varAffected, ProprietyID, id));
             lastSQLParamAdded = varAffected;
             return this;
         }
-        public Task<DynamicQueryForRoute> addSQLParam(string varAffected, ShowTypes showType, int ind)
+        public Task<DynamicQueryForRoute> addSQLParam(string varAffected)
         {
-            return addSQLParam(varAffected, 1, showType, ind);
+            return addSQLParam(varAffected, 1);
         }
         public async Task<DynamicQueryForRoute> addValidator(string VarAffected, string Value, ValidatorTypes ValidatorType)
         {
@@ -118,7 +116,7 @@ namespace DynamicStructureObjects
             }
             return this;
         }
-        public async Task<DynamicQueryForRoute> setSQLParam(string VarAffected, long ProprietyID, bool updatePropriety, ShowTypes? showType, int? ind, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicQueryForRoute> setSQLParam(string VarAffected, long ProprietyID, bool updatePropriety, params ValidatorBundle[] ValidatorBundles)
         {
             if (updatePropriety)
                 await DynamicController.executor.ExecuteQueryWithTransaction(
@@ -126,8 +124,6 @@ namespace DynamicStructureObjects
                         .setParam("ProprietyID", ProprietyID)
                         .setParam("VarAffected", VarAffected)
                         .setParam("RouteQueryID", id)
-                        .setParam("ShowTypeID", showType is null ? ShowTypes.NONE : (long)showType)
-                        .setValidParam("ind", ind)
                 );
             foreach (var bundle in ValidatorBundles)
                 await ParamsInfos[VarAffected].addValidator(bundle);

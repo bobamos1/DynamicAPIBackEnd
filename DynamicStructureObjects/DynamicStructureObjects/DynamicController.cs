@@ -37,7 +37,7 @@ namespace DynamicStructureObjects
         public List<DynamicPropriety> Proprieties { get; internal set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles");
         internal static readonly Query getControllers = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, name AS Name, isMain AS IsMain FROM Controllers", true);
-        internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isUpdatable AS IsUpdatable, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true);
+        internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isUpdatable AS IsUpdatable, id_ShowType AS ShowTypeID, ind AS ind, description AS description, displayName AS displayName FROM Proprieties WHERE id_controller = @controllerID", true);
         internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, CASE WHEN URLRoutes.id_baseRoute = 1 THEN URLRoutes.name ELSE BaseRoutes.name END AS Name, id_routeType AS RouteTypeID, requireAuthorization AS requireAuthorization, getAuthorizedCols AS getAuthorizedCols, onlyModify AS onlyModify, paramForUserID AS paramForUserID, id_routeDisplayType AS routeDisplayTypeID FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true);
         internal static readonly Query insertController = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Controllers (name, isMain) VALUES (@Name, @IsMain)", true);
         private DynamicController(long id, string Name, bool IsMain)
@@ -191,7 +191,7 @@ namespace DynamicStructureObjects
             {
                 var bindedProprietyId = GetProprietyID(paramInfo.Key);
                 if (bindedProprietyId > -1)
-                    await lastRouteQuery.setSQLParam(paramInfo.Key, bindedProprietyId, true, null, ind);
+                    await lastRouteQuery.setSQLParam(paramInfo.Key, bindedProprietyId, true);
                 ind++;
             }
             return this;
@@ -216,42 +216,32 @@ namespace DynamicStructureObjects
             await Routes.Last().addValidator(Value, ValidatorType);
             return this;
         }
-        public async Task<DynamicController> addSQLParam(string ParamName, ShowTypes? showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> addSQLParam(string ParamName, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().addSQLParam(ParamName, 1, showType, ind).addValidator(ParamName, false, ValidatorBundles);
+            await Routes.Last().addSQLParam(ParamName, 1).addValidator(ParamName, false, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicController> addParam(string ParamName, ShowTypes? showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> addParam(string ParamName, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().addSQLParam(ParamName, 1, showType, ind).addValidator(ParamName, true, ValidatorBundles);
+            await Routes.Last().addSQLParam(ParamName, 1).addValidator(ParamName, true, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicController> addParam(string ParamName, ShowTypes showType,  bool addRequired, int ind, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> addParam(string ParamName,  bool addRequired, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().addSQLParam(ParamName, 1, showType, ind).addValidator(ParamName, addRequired, ValidatorBundles);
+            await Routes.Last().addSQLParam(ParamName, 1).addValidator(ParamName, addRequired, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicController> setSQLParam(string VarAffected, string ProprietyName, int? ind, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> setSQLParam(string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
         {
             long proprietyID = 1;
             if (ProprietyName is not null)
                 proprietyID = Proprieties.First(propriety => propriety.Name == ProprietyName).id;
-            await Routes.Last().setSQLParam(VarAffected, proprietyID, null, ind, ValidatorBundles);
+            await Routes.Last().setSQLParam(VarAffected, proprietyID, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicController> setSQLParam(string VarAffected, ShowTypes? showType, int? ind, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> setSQLParam(string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().setSQLParam(VarAffected, showType, ind, ValidatorBundles);
-            return this;
-        }
-        public async Task<DynamicController> setSQLParam(string VarAffected, int? ind, params ValidatorBundle[] ValidatorBundles)
-        {
-            await Routes.Last().setSQLParam(VarAffected, null, ind, ValidatorBundles);
-            return this;
-        }
-        public async Task<DynamicController> setSQLParamShowType(string VarAffected, ShowTypes? showType, int? ind)
-        {
-            await Routes.Last().setSQLParam(VarAffected, showType, ind);
+            await Routes.Last().setSQLParam(VarAffected, ValidatorBundles);
             return this;
         }
         public async Task<DynamicController> setNotRequired(params string[] VarsAffected)
@@ -259,9 +249,9 @@ namespace DynamicStructureObjects
             await Routes.Last().setNotRequired(VarsAffected);
             return this;
         }
-        public async Task<DynamicController> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, params ValidatorBundle[] validatorBundle)
+        public async Task<DynamicController> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string description, string displayName, int ind, params ValidatorBundle[] validatorBundle)
         {
-            Proprieties.Add(await DynamicPropriety.addPropriety(Name, IsMain, IsUpdatable, showType, id, validatorBundle));
+            Proprieties.Add(await DynamicPropriety.addPropriety(Name, IsMain, IsUpdatable, showType, description, displayName, ind, id, validatorBundle));
             return this;
         }
         public async Task<DynamicController> addValidatorForPropriety(string ProprietyName, string Value, ValidatorTypes ValidatorType)

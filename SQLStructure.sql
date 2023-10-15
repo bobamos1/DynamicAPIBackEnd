@@ -38,7 +38,10 @@ CREATE TABLE Proprieties (
     isMain BIT,
     isUpdatable BIT DEFAULT 0,
     id_ShowType BIGINT,
-    id_controller BIGINT
+    id_controller BIGINT,
+    ind INT,
+    displayName VARCHAR(100),
+    description VARCHAR(1000)
 )
 CREATE TABLE CSharpTypes (
     id BIGINT IDENTITY(1,1),
@@ -118,9 +121,7 @@ CREATE TABLE SQLParamInfos (
     id BIGINT IDENTITY(1,1),
     id_Propriety BIGINT,
     id_RouteQuery BIGINT,
-    varAffected VARCHAR(100),
-    id_ShowType BIGINT,
-    ind INT,
+    varAffected VARCHAR(100)
 )
 CREATE TABLE ValidatorTypes (
     id BIGINT IDENTITY(1,1),
@@ -342,10 +343,6 @@ FOREIGN KEY (id_RouteQuery) REFERENCES RouteQueries(id);
 ALTER TABLE SQLParamInfos
 ADD CONSTRAINT FK_SQLParamInfos_Proprieties
 FOREIGN KEY (id_Propriety) REFERENCES Proprieties(id);
-
-ALTER TABLE SQLParamInfos
-ADD CONSTRAINT FK_SQLParamInfos_ShowTypes
-FOREIGN KEY (id_ShowType) REFERENCES ShowTypes(id);
 
 
 -- ValidatorSQLParamInfoValues Table

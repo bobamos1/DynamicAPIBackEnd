@@ -29,9 +29,9 @@ namespace DynamicStructureObjects
             await task[controllerName].addValidatorForSQLParam(routeName, indexQuery, VarAffected, Value, ValidatorType);
             return task;
         }
-        public async static Task<Dictionary<string, DynamicController>> addPropriety(this Dictionary<string, DynamicController> task, string controllerName, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType)
+        public async static Task<Dictionary<string, DynamicController>> addPropriety(this Dictionary<string, DynamicController> task, string controllerName, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string description, string displayName, int ind)
         {
-            await task[controllerName].addPropriety(Name, IsMain, IsUpdatable, showType);
+            await task[controllerName].addPropriety(Name, IsMain, IsUpdatable, showType, description, displayName, ind);
             return task;
         }
         public async static Task<Dictionary<string, DynamicController>> addValidatorForPropriety(this Dictionary<string, DynamicController> task, string controllerName, string ProprietyName, string Value, ValidatorTypes ValidatorType)
@@ -82,9 +82,9 @@ namespace DynamicStructureObjects
         {
             return await (await task).addValidatorForSQLParam(controllerName, routeName, indexQuery, VarAffected, Value, ValidatorType);
         }
-        public async static Task<Dictionary<string, DynamicController>> addPropriety(this Task<Dictionary<string, DynamicController>> task, string controllerName, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType)
+        public async static Task<Dictionary<string, DynamicController>> addPropriety(this Task<Dictionary<string, DynamicController>> task, string controllerName, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string description, string displayName, int ind)
         {
-            return await (await task).addPropriety(controllerName, Name, IsMain, IsUpdatable, showType);
+            return await (await task).addPropriety(controllerName, Name, IsMain, IsUpdatable, showType, description, displayName, ind);
         }
         public async static Task<Dictionary<string, DynamicController>> addValidatorForPropriety(this Task<Dictionary<string, DynamicController>> task, string controllerName, string ProprietyName, string Value, ValidatorTypes ValidatorType)
         {
@@ -155,25 +155,25 @@ namespace DynamicStructureObjects
         {
             return await (await task).setNotRequired(VarsAffected);
         }
-        public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, string ProprietyName, int? ind, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).setSQLParam(VarAffected, ProprietyName, ind, ValidatorBundles);
+            return await (await task).setSQLParam(VarAffected, ProprietyName, ValidatorBundles);
         }
-        public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, int? ind, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> setSQLParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).setSQLParam(VarAffected, ind, ValidatorBundles);
+            return await (await task).setSQLParam(VarAffected, ValidatorBundles);
         }
-        public async static Task<DynamicController> addParam(this Task<DynamicController> task, string VarAffected, ShowTypes? showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> addParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).addParam(VarAffected, showType, ind, ValidatorBundles);
+            return await (await task).addParam(VarAffected, ValidatorBundles);
         }
-        public async static Task<DynamicController> addSQLParam(this Task<DynamicController> task, string VarAffected, ShowTypes? showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> addSQLParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).addSQLParam(VarAffected, showType, ind, ValidatorBundles);
+            return await (await task).addSQLParam(VarAffected, ValidatorBundles);
         }
-        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable,ShowTypes showType, params ValidatorBundle[] validatorBundles)
+        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable,ShowTypes showType, string description, string displayName, int ind, params ValidatorBundle[] validatorBundles)
         {
-            return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, validatorBundles);
+            return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, description, displayName, ind, validatorBundles);
         }/*
         public async static Task<DynamicController> addValidatorForPropriety(this Task<DynamicController> task, string ProprietyName, string Value, ValidatorTypes ValidatorType)
         {
