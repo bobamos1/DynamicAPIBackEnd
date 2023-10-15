@@ -454,7 +454,7 @@ namespace DynamicStructureObjects
                 if (route.requireAuthorization)
                     return false;
                 authorizedProprieties = getAuthorizedProprieties(route.onlyModify);
-                setAuthorizedProprieties(bodyData, authorizedProprieties);
+                setAuthorizedProprieties(bodyData, authorizedProprieties, route.onlyModify);
                 return true;
             }
             var roles = DynamicConnection.ParseRoles(token).ToArray();
@@ -466,15 +466,15 @@ namespace DynamicStructureObjects
             if (route.getAuthorizedCols)
             {
                 authorizedProprieties = getAuthorizedProprieties(route.onlyModify, roles);
-                setAuthorizedProprieties(bodyData, authorizedProprieties);
+                setAuthorizedProprieties(bodyData, authorizedProprieties, route.onlyModify);
             }
             if (route.requireAuthorization)
                 return route.CanUse(roles);
             return true;
         }
-        public void setAuthorizedProprieties(Dictionary<string, object> bodyData, IEnumerable<DynamicPropriety> authorizedProprieties)
+        public void setAuthorizedProprieties(Dictionary<string, object> bodyData, IEnumerable<DynamicPropriety> authorizedProprieties, bool forModify)
         {
-            bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.ShowType.IsID() ? $"{prop.Name}New" : prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
+            bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => forModify && prop.ShowType.IsID() ? $"{prop.Name}New" : prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
         }
         public static void QueryCollectionToDictionary(IQueryCollection queryParameters, Dictionary<string, object> dictionary)
         {
