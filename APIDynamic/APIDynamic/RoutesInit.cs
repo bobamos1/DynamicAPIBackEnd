@@ -16,16 +16,10 @@ namespace APIDynamic
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
             controllers["Clients"].mapRoute("ConnexionStepOne",
-                (queries, bodyData) =>
-                {
-                    return DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"));
-                }
+                (queries, bodyData) =>  DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"))
             );
             controllers["Clients"].mapRoute("ConnexionStepTwo",
-                (queries, bodyData) =>
-                {
-                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID());
-                }
+                (queries, bodyData) =>  DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID())
             );
             controllers["Clients"].mapRoute("InscriptionClient",
                 async (queries, bodyData) =>
@@ -40,7 +34,9 @@ namespace APIDynamic
                         .setParam("Sel", userInfo.passwordSalt)
                         //.setParam("Password", bodyData.Get<bool>("Password"))
                     );
-                    return Results.Ok(DynamicConnection.CreateToken(id, userInfo));
+                    if ((await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ClientID", id))) == 0)
+                        return Results.Problem();
+                    return Results.Ok(DynamicConnection.CreateToken(id, userInfo, Roles.Client.ID()));
                 }
             );
             controllers["Clients"].mapRoute("RecuperationStepOne",
@@ -59,10 +55,7 @@ namespace APIDynamic
                 }
             );
             controllers["Clients"].mapRoute("RecuperationStepTwo",
-                (queries, bodyData) =>
-                {
-                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), false, Roles.Client.ID());
-                }
+                (queries, bodyData) => DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), false, Roles.Client.ID())
             );
             controllers["Clients"].mapRoute("ChangePassword",
                 async (queries, bodyData) =>
@@ -87,7 +80,7 @@ namespace APIDynamic
             controllers["Employes"].mapRoute("ConnexionStepTwo",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Admin.ID());
+                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), true);
                 }
             );
             controllers["Employes"].mapRoute("InscriptionEmploye",
@@ -124,7 +117,7 @@ namespace APIDynamic
             controllers["Employes"].mapRoute("RecuperationStepTwo",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), false, Roles.Admin.ID());
+                    return DynamicConnection.makeRecuperationStepTwo(executorData, queries[0], queries[1], bodyData.Get<string>("Token"), bodyData.Get<string>("NewPassword"), true);
                 }
             );
             controllers["Employes"].mapRoute("ChangePassword",
@@ -189,8 +182,7 @@ namespace APIDynamic
             controllers["ProduitsParCommande"].mapRoute("MoveToPanier",
                 async (queries, bodyData) =>
                 {
-                    var idClient = bodyData.UserID();
-                    queries[0].setParam("ClientID", idClient).setParam("id", bodyData.Get<long>("id"));
+                    queries[0].setParam("ClientID", bodyData.Get<long>("ClientID")).setParam("id", bodyData.Get<long>("id"));
                     if ((await executorData.ExecuteQueryWithTransaction(queries[0])) == 0)
                         return Results.Forbid();
                     return Results.Ok();
@@ -308,7 +300,6 @@ namespace APIDynamic
         {
             try
             {
-                bodyData["id_client"] = bodyData[DynamicController.USERIDKEY];
                 var produitParCommandeID = await executorData.ExecuteInsertWithLastID(queries[0].setParams(bodyData));
                 if (produitParCommandeID == 0)
                     return Results.Forbid();

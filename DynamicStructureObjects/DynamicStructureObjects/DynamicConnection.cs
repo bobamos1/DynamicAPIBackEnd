@@ -28,7 +28,7 @@ namespace DynamicStructureObjects
 
         internal static string apiKey { get; set; }
         internal static EmailSender emailSender { get; set; }
-        internal static TimeSpan TokenLifetime = TimeSpan.FromHours(8);
+        internal static TimeSpan TokenLifetime = TimeSpan.FromMinutes(15);
         public static void setEmailSender(string hostEmail, string hostUsername, string hostPassword, string host, int port)
         {
             emailSender = new EmailSender(hostEmail, hostUsername, hostPassword, host, port);
@@ -41,6 +41,10 @@ namespace DynamicStructureObjects
                 rngCryptoServiceProvider.GetBytes(salt);
                 return salt;
             }
+        }
+        private static byte[] ComputeHash(this HMACSHA512 hmac, string password)
+        {
+            return hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
         }
         public static UserInfo CreatePasswordHash(string password)
         {
@@ -57,7 +61,7 @@ namespace DynamicStructureObjects
             using (var hmac = new HMACSHA512())
             {
                 var salt = hmac.Key;
-                var hash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                var hash = hmac.ComputeHash(password);
                 return (hash, salt);
             }
         }
@@ -65,7 +69,7 @@ namespace DynamicStructureObjects
         {
             using (var hmac = new HMACSHA512(storedSalt))
             {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                var computedHash = hmac.ComputeHash(password);
                 return computedHash.SequenceEqual(storedHash);
             }
         }
@@ -111,7 +115,7 @@ namespace DynamicStructureObjects
         {
             var oldToken = ParseClaim(oldTokenString);
 
-            if (oldToken is null || oldToken.ValidTo > DateTime.UtcNow)
+            if (oldToken is null || oldToken.ValidTo < DateTime.UtcNow)
                 return null;
             return CreateToken(oldToken.Claims);
 
@@ -166,7 +170,7 @@ namespace DynamicStructureObjects
         {
             var token = new JwtSecurityToken(
             claims: claims,
-                expires: DateTime.Now.Add(TokenLifetime),
+                expires: DateTime.UtcNow.Add(TokenLifetime),
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(apiKey)), SecurityAlgorithms.HmacSha512Signature));
 
             return new JwtSecurityTokenHandler().WriteToken(token);

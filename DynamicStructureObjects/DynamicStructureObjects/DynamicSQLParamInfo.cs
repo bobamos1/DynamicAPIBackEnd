@@ -5,13 +5,14 @@ namespace DynamicStructureObjects
 {
     public class DynamicSQLParamInfo
     {
-        internal long id { get; set; }
-        internal long ProprietyID { get; set; }
-        internal string VarAffected { get; set; }
-        internal bool isRequired { get; set; }
+        public long id { get; internal set; }
+        public long ProprietyID { get; internal set; }
+        public string VarAffected { get; internal set; }
+        public bool isRequired { get; internal set; }
         internal List<DynamicValidator> Validators { get; set; }
         internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @SQLParamInfoID UNION ALL SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true);
         internal static readonly Query insertSQLParamInfo = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO SQLParamInfos (id_Propriety, id_RouteQuery, varAffected) VALUES (@PropretyID, @RouteQueryID, @VarAffected)", true);
+        internal static readonly Query getProprietyShowType = Query.fromQueryString(QueryTypes.VALUE, "SELECT id_ShowType FROM Proprieties WHERE id = @ID");
         internal DynamicSQLParamInfo(long id, string VarAffected, long ProprietyID)
         {
             this.id = id;
@@ -48,7 +49,7 @@ namespace DynamicStructureObjects
             }
             return paramInfo;
         }
-        public async static Task<DynamicSQLParamInfo> addSQLParam(string VarAffected, long ProprietyID, long RouteQueryID, ShowTypes? showType)
+        public async static Task<DynamicSQLParamInfo> addSQLParam(string VarAffected, long ProprietyID, long RouteQueryID)
         {
             return new DynamicSQLParamInfo(
                 await DynamicController.executor.ExecuteInsertWithLastID(
@@ -56,7 +57,6 @@ namespace DynamicStructureObjects
                         .setParam("PropretyID", ProprietyID)
                         .setParam("RouteQueryID", RouteQueryID)
                         .setParam("VarAffected", VarAffected)
-                        //.setParam("ShowTypeID", showType is null ? ShowTypes.NONE : (long)showType)
                     )
                 , VarAffected
                 , ProprietyID

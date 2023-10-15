@@ -38,7 +38,10 @@ CREATE TABLE Proprieties (
     isMain BIT,
     isUpdatable BIT DEFAULT 0,
     id_ShowType BIGINT,
-    id_controller BIGINT
+    id_controller BIGINT,
+    ind INT,
+    displayName VARCHAR(100),
+    description VARCHAR(1000)
 )
 CREATE TABLE CSharpTypes (
     id BIGINT IDENTITY(1,1),
@@ -77,7 +80,12 @@ CREATE TABLE URLRoutes (
     requireAuthorization BIT,
     getAuthorizedCols BIT,
     onlyModify BIT,
-    id_proprietyForUserID BIGINT
+    paramForUserID VARCHAR(100),
+    id_routeDisplayType BIGINT
+)
+CREATE TABLE RouteDisplayTypes (
+    id BIGINT IDENTITY(1,1),
+    name VARCHAR(100)
 )
 CREATE TABLE RouteQueries (
     id BIGINT IDENTITY(1,1),
@@ -114,13 +122,6 @@ CREATE TABLE SQLParamInfos (
     id_Propriety BIGINT,
     id_RouteQuery BIGINT,
     varAffected VARCHAR(100)
-)
-CREATE TABLE Filters (
-    id BIGINT IDENTITY(1,1),
-    id_SQLParamInfo BIGINT,
-    id_ShowType BIGINT,
-    ind INT,
-    name VARCHAR(100)
 )
 CREATE TABLE ValidatorTypes (
     id BIGINT IDENTITY(1,1),
@@ -189,6 +190,10 @@ ADD CONSTRAINT PK_RouteTypes PRIMARY KEY (id);
 ALTER TABLE BaseRoutes
 ADD CONSTRAINT PK_BaseRoutes PRIMARY KEY (id);
 
+-- RouteDisplayTypes Table
+ALTER TABLE RouteDisplayTypes
+ADD CONSTRAINT PK_RouteDisplayTypes PRIMARY KEY (id);
+
 -- URLRoutes Table
 ALTER TABLE URLRoutes
 ADD CONSTRAINT PK_Routes PRIMARY KEY (id);
@@ -220,10 +225,6 @@ ADD CONSTRAINT PK_ShowTypes PRIMARY KEY (id);
 -- SQLParamInfos Table
 ALTER TABLE SQLParamInfos
 ADD CONSTRAINT PK_SQLParamInfos PRIMARY KEY (id);
-
--- Filters Table
-ALTER TABLE Filters
-ADD CONSTRAINT PK_Filters PRIMARY KEY (id);
 
 -- ValidatorTypes Table
 ALTER TABLE ValidatorTypes
@@ -294,8 +295,8 @@ ADD CONSTRAINT FK_Routes_RouteTypes
 FOREIGN KEY (id_routeType) REFERENCES RouteTypes(id);
 
 ALTER TABLE URLRoutes
-ADD CONSTRAINT FK_Routes_Proprieties
-FOREIGN KEY (id_proprietyForUserID) REFERENCES Proprieties(id);
+ADD CONSTRAINT FK_Routes_RouteDisplayTypes
+FOREIGN KEY (id_routeDisplayType) REFERENCES RouteDisplayTypes(id);
 
 -- RouteQueries Table
 ALTER TABLE RouteQueries
@@ -343,14 +344,6 @@ ALTER TABLE SQLParamInfos
 ADD CONSTRAINT FK_SQLParamInfos_Proprieties
 FOREIGN KEY (id_Propriety) REFERENCES Proprieties(id);
 
--- Filters Table
-ALTER TABLE Filters
-ADD CONSTRAINT FK_Filters_ShowTypes
-FOREIGN KEY (id_ShowType) REFERENCES ShowTypes(id);
-
-ALTER TABLE Filters
-ADD CONSTRAINT FK_Filters_SQLParamInfos
-FOREIGN KEY (id_SQLParamInfo) REFERENCES SQLParamInfos(id);
 
 -- ValidatorSQLParamInfoValues Table
 ALTER TABLE ValidatorSQLParamInfoValues

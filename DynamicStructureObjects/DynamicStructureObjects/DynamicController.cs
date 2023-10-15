@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using System.Linq;
+using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace DynamicStructureObjects
 {
@@ -35,8 +37,8 @@ namespace DynamicStructureObjects
         public List<DynamicPropriety> Proprieties { get; internal set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT name AS Name, id AS id FROM Roles");
         internal static readonly Query getControllers = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, name AS Name, isMain AS IsMain FROM Controllers", true);
-        internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isUpdatable AS IsUpdatable, id_ShowType AS ShowTypeID FROM Proprieties WHERE id_controller = @controllerID", true);
-        internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, CASE WHEN URLRoutes.id_baseRoute = 1 THEN URLRoutes.name ELSE BaseRoutes.name END AS Name, id_routeType AS RouteTypeID, requireAuthorization AS requireAuthorization, getAuthorizedCols AS getAuthorizedCols, onlyModify AS onlyModify, id_proprietyForUserID AS proprietyToBindUserID FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true);
+        internal static readonly Query getProprieties = Query.fromQueryString(QueryTypes.SELECT, "SELECT Proprieties.id AS id, Proprieties.name AS Name, isMain AS IsMain, isUpdatable AS IsUpdatable, id_ShowType AS ShowTypeID, ind AS ind, description AS description, displayName AS displayName FROM Proprieties WHERE id_controller = @controllerID", true);
+        internal static readonly Query getRoutes = Query.fromQueryString(QueryTypes.SELECT, "SELECT URLRoutes.id AS id, CASE WHEN URLRoutes.id_baseRoute = 1 THEN URLRoutes.name ELSE BaseRoutes.name END AS Name, id_routeType AS RouteTypeID, requireAuthorization AS requireAuthorization, getAuthorizedCols AS getAuthorizedCols, onlyModify AS onlyModify, paramForUserID AS paramForUserID, id_routeDisplayType AS routeDisplayTypeID FROM URLRoutes LEFT JOIN BaseRoutes ON BaseRoutes.id = URLRoutes.id_baseRoute WHERE URLRoutes.id_controller = @controllerID", true);
         internal static readonly Query insertController = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Controllers (name, isMain) VALUES (@Name, @IsMain)", true);
         private DynamicController(long id, string Name, bool IsMain)
         {
@@ -101,7 +103,6 @@ namespace DynamicStructureObjects
             List<KeyValuePair<string, bool>> tablesToDeleteContent = new List<KeyValuePair<string, bool>>()
                 .Add("ValidatorProprietyValues", false)
                 .Add("ValidatorSQLParamInfoValues", false)
-                .Add("Filters", true)
                 .Add("SQLParamInfos", true)
                 .Add("PermissionRoutes", false)
                 .Add("PermissionProprieties", false)
@@ -154,16 +155,14 @@ namespace DynamicStructureObjects
                 return bindedPropriety.id;
             return 1;
         }
-        public async Task<DynamicController> addRoute(BaseRoutes baseRoute, string proprietyToBindUserID = null)
+        public async Task<DynamicController> addRoute(BaseRoutes baseRoute)
         {
-            var proprietyId = GetProprietyID(proprietyToBindUserID);
-            Routes.Add(await DynamicRoute.addRoute(id, baseRoute, proprietyId));
+            Routes.Add(await DynamicRoute.addRoute(id, baseRoute));
             return this;
         }
-        public async Task<DynamicController> addRoute(string Name, RouteTypes routeType, string proprietyToBindUserID = null, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = false)
+        public async Task<DynamicController> addRoute(string Name, RouteTypes routeType, RouteDisplayTypes routeDisplayType = RouteDisplayTypes.NONE, bool getAuthorizedCols = false, bool onlyModify = false, bool requireAuthorization = false)
         {
-            var proprietyId = GetProprietyID(proprietyToBindUserID);
-            Routes.Add(await DynamicRoute.addRoute(id, Name, routeType, proprietyId, getAuthorizedCols, onlyModify, requireAuthorization));
+            Routes.Add(await DynamicRoute.addRoute(id, Name, routeType, routeDisplayType, getAuthorizedCols, onlyModify, requireAuthorization));
             return this;
         }
         public DynamicController addEmptyQuery()
@@ -176,15 +175,24 @@ namespace DynamicStructureObjects
             await Routes.First(route => route.Name == routeName).addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
             return this;
         }
+        public async Task<DynamicController> bindParamToUserID(string paramName)
+        {
+            if (!Routes.Any(route => route.Queries.Any(query => query.ParamsInfos.Any(param => param.Key == paramName))))
+                throw new Exception();
+            Routes.Last().bindParamToUserID(paramName);
+            return this;
+        }
         public async Task<DynamicController> addRouteQuery(string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
             await Routes.Last().addRouteQuery(queryString, QueryType, CompleteAuth, CompleteCheck);
             var lastRouteQuery = Routes.Last().Queries.Last();
+            var ind = 0;
             foreach (var paramInfo in lastRouteQuery.ParamsInfos)
             {
                 var bindedProprietyId = GetProprietyID(paramInfo.Key);
                 if (bindedProprietyId > -1)
-                    await lastRouteQuery.setValidator(paramInfo.Key, bindedProprietyId, true);
+                    await lastRouteQuery.setSQLParam(paramInfo.Key, bindedProprietyId, true);
+                ind++;
             }
             return this;
         }
@@ -208,19 +216,19 @@ namespace DynamicStructureObjects
             await Routes.Last().addValidator(Value, ValidatorType);
             return this;
         }
-        public async Task<DynamicController> addSQLParam(string ParamName, ShowTypes? showType, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> addSQLParam(string ParamName, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().addSQLParam(ParamName, 1, showType).addValidator(ParamName, false, ValidatorBundles);
+            await Routes.Last().addSQLParam(ParamName, 1).addValidator(ParamName, false, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicController> addParam(string ParamName, ShowTypes? showType, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> addParam(string ParamName, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().addSQLParam(ParamName, 1, showType).addValidator(ParamName, true, ValidatorBundles);
+            await Routes.Last().addSQLParam(ParamName, 1).addValidator(ParamName, true, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicController> addParam(string ParamName, ShowTypes showType,  bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> addParam(string ParamName,  bool addRequired, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().addSQLParam(ParamName, 1, showType).addValidator(ParamName, addRequired, ValidatorBundles);
+            await Routes.Last().addSQLParam(ParamName, 1).addValidator(ParamName, addRequired, ValidatorBundles);
             return this;
         }
         public async Task<DynamicController> setSQLParam(string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
@@ -228,12 +236,12 @@ namespace DynamicStructureObjects
             long proprietyID = 1;
             if (ProprietyName is not null)
                 proprietyID = Proprieties.First(propriety => propriety.Name == ProprietyName).id;
-            await Routes.Last().setValidator(VarAffected, proprietyID, ValidatorBundles);
+            await Routes.Last().setSQLParam(VarAffected, proprietyID, ValidatorBundles);
             return this;
         }
         public async Task<DynamicController> setSQLParam(string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().setValidator(VarAffected, ValidatorBundles);
+            await Routes.Last().setSQLParam(VarAffected, ValidatorBundles);
             return this;
         }
         public async Task<DynamicController> setNotRequired(params string[] VarsAffected)
@@ -241,14 +249,9 @@ namespace DynamicStructureObjects
             await Routes.Last().setNotRequired(VarsAffected);
             return this;
         }
-        public async Task<DynamicController> addFilter(string routeName, int index, string name, ShowTypes showType, string VarAffected)
+        public async Task<DynamicController> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string description, string displayName, int ind, params ValidatorBundle[] validatorBundle)
         {
-            await Routes.First(route => route.Name == routeName).addFilter(index, name, showType, VarAffected);
-            return this;
-        }
-        public async Task<DynamicController> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, params ValidatorBundle[] validatorBundle)
-        {
-            Proprieties.Add(await DynamicPropriety.addPropriety(Name, IsMain, IsUpdatable, showType, id, validatorBundle));
+            Proprieties.Add(await DynamicPropriety.addPropriety(Name, IsMain, IsUpdatable, showType, description, displayName, ind, id, validatorBundle));
             return this;
         }
         public async Task<DynamicController> addValidatorForPropriety(string ProprietyName, string Value, ValidatorTypes ValidatorType)
@@ -381,15 +384,6 @@ namespace DynamicStructureObjects
             }).WithName($"{Name}InfoRoutes");
             foreach (var route in Routes)
             {
-                app.MapGet($"/{Name}/Info/RouteFilters/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
-                {
-                    var roles = getRolesInfo(JWT);
-                    if (!roles.Any())
-                        return Results.Forbid();
-                    if (!route.CanUse(roles))
-                        return Results.Forbid();
-                    return Results.Ok(route.Queries.SelectMany(query => query.Filters));
-                }).WithName($"{Name}Info{route.Name}Filters");
                 app.MapGet($"/{Name}/Info/RouteVariables/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
                 {
                     var roles = getRolesInfo(JWT);
@@ -451,28 +445,29 @@ namespace DynamicStructureObjects
             {
                 if (route.requireAuthorization)
                     return false;
-                authorizedProprieties = getAuthorizedProprieties(route.onlyModify);
-                setAuthorizedProprieties(bodyData, authorizedProprieties);
+                setAuthorizedProprieties(bodyData, route.onlyModify);
                 return true;
             }
             var roles = DynamicConnection.ParseRoles(token).ToArray();
             var userID = DynamicConnection.ParseUserID(token);
             bodyData[USERIDKEY] = userID;
             bodyData[ROLESKEY] = roles;
-            if (route.proprietyToBindUserID != 1 && roles.Length == 1 && roles[0] == 1)
-                bodyData[route.proprietyName] = userID;
+            if (route.paramForUserID is not null && roles.Length <= 1 && roles[0] == 1)
+                bodyData[route.paramForUserID] = userID;
             if (route.getAuthorizedCols)
-            {
-                authorizedProprieties = getAuthorizedProprieties(route.onlyModify, roles);
-                setAuthorizedProprieties(bodyData, authorizedProprieties);
-            }
+                setAuthorizedProprieties(bodyData, route.onlyModify, roles);
             if (route.requireAuthorization)
                 return route.CanUse(roles);
             return true;
         }
-        public void setAuthorizedProprieties(Dictionary<string, object> bodyData, IEnumerable<DynamicPropriety> authorizedProprieties)
+        public void setAuthorizedProprieties(Dictionary<string, object> bodyData, bool forModify, params long[] roles)
         {
-            bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => prop.ShowType.IsID() ? $"{prop.Name}New" : prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
+            IEnumerable<DynamicPropriety> authorizedProprieties;
+            if (roles.Any())
+                authorizedProprieties = getAuthorizedProprieties(forModify, roles);
+            else
+                authorizedProprieties = getAuthorizedProprieties(forModify);
+            bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => forModify && prop.ShowType.IsID() ? $"{prop.Name}New" : prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
         }
         public static void QueryCollectionToDictionary(IQueryCollection queryParameters, Dictionary<string, object> dictionary)
         {
