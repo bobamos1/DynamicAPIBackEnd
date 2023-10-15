@@ -38,8 +38,8 @@ namespace APIDynamic
                 .addController("TypesPreferencesGraphique", false)
                 .addController("Couleurs", false)
                 .addController("PreferencesGraphiques", false)
-                .addController("TypesMedia", false)
-                .addController("Media", false)
+                .addController("TypesMedias", false)
+                .addController("Medias", false)
                 .addController("Images", false)
                 .addController("TypeFormats", false)
                 .addController("TypeValeurs", false)
@@ -846,6 +846,29 @@ namespace APIDynamic
 
 
             #endregion
+            #region Media
+            await controllers["Medias"]
+                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Lien", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("TypeMediaID", true, true, ShowTypes.CBO).Anonymous()
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT m.id AS ID, m.liens AS Lien, m.Nom AS Nom, tm.id AS TypeMediaID, tm.nom AS TypeMedia FROM media m INNER JOIN types_medias tm ON tm.id = m.id_types_media WHERE id = @_ID", QueryTypes.SELECT)
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id, nom FROM media", QueryTypes.CBO)
+            ;
+            #endregion
+            #region TypesMedia
+            await controllers["TypesMedias"]
+                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom FROM types_medias WHERE id = @_ID", QueryTypes.SELECT)
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id, nom FROM types_medias", QueryTypes.CBO)
+            ;
+            #endregion
             //#region Roles
             //await controllers["Roles"]
             //    .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
@@ -881,6 +904,10 @@ namespace APIDynamic
             
             await controllers["Formats"]
                 .addCBOInfo("TypeFormatID", "TypeFormats", "TypeFormat")
+            ;
+
+            await controllers["Medias"]
+                .addCBOInfo("TypeMediaID", "TypesMedias", "TypeMedia")
             ;
             await controllers["FormatsProduits"]
                 .addCBOInfo("ProduitID", "Produits", "Produit")
