@@ -613,15 +613,9 @@ namespace APIDynamic
 
                 .addRoute("CheckoutPanier", RouteTypes.POST)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
-
-                    /*
-                    .addRouteQueryNoVar("SELECT TOP(1) id FROM commandes WHERE id_client = @id_client AND cid_etat_commande = 4", QueryTypes.VALUE)
-                    .addRouteQuery("SELECT pc.id AS id FROM produits_par_commande AS pc WHERE pc.id_commande = @idCommande", QueryTypes.ARRAY)
-                    .addRouteQuery("SELECT apc.montant FROM affectation_prix_lors_commande AS apc INNER JOIN produits_par_commande AS pc ON pc.id = apc.id_produit_par_commande WHERE pc.id = @id", QueryTypes.SELECT)
-                    .addRouteQuery("UPDATE produits_par_commande SET prix_unitaire = @prix_unitaire WHERE id = @id", QueryTypes.UPDATE)
-                    */
-                    
-
+                    .addRouteQuery("SELECT pc.id AS ProduitParCommande FROM produits_par_commande AS pc INNER JOIN commandes AS c ON c.id = pc.id_commande WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.ARRAY)
+                    .addRouteQueryNoVar("EXEC CheckoutPanier(@ClientID, @ProduitParCommande)", QueryTypes.STOREPROCEDURE)
+                    .addRouteQuery("EXEC FinaliseCommande(@ClientID, @MontantBrut)", QueryTypes.STOREPROCEDURE)               
 
             ;
             #endregion

@@ -170,29 +170,19 @@ namespace APIDynamic
                 async (queries, bodyData) =>
                 {
                     var idClient = bodyData.UserID();
-                    using (IDbConnection connection = new SqlConnection())
-                    var idCommande = await executorData.SelectValue<long>(queries[0].setParam("id_client", idClient));
+                    var ProduitsParCommande = executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
 
-                    var ProduitsParCommande = await executorData.SelectArray<long>(queries[1].setParam("idCommande", idCommande));
+                    foreach (long idProduitParCommande in ProduitsParCommande) {
 
-                    /*Faire ceci pour tous les produits*/
-
-                    foreach (long idProduitParCommande in ProduitsParCommande)
-                    {
-                        queries[2].setParam("id", idProduitParCommande);
-                        var montantTaxe = await executorData.SelectArray<double>(queries[2]);
-                        double totalProduit = 0;
-                        foreach (double taxe in montantTaxe)
-                        {
-                            totalProduit = totalProduit * (taxe + 1);
-                        }
-
-                        await executorData.ExecuteQueryWithTransaction(queries[3].setParam("prix_unitaire", totalProduit).setParam("id", idProduitParCommande));
-
-                        return Results.Ok();
+                        if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommande", idProduitParCommande))) == 0)
+                            return Results.Forbid();
                     }
 
-                    return Results.Forbid();
+                    if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient))) == 0)
+                        return Results.Forbid();
+
+                    return Results.Ok();
+
                 }
 
             );
