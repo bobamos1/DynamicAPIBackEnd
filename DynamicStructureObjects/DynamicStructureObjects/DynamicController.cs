@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using System.Linq;
+using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace DynamicStructureObjects
 {
@@ -453,8 +455,7 @@ namespace DynamicStructureObjects
             {
                 if (route.requireAuthorization)
                     return false;
-                authorizedProprieties = getAuthorizedProprieties(route.onlyModify);
-                setAuthorizedProprieties(bodyData, authorizedProprieties, route.onlyModify);
+                setAuthorizedProprieties(bodyData, route.onlyModify);
                 return true;
             }
             var roles = DynamicConnection.ParseRoles(token).ToArray();
@@ -464,16 +465,18 @@ namespace DynamicStructureObjects
             if (route.paramForUserID is not null && roles.Length == 1 && roles[0] == 1)
                 bodyData[route.paramForUserID] = userID;
             if (route.getAuthorizedCols)
-            {
-                authorizedProprieties = getAuthorizedProprieties(route.onlyModify, roles);
-                setAuthorizedProprieties(bodyData, authorizedProprieties, route.onlyModify);
-            }
+                setAuthorizedProprieties(bodyData, route.onlyModify, roles);
             if (route.requireAuthorization)
                 return route.CanUse(roles);
             return true;
         }
-        public void setAuthorizedProprieties(Dictionary<string, object> bodyData, IEnumerable<DynamicPropriety> authorizedProprieties, bool forModify)
+        public void setAuthorizedProprieties(Dictionary<string, object> bodyData, bool forModify, params long[] roles)
         {
+            IEnumerable<DynamicPropriety> authorizedProprieties;
+            if (roles.Any())
+                authorizedProprieties = getAuthorizedProprieties(forModify, roles);
+            else
+                authorizedProprieties = getAuthorizedProprieties(forModify);
             bodyData[PROPRETYKEY] = authorizedProprieties.Select(prop => forModify && prop.ShowType.IsID() ? $"{prop.Name}New" : prop.Name).Concat(getCBOKeyValues(authorizedProprieties)).ToArray();
         }
         public static void QueryCollectionToDictionary(IQueryCollection queryParameters, Dictionary<string, object> dictionary)

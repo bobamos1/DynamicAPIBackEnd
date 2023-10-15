@@ -673,6 +673,7 @@ namespace APIDynamic
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
                         .setNotRequired("MDP", "Sel", "Token")
                         .addParam("Password", ShowTypes.NONE, 0)
+                    .addRouteQueryNoVar("INSERT INTO commandes (numero_facture, montant_brut, date_heure_transaction, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (NULL, 0, NULL, NULL, NULL, @ClientID, 4, NULL, NULL), (NULL, 0, NULL, NULL, NULL, @ClientID, 5, NULL, NULL)", QueryTypes.INSERT)
                 
 
                 .addRoute("RecuperationStepOne", RouteTypes.POST)

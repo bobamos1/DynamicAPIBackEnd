@@ -40,6 +40,8 @@ namespace APIDynamic
                         .setParam("Sel", userInfo.passwordSalt)
                         //.setParam("Password", bodyData.Get<bool>("Password"))
                     );
+                    if ((await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ClientID", id))) == 0)
+                        return Results.Problem();
                     return Results.Ok(DynamicConnection.CreateToken(id, userInfo));
                 }
             );
