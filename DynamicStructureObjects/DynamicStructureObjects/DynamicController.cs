@@ -84,16 +84,16 @@ namespace DynamicStructureObjects
             else if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, new string[0]));
 
-            controller.Roles = controller.Proprieties.SelectMany(prop => prop.roles.Select(role => role.Key)).Concat(controller.Routes.SelectMany(route => route.Roles)).Distinct();
+            controller.Roles = controller.Proprieties.SelectMany(prop => prop.roles.Select(role => role.Key)).Distinct();
             return controller;
         }
         public string BaseRouteString(BaseRoutes baseRoute)
         {
-            return getRoute(BaseRoutes.CBO.Value()).FirstQuery.originalQuery;
+            return getRoute(baseRoute.Value()).FirstQuery.originalQuery;
         }
         public Query BaseRouteQuery(BaseRoutes baseRoute)
         {
-            return getRoute(BaseRoutes.CBO.Value()).FirstQuery;
+            return getRoute(baseRoute.Value()).FirstQuery;
         }
         public static async Task<Dictionary<string, DynamicController>> initControllers(SQLExecutor executor, string apiKey)
         {
@@ -414,8 +414,6 @@ namespace DynamicStructureObjects
             if (onlyModify)
                 return Proprieties.Where(propriety => propriety.CanModify(roles));
             return Proprieties.Where(propriety => propriety.CanSee(roles));
-
-
         }
         public IEnumerable<DynamicRoute> getAuthorizedRoutes(IEnumerable<long> roles)
         {
