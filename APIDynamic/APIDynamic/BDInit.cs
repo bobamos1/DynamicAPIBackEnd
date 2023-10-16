@@ -612,12 +612,12 @@ namespace APIDynamic
                  .addRoute(BaseRoutes.CBO)
                      .addRouteQuery("SELECT c.id, CONCAT(c.NumeroFacture, ' - ', cli.prenom, ' ', cli.nom) FROM commandes INNER JOIN clients AS cli ON cli.id = c.id_clients", QueryTypes.CBO)
 
-                .addRoute("CheckoutPanier", RouteTypes.GET)
+                .addRoute("CheckoutPanier", RouteTypes.POST)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT pc.id AS ProduitParCommande FROM produits_par_commande AS pc INNER JOIN commandes AS c ON c.id = pc.id_commande WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.ARRAY)
                         .bindParamToUserID("ClientID")
                     .addRouteQueryNoVar("EXEC CheckoutPanier(@ClientID, @ProduitParCommande)", QueryTypes.STOREPROCEDURE)
-                    .addRouteQuery("EXEC FinaliseCommande(@ClientID, @NoCiviqueLivraison, @RueLivraison)", QueryTypes.STOREPROCEDURE)
+                    .addRouteQuery("EXEC FinaliseCommande(@ClientID, @NoCiviqueLivraison, @RueLivraison, @VilleID)", QueryTypes.STOREPROCEDURE)
 
             ;
             #endregion
