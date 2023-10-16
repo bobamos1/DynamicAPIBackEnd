@@ -47,7 +47,7 @@ namespace DynamicStructureObjects
             this.Filters = dynamicRoute.Filters.ToList();
             this.Queries = dynamicRoute.Queries.ToList();
             this.Roles = dynamicRoute.Roles;
-            this.requireAuthorization = baseRoute.requireAuthorization();
+            this.requireAuthorization = dynamicRoute.requireAuthorization;
             this.getAuthorizedCols = baseRoute.getAuthorizedCols();
             this.onlyModify = baseRoute.onlyModify();
             this.paramForUserID = dynamicRoute.paramForUserID;
