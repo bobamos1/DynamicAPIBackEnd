@@ -7,6 +7,8 @@ using Stripe.BillingPortal;
 using Stripe.Checkout;
 using System;
 using System.Collections.Immutable;
+using SessionCreateOptions = Stripe.Checkout.SessionCreateOptions;
+using SessionService = Stripe.Checkout.SessionService;
 
 namespace APIDynamic
 {
@@ -186,23 +188,33 @@ namespace APIDynamic
 
                     try
                     {
-                        var service = new PaymentIntentService();
-                        var paymentIntent = service.Confirm(
-                            paymentIntentId,
-                            new PaymentIntentConfirmOptions { });
+                        // Calculate the total amount based on the percentage (e.g., 10% of 2000 = 200)
+                        int percentage = 10; // Replace with your desired percentage
+                        int baseAmount = 2000; // Replace with your base amount
+                        int totalAmount = (int)(baseAmount * (percentage / 100.0));
 
-                        if (paymentIntent.Status == "succeeded")
+                        var options = new SessionCreateOptions
                         {
-                            // Payment is successful
-                            return Results.Ok();
-                        }
-                        else
-                        {
-                            // Payment failed
-                            return Results.Forbid();
-                        }
+                            PaymentMethodTypes = new List<string> { "card" },
+                            LineItems = new List<SessionLineItemOptions>
+                            {
+                                new SessionLineItemOptions
+                                {
+                                    Price = "your_price_id", // Replace with the actual price ID
+                                    Quantity = 1,
+                                },
+                            },
+                            Mode = "payment",
+                            SuccessUrl = "https://yourwebsite.com/success",
+                            CancelUrl = "https://yourwebsite.com/cancel",
+                        };
+
+                        var service = new SessionService();
+                        var session = await service.CreateAsync(options);
+
+                        return Results.Ok(new { sessionId = session.Id });
                     }
-                    catch (StripeException e)
+                    catch (Exception ex)
                     {
                         return Results.Forbid();
                     }
