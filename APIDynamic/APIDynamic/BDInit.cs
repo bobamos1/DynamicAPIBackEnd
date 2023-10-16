@@ -547,9 +547,6 @@ namespace APIDynamic
                     .addRouteQuery("UPDATE produits_par_commande SET id_commande = (SELECT TOP(1) id FROM commandes WHERE id_client = @ClientID AND id_etat_commande = 4) WHERE id = @id", QueryTypes.UPDATE)
                         .bindParamToUserID("ClientID")
 
-                /*
-                 * Checker ce qui peut être modifié dans cette table là, dans le fonctionnement, tu ne peux pas changer un produit, mais au lieu l'enlever de la commande et ajouter / DOnc 1 delete et 1 insert au lieu d'un update
-                 */
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT ppc.id, p.nom FROM produits_par_commande ppc INNER JOIN produits p ON p.id = ppc.id_produit", QueryTypes.CBO)
             ;
@@ -601,17 +598,25 @@ namespace APIDynamic
                 .addRouteQuery("SELECT c.id AS id, c.montant_brut AS MontantBrut, c.date_heure_transaction AS dateCreation, c.id_etat_commande AS EtatsCommandesID, ec.nom AS etat, c.no_civique_livraison AS no_civique, c.rue_livraison AS rue, c.id_ville AS VilleID, v.nom AS ville, c.numero_facture AS numero_facture, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, pro.nom AS Province, c.id_employe AS EmployeID, c.code_postal AS code_postal, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_id AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_no_civique AND c.id_etat_commande = @_EtatsCommandesID ORDER BY @&SortByCol", QueryTypes.SELECT)
                     .bindParamToUserID("ClientID")
             
-             .addRoute(BaseRoutes.INSERT)
-                 .Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                 .addRouteQuery("INSERT INTO commandes (numero_facture, montant_brut, date_heure_transaction, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (@numero_facture, @MontantBrut, @dateCreation, @no_civique, @rue, @ClientID, @EtatsCommandesID, @VilleID, @EmployeID)", QueryTypes.INSERT)
+                 .addRoute(BaseRoutes.INSERT)
+                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                     .addRouteQuery("INSERT INTO commandes (numero_facture, montant_brut, date_heure_transaction, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (@numero_facture, @MontantBrut, @dateCreation, @no_civique, @rue, @ClientID, @EtatsCommandesID, @VilleID, @EmployeID)", QueryTypes.INSERT)
 
-             .addRoute(BaseRoutes.UPDATE)
-                 .Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                 .addRouteQuery("UPDATE commandes SET numero_facture = @_numero_facture, date_heure_transaction = @_dateCreation, montant_brut = @_MontantBrut, no_civique_livraison = @_no_civique, rue_livraison = @_rue, id_client = @_ClientID, id_etat_commande = @_EtatsCommandesID, id_ville = @_VilleID, id_employe = @_EmployeID WHERE id = @id", QueryTypes.UPDATE)
+                 .addRoute(BaseRoutes.UPDATE)
+                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                     .addRouteQuery("UPDATE commandes SET numero_facture = @_numero_facture, date_heure_transaction = @_dateCreation, montant_brut = @_MontantBrut, no_civique_livraison = @_no_civique, rue_livraison = @_rue, id_client = @_ClientID, id_etat_commande = @_EtatsCommandesID, id_ville = @_VilleID, id_employe = @_EmployeID WHERE id = @id", QueryTypes.UPDATE)
 
-             .addRoute(BaseRoutes.CBO)
-                 .addRouteQuery("SELECT c.id, CONCAT(c.NumeroFacture, ' - ', cli.prenom, ' ', cli.nom) FROM commandes INNER JOIN clients AS cli ON cli.id = c.id_clients", QueryTypes.CBO)
+                 .addRoute(BaseRoutes.CBO)
+                     .addRouteQuery("SELECT c.id, CONCAT(c.NumeroFacture, ' - ', cli.prenom, ' ', cli.nom) FROM commandes INNER JOIN clients AS cli ON cli.id = c.id_clients", QueryTypes.CBO)
 
+                .addRoute("CheckoutPanier", RouteTypes.GET)
+                    .Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .addRouteQuery("SELECT pc.id AS ProduitParCommande FROM produits_par_commande AS pc INNER JOIN commandes AS c ON c.id = pc.id_commande WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.ARRAY)
+                        .bindParamToUserID("ClientID")
+                    .addRouteQueryNoVar("EXEC CheckoutPanier(@ClientID, @ProduitParCommande)", QueryTypes.STOREPROCEDURE)
+                        .bindParamToUserID("ClientID")
+                    .addRouteQuery("EXEC FinaliseCommande(@ClientID)", QueryTypes.STOREPROCEDURE)
+                        .bindParamToUserID("ClientID")
 
             ;
             #endregion

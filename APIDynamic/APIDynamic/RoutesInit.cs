@@ -157,6 +157,26 @@ namespace APIDynamic
 
                     return Results.Ok();
                 }
+            );
+            
+            controllers["Commandes"].mapRoute("CheckoutPanier",
+                async (queries, bodyData) =>
+                {
+                    var idClient = bodyData.UserID();
+                    var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
+
+                    foreach (long idProduitParCommande in ProduitsParCommande) {
+
+                        if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommande", idProduitParCommande))) == 0)
+                            return Results.Forbid();
+                    }
+
+                    if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient))) == 0)
+                        return Results.Forbid();
+
+                    return Results.Ok();
+
+                }
 
             );
             controllers["ProduitsParCommande"].mapRoute("MoveToPanier",
@@ -167,7 +187,7 @@ namespace APIDynamic
                         return Results.Forbid();
                     return Results.Ok();
                 }
-                );
+            );
 
 
             /*
