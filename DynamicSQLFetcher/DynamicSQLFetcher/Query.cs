@@ -15,13 +15,14 @@ namespace DynamicSQLFetcher
         public static readonly string ORDERBYVARKEY = "SortByCol";
         public QueryTypes queryType { get; internal set; }
         public string query { get; internal set; }
+        public string originalQuery { get; internal set; }
         public List<SQLVariableInfo> varsInfoList { get; internal set; }
         public Dictionary<string, bool> variablesInQuery { get; internal set; }
         public Dictionary<string, string> selectColumns { get; internal set; }
         public Dictionary<string, object> paramsUsed { get; internal set; }
         public bool containOrderVar { get;internal set; }
         public bool completeCheck { get; internal set; }
-        public Query(QueryTypes queryType)
+        public Query(QueryTypes queryType, string originalQuery)
         {
             this.queryType = queryType;
             varsInfoList = new List<SQLVariableInfo>();
@@ -30,7 +31,11 @@ namespace DynamicSQLFetcher
             paramsUsed = new Dictionary<string, object>();
             completeCheck = false;
             containOrderVar = false;
+            this.originalQuery = new string(originalQuery);
         }
+        public Query(QueryTypes queryType)
+            : this(queryType, "")
+        { }
         public Query()
             :this (QueryTypes.NONE)
         {}
@@ -271,6 +276,7 @@ namespace DynamicSQLFetcher
         }
         public static Query fromQueryString(QueryTypes queryType, string query, bool completeAuth = false, bool completeCheck = true, bool removeVarIdentifier = true)
         {
+            Query newQuery = new Query(queryType, query);
             char[] tempNoComma = query.ToCharArray();
             handleReplacements('\'', tempNoComma);
             handleReplacements('[', ']', tempNoComma);
@@ -294,7 +300,6 @@ namespace DynamicSQLFetcher
                     default:
                         break;
                 }
-            Query newQuery = new Query(queryType);
             query = parseVariables(query, newQuery, removeVarIdentifier);
             var orderVar = newQuery.varsInfoList.FirstOrDefault(varinfo => varinfo.isSQLText && varinfo.VarName == ORDERBYVARKEY);
             if (orderVar is not null)

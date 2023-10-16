@@ -27,6 +27,7 @@ namespace DynamicStructureObjects
         public readonly static string PROPRETYKEY = "AuthorizedProprieties";
         public readonly static string IDParamsKey = "IDParams";
         public readonly static string ROLESKEY = "CurrentUserRoles";
+        public string CBO => Routes.FirstOrDefault(route => route.Name == BaseRoutes.CBO.Value())?.Queries.First().query.originalQuery;
         public long id { get; internal set; }
         public string Name { get; internal set; }
         public bool IsMain { get; internal set; }
