@@ -177,11 +177,11 @@ namespace APIDynamic
 
                     foreach (long idProduitParCommande in ProduitsParCommande) {
 
-                        if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommande", idProduitParCommande))) == 0)
+                        if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("clientID", idClient).setParam("produitParCommandeID", idProduitParCommande))) == 0)
                             return Results.Forbid();
                     }
 
-                    if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
+                    if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("clientID", idClient).setParam("noCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("rueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("villeID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
 
                     var paymentIntentId = bodyData.SafeGet<string>("sessionId");
