@@ -12,7 +12,7 @@ namespace APIDynamic
             var isDate = ValidatorTypes.REGEX.SetValue("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$", "");
             var isTelephone = ValidatorTypes.REGEX.SetValue("*", "");
 
-            await DynamicConnection.addRoleToUser(1, Roles.Admin.ID());
+            await DynamicConnection.addRoleToUser(3, Roles.Admin.ID());
             var controllers = new Dictionary<string, DynamicController>();
             #region AddControllers
             await controllers
