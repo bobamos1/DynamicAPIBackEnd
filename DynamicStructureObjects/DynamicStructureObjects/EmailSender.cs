@@ -57,13 +57,13 @@ namespace DynamicStructureObjects
         {
             return SendEmail(from, toEmails, subject, body, smtpUsername, smtpPassword, Host, Port, displayName);
         }
-        public void SendEmail(string toEmail, string subject, string body)
+        public bool SendEmail(string toEmail, string subject, string body)
         {
-            SendEmail(new string[] { toEmail }, subject, body);
+            return SendEmail(new string[] { toEmail }, subject, body);
         }
-        public void SendEmail(string subject, string body, params string[] toEmails)
+        public bool SendEmail(string subject, string body, params string[] toEmails)
         {
-            SendEmail(toEmails, subject, body);
+            return SendEmail(toEmails, subject, body);
         }
     }
 }

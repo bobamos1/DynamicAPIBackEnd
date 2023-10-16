@@ -697,6 +697,13 @@ namespace APIDynamic
                 .addRoute("CheckEmail", RouteTypes.GET)
                     .addRouteQuery("SELECT COUNT(*) FROM Clients WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
 
+                .addRoute("Contacter", RouteTypes.POST)
+                .Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .addEmptyQuery()
+                        .addFilterParam("Email", ShowTypes.NONE)
+                        .addFilterParam("Sujet", ShowTypes.STRING)
+                        .addFilterParam("Contenu", ShowTypes.STRING)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom) FROM clients", QueryTypes.CBO)
             ;

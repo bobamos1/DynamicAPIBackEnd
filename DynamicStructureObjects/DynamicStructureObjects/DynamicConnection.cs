@@ -33,7 +33,7 @@ namespace DynamicStructureObjects
         private const int HashSize = 64; // 64 bytes for the hash
 
         internal static string apiKey { get; set; }
-        internal static EmailSender emailSender { get; set; }
+        public static EmailSender emailSender { get; set; }
         internal static TimeSpan TokenLifetime = TimeSpan.FromMinutes(15);
         public static void setEmailSender(string hostEmail, string hostUsername, string hostPassword, string host, int port)
         {
