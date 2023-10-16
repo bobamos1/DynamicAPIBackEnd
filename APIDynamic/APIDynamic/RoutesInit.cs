@@ -171,7 +171,7 @@ namespace APIDynamic
                 {
 
 
-
+                    /*
                     var idClient = bodyData.UserID();
                     var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
 
@@ -183,7 +183,7 @@ namespace APIDynamic
 
                     if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
-
+                    */
                     try
                     {
                         // Calculate the total amount based on the percentage (e.g., 10% of 2000 = 200)
