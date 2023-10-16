@@ -29,15 +29,16 @@ namespace DynamicStructureObjects
             this.ParamsInfos = new Dictionary<string, DynamicSQLParamInfo>();
             this.CompleteAuth = true;
         }
-        internal DynamicQueryForRoute(DynamicQueryForRoute dynamicQuery, bool requiredID)
+        internal DynamicQueryForRoute(DynamicQueryForRoute dynamicQuery, IEnumerable<string> idParams)
         {
             this.id = dynamicQuery.id;
             this.query = dynamicQuery.query;
             this.ParamsInfos = dynamicQuery.ParamsInfos.ToDictionary(param => param.Key, param => param.Value);
             this.CompleteAuth = dynamicQuery.CompleteAuth;
             DynamicSQLParamInfo paramInfo;
-            if (requiredID && ParamsInfos.TryGetValue("ID", out paramInfo))
-                ParamsInfos["ID"] = new DynamicSQLParamInfo(paramInfo, true);
+            foreach (var param in idParams)
+                if (ParamsInfos.TryGetValue(param, out paramInfo))
+                    ParamsInfos[param] = new DynamicSQLParamInfo(paramInfo, true);
         }
         internal static async Task<DynamicQueryForRoute> init(DynamicQueryForRoute query)
         {

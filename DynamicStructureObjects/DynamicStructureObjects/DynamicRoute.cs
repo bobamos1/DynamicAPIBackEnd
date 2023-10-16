@@ -11,6 +11,7 @@ namespace DynamicStructureObjects
         public bool getAuthorizedCols { get; internal set; }
         public bool onlyModify { get; internal set; }
         public string paramForUserID { get; internal set; }
+        public Query FirstQuery => Queries.FirstOrDefault()?.query;
         public RouteDisplayTypes routeDisplayType { get; internal set; }
 
         public List<DynamicQueryForRoute> Queries { get; internal set; }
@@ -39,7 +40,7 @@ namespace DynamicStructureObjects
             this.paramForUserID = paramForUserID;
             this.routeDisplayType = (RouteDisplayTypes)routeDisplayTypeID;
         }
-        internal DynamicRoute(DynamicRoute dynamicRoute, BaseRoutes baseRoute, bool requiredID = false)
+        internal DynamicRoute(DynamicRoute dynamicRoute, BaseRoutes baseRoute, IEnumerable<string> idParams)
         {
             this.id = dynamicRoute.id;
             this.Name = baseRoute.Value();
@@ -52,8 +53,8 @@ namespace DynamicStructureObjects
             this.onlyModify = baseRoute.onlyModify();
             this.paramForUserID = dynamicRoute.paramForUserID;
             this.routeDisplayType = dynamicRoute.routeDisplayType;
-            if (requiredID)
-                Queries[0] = new DynamicQueryForRoute(Queries[0], true);
+            if (idParams.Any())
+                Queries[0] = new DynamicQueryForRoute(Queries[0], idParams);
         }
         internal static async Task<DynamicRoute> init(DynamicRoute route, IEnumerable<DynamicPropriety> proprieties)
         {
