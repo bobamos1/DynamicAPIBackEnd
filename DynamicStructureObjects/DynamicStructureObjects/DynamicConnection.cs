@@ -12,6 +12,11 @@ using System.Text;
 
 namespace DynamicStructureObjects
 {
+    public class RequestForRoleID
+    {
+        public long UserID { get; set; }
+        public IEnumerable<long> RolesIDS { get; set; }
+    }
     public record UserInfo(long userID, string username, string Email, byte[] passwordHash, byte[] passwordSalt)
     {
         public UserInfo(int userID, string username, string Email, byte[] passwordHash, byte[] passwordSalt) : this((long)userID, username, Email, passwordHash, passwordSalt) { }
@@ -23,6 +28,7 @@ namespace DynamicStructureObjects
         public static readonly string CourrielTokenBodyRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
         public static readonly string CourrielTokenSubjectRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
         internal static readonly Query getRolesQuery = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id_role FROM UsersRoles WHERE id_user = @UserID");
+        internal static readonly Query insertRoles = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO UsersRoles (id_user, id_role) VALUES (@UserID, @RoleID)", true);
         private const int SaltSize = 16; // 16 bytes for the salt
         private const int HashSize = 64; // 64 bytes for the hash
 
@@ -33,6 +39,17 @@ namespace DynamicStructureObjects
         {
             emailSender = new EmailSender(hostEmail, hostUsername, hostPassword, host, port);
         }
+        public static Task<bool> addRoleToUser<T>(T userID, params T[] roles)
+        {
+            return addRoleToUser(userID, (IEnumerable<T>)roles);
+        }
+        public async static Task<bool> addRoleToUser<T>(T userID, IEnumerable<T> roles)
+        {
+            if ((await DynamicController.executor.ExecuteQueryWithTransaction(insertRoles.toOrderedPairs("RoleID", "UserID", userID, roles))) == 0)
+                return false;
+            return true;
+        }
+        
         private static byte[] GenerateSalt()
         {
             using (var rngCryptoServiceProvider = new RNGCryptoServiceProvider())

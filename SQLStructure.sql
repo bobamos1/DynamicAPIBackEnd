@@ -127,6 +127,19 @@ CREATE TABLE ValidatorTypes (
     id BIGINT IDENTITY(1,1),
     name VARCHAR(100)
 )
+CREATE TABLE Filters (
+    id BIGINT IDENTITY(1,1),
+    displayName VARCHAR(100),
+    description VARCHAR(1000),
+    ind INT,
+    id_showType BIGINT,
+    id_route BIGINT
+)
+CREATE TABLE FiltersSQLParamsInfo (
+    ind INT,
+    id_filter BIGINT NOT NULL,
+    id_SQLParamInfo BIGINT NOT NULL
+)
 CREATE TABLE ValidatorSQLParamInfoValues (
     id_SQLParamInfo BIGINT NOT NULL,
     id_ValidatorType BIGINT NOT NULL,
@@ -229,6 +242,14 @@ ADD CONSTRAINT PK_SQLParamInfos PRIMARY KEY (id);
 -- ValidatorTypes Table
 ALTER TABLE ValidatorTypes
 ADD CONSTRAINT PK_ValidatorTypes PRIMARY KEY (id);
+
+-- Filters Table
+ALTER TABLE Filters
+ADD CONSTRAINT PK_Filters PRIMARY KEY (id);
+
+-- FiltersSQLParamsInfo Table
+ALTER TABLE FiltersSQLParamsInfo
+ADD CONSTRAINT PK_FiltersSQLParamsInfo PRIMARY KEY (id_SQLParamInfo, id_Filter);
 
 -- ValidatorSQLParamInfoValues Table
 ALTER TABLE ValidatorSQLParamInfoValues
@@ -344,6 +365,24 @@ ALTER TABLE SQLParamInfos
 ADD CONSTRAINT FK_SQLParamInfos_Proprieties
 FOREIGN KEY (id_Propriety) REFERENCES Proprieties(id);
 
+-- Filters Table
+ALTER TABLE Filters
+ADD CONSTRAINT FK_Filters_ShowTypes
+FOREIGN KEY (id_showType) REFERENCES ShowTypes(id);
+
+ALTER TABLE Filters
+ADD CONSTRAINT FK_Filters_URLRoutes
+FOREIGN KEY (id_route) REFERENCES URLRoutes(id);
+
+
+-- FiltersSQLParamsInfo Table
+ALTER TABLE FiltersSQLParamsInfo
+ADD CONSTRAINT FK_FiltersSQLParamsInfo_Filters
+FOREIGN KEY (id_Filter) REFERENCES Filters(id);
+
+ALTER TABLE FiltersSQLParamsInfo
+ADD CONSTRAINT FK_FiltersSQLParamsInfo_SQLParamInfos
+FOREIGN KEY (id_SQLParamInfo) REFERENCES SQLParamInfos(id);
 
 -- ValidatorSQLParamInfoValues Table
 ALTER TABLE ValidatorSQLParamInfoValues

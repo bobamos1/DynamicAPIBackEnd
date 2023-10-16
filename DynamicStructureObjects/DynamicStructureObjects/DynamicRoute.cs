@@ -14,6 +14,7 @@ namespace DynamicStructureObjects
         public RouteDisplayTypes routeDisplayType { get; internal set; }
 
         public List<DynamicQueryForRoute> Queries { get; internal set; }
+        public List<DynamicFilter> Filters { get; internal set; }
         public List<long> Roles { get; internal set; }
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id FROM PermissionRoutes INNER JOIN Roles ON id = id_role WHERE id_route = @RouteID");
         internal static readonly Query getQueries = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, SQLString AS queryString, id_queryType AS QueryTypeID, completeAuth AS CompleteAuth, completeCheck AS CompleteCheck FROM RouteQueries WHERE id_route = @RouteID ORDER BY ind", true);
@@ -22,11 +23,14 @@ namespace DynamicStructureObjects
         internal static readonly Query getBaseRouteName = Query.fromQueryString(QueryTypes.VALUE, "SELECT Name FROM BaseRoutes WHERE id = @BaseRouteID");
         internal static readonly Query updateRequired = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE URLRoutes SET requireAuthorization = 1 WHERE @ID = id", true);
         internal static readonly Query updateParamForUserID = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE URLRoutes SET paramForUserID = @paramForUserID WHERE id = @ID", true);
+        internal static readonly Query selectFilters = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, displayName AS DisplayName, description AS Description, id_showType AS ShowTypeID, ind AS ind FROM Filters WHERE id_route = @RouteID", true);
+        internal static readonly Query selectFiltersParamInfo = Query.fromQueryString(QueryTypes.CBO, "SELECT id_SQLParamInfo, ind FROM FiltersSQLParamsInfo WHERE id_filter = @FilterID");
         internal DynamicRoute(long id, string Name, long RouteTypeID, bool requireAuthorization, bool getAuthorizedCols, bool onlyModify, string paramForUserID, long routeDisplayTypeID)
         {
             this.id = id;
             this.Name = Name;
             this.RouteType = (RouteTypes)RouteTypeID;
+            this.Filters = new List<DynamicFilter>();
             this.Queries = new List<DynamicQueryForRoute>();
             this.Roles = new List<long>();
             this.requireAuthorization = requireAuthorization;
@@ -40,6 +44,7 @@ namespace DynamicStructureObjects
             this.id = dynamicRoute.id;
             this.Name = baseRoute.Value();
             this.RouteType = dynamicRoute.RouteType;
+            this.Filters = dynamicRoute.Filters.ToList();
             this.Queries = dynamicRoute.Queries.ToList();
             this.Roles = dynamicRoute.Roles;
             this.requireAuthorization = baseRoute.requireAuthorization();
@@ -50,7 +55,7 @@ namespace DynamicStructureObjects
             if (requiredID)
                 Queries[0] = new DynamicQueryForRoute(Queries[0], true);
         }
-        internal static async Task<DynamicRoute> init(DynamicRoute route)
+        internal static async Task<DynamicRoute> init(DynamicRoute route, IEnumerable<DynamicPropriety> proprieties)
         {
             route.Queries = (await DynamicController.executor.SelectQuery<DynamicQueryForRoute>(getQueries.setParam("RouteID", route.id))).ToList(); 
             route.Roles = (await DynamicController.executor.SelectArray<long>(getRoles.setParam("RouteID", route.id))).ToList();
@@ -58,6 +63,30 @@ namespace DynamicStructureObjects
             //route.Roles.Add(1);
             foreach (var query in route.Queries)
                 await DynamicQueryForRoute.init(query);
+            var dynaSQLParam = route.Queries.SelectMany(query => query.ParamsInfos.Select(pair => pair.Value));
+            route.Filters = (await DynamicController.executor.SelectQuery<DynamicFilter>(
+                selectFilters
+                    .setParam("RouteID", route.id)
+            )).ToList();
+            foreach (var filter in route.Filters)
+            {
+                var paramInfos = await DynamicController.executor.SelectDictionary<long, int>(
+                    selectFiltersParamInfo
+                        .setParam("FilterID", filter.id)
+                );
+                filter.AffectedVars = paramInfos.Select(paramInfo => dynaSQLParam.First(param => param.id == paramInfo.Key));
+                if (string.IsNullOrEmpty(filter.Name))
+                    filter.Name = filter.AffectedVars.First().VarAffected;
+            }
+            foreach (var param in dynaSQLParam)
+            {
+                if (param.ProprietyID != 1)
+                {
+                    var prop = proprieties.First(prop => prop.id == param.ProprietyID);
+                    route.Filters.Add(new DynamicFilter(string.IsNullOrEmpty(prop.displayName) ? prop.Name : prop.displayName, prop.description, prop.ShowType, prop.ind, param));
+                }
+            }
+
             return route;
         }
         public static Task<DynamicRoute> addRoute(long idController, BaseRoutes baseRoute)
@@ -112,31 +141,67 @@ namespace DynamicStructureObjects
             Queries.Add(DynamicQueryForRoute.addEmptyQuery());
             return this;
         }
-        
+
+
         public async Task<DynamicRoute> addSQLParam(int indexQuery, string varAffected, long ProprietyID = 1)
         {
             await Queries[indexQuery].addSQLParam(varAffected, ProprietyID);
             return this;
         }
-        public async Task<DynamicRoute> addSQLParam(string varAffected, long ProprietyID = 1)
+        public Task<DynamicRoute> addSQLParam(string varAffected, long ProprietyID = 1)
+        {
+            return addSQLParam(varAffected, ProprietyID, false);
+        }
+        public Task<DynamicRoute> addSQLParam(string varAffected, long ProprietyID, params ValidatorBundle[] ValidatorBundles)
+        {
+            return addSQLParam(varAffected, ProprietyID, false, ValidatorBundles);
+        }
+        public async Task<DynamicRoute> addSQLParam(string varAffected, long ProprietyID, bool addRequired, params ValidatorBundle[] ValidatorBundles)
         {
             await Queries.Last().addSQLParam(varAffected, ProprietyID);
+            if (ValidatorBundles.Any())
+                await addValidator(varAffected, addRequired, ValidatorBundles);
+            return this;
+        }
+        public Task<DynamicRoute> addFilterParam(string varAffected, long ProprietyID, string DisplayName, string Description, ShowTypes showType, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        {
+            return addFilterParam(varAffected, ProprietyID, DisplayName, Description, showType, Filters.Count, addRequired, ValidatorBundles);
+        }
+        public async Task<DynamicRoute> addFilterParam(string varAffected, long ProprietyID, string DisplayName, string Description, ShowTypes showType, int ind, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        {
+            await Queries.Last().addSQLParam(varAffected, ProprietyID);
+            if (ValidatorBundles.Any())
+                await addValidator(varAffected, addRequired, ValidatorBundles);
+            return await addFilter(DisplayName, Description, showType, ind, varAffected);
+        }
+        public async Task<DynamicRoute> addFilter(string DisplayName, string Description, ShowTypes showType, int ind, params string[] SQLVariables)
+        {
+            Filters.Add(await DynamicFilter.addFilter(DisplayName, Description, showType, ind, id, Queries.SelectMany(query => query.ParamsInfos.Where(param => SQLVariables.Contains(param.Key)).Select(param => param.Value))));
             return this;
         }
 
-        public async Task<DynamicRoute> setSQLParam(string VarAffected, params ValidatorBundle[] ValidatorBundles)
+        public Task<DynamicRoute> setSQLParam(string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
-            await Queries.Last().setSQLParam(VarAffected, 1, false, ValidatorBundles);
+            return setSQLParam(VarAffected, 1, false, ValidatorBundles);
+        }
+        public Task<DynamicRoute> setSQLParam(string VarAffected, long ProprietyID, params ValidatorBundle[] ValidatorBundles)
+        {
+            return setSQLParam(VarAffected, ProprietyID, false, ValidatorBundles);
+        }
+        public async Task<DynamicRoute> setSQLParam(string VarAffected, long ProprietyID, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        {
+            await Queries.Last().setSQLParam(VarAffected, ProprietyID, addRequired, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicRoute> setSQLParam(string VarAffected, long ProprietyID, params ValidatorBundle[] ValidatorBundles)
-        {
-            await Queries.Last().setSQLParam(VarAffected, ProprietyID, false, ValidatorBundles);
-            return this;
-        }
+        
         public async Task<DynamicRoute> setNotRequired(params string[] VarsAffected)
         {
             await Queries.Last().setNotRequired(VarsAffected);
+            return this;
+        }
+        public async Task<DynamicRoute> removeParams(params string[] VarsAffected)
+        {
+            await Queries.Last().removeParams(VarsAffected);
             return this;
         }
         public async Task<DynamicRoute> addValidator(int indexQuery, string VarAffected, string Value, ValidatorTypes ValidatorType)

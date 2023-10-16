@@ -9,7 +9,10 @@ namespace APIDynamic
         {
             await DynamicController.resetStructureData(executor, true);
             if (resetRoles)
+            {
+                await executor.ExecuteQueryWithTransaction("DELETE UsersRoles");
                 await DynamicController.InsertEnum(executor, "INSERT INTO Roles (id, name) VALUES ({0}, '{1}')", "Roles", typeof(Roles));
+            }
             await BDInit.InitDB();
         }
         public static Dictionary<string, string> LoadConnectionStrings(IConfiguration configuration)
