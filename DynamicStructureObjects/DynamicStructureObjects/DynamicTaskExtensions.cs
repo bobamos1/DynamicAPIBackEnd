@@ -124,7 +124,7 @@ namespace DynamicStructureObjects
         }
         public async static Task<DynamicController> addEmptyQuery(this Task<DynamicController> task)
         {
-            return (await task).addEmptyQuery();
+            return await (await task).addEmptyQuery();
         }
         public async static Task<DynamicController> addRouteQuery(this Task<DynamicController> task, string routeName, string queryString, QueryTypes QueryType, bool? CompleteAuth = null, bool CompleteCheck = true)
         {
@@ -172,37 +172,45 @@ namespace DynamicStructureObjects
         {
             return await (await task).addParam(VarAffected, ValidatorBundles);
         }
-        public async static Task<DynamicController> addFilterParamOptional(this Task<DynamicController> task, string varAffected, string DisplayName, string Description, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> addFilterParamOptional(this Task<DynamicController> task, string varAffected, string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).addFilterParamOptional(varAffected, DisplayName, Description, showType, ind, ValidatorBundles);
+            return await (await task).addFilterParamOptional(varAffected, DisplayName, Description, placeholder, showType, ind, ValidatorBundles);
         }
         public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, ShowTypes showType, params ValidatorBundle[] ValidatorBundles)
         {
             return await (await task).addFilterParam(varAffected, showType, ValidatorBundles);
         }
-        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, string placeholder, ShowTypes showType, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).addFilterParam(varAffected, showType, ind, ValidatorBundles);
+            return await (await task).addFilterParam(varAffected, placeholder, showType, ValidatorBundles);
         }
-        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, string DisplayName, string Description, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, string placeholder, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).addFilterParam(varAffected, DisplayName, Description, showType, ind, ValidatorBundles);
+            return await (await task).addFilterParam(varAffected, placeholder, showType, ind, ValidatorBundles);
         }
-        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, string Description, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).addFilterParam(varAffected, Description, showType, ind, ValidatorBundles);
+            return await (await task).addFilterParam(varAffected, DisplayName, placeholder, Description, showType, ind, ValidatorBundles);
         }
-        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, string Description, ShowTypes showType, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, string Description, string placeholder, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).addFilterParam(varAffected, Description, showType, ValidatorBundles);
+            return await (await task).addFilterParam(varAffected, Description, placeholder, showType, ind, ValidatorBundles);
         }
-        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, string DisplayName, string Description, ShowTypes showType, int ind, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, string Description, string placeholder, ShowTypes showType, params ValidatorBundle[] ValidatorBundles)
         {
-            return await (await task).addFilterParam(varAffected, DisplayName, Description, showType, ind, addRequired, ValidatorBundles);
+            return await (await task).addFilterParam(varAffected, Description, placeholder, showType, ValidatorBundles);
+        }
+        public async static Task<DynamicController> addFilterParam(this Task<DynamicController> task, string varAffected, string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        {
+            return await (await task).addFilterParam(varAffected, DisplayName, Description, placeholder, showType, ind, addRequired, ValidatorBundles);
         }
         public async static Task<DynamicController> addFilter(this Task<DynamicController> task, string DisplayName, string Description, ShowTypes showType, int ind, params string[] SQLVariables)
         {
             return await (await task).addFilter(DisplayName, Description, showType, ind, SQLVariables);
+        }
+        public async static Task<DynamicController> addFilter(this Task<DynamicController> task, string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, params string[] SQLVariables)
+        {
+            return await (await task).addFilter(DisplayName, Description, placeholder, showType, ind, SQLVariables);
         }
         public async static Task<DynamicController> addSQLParam(this Task<DynamicController> task, string VarAffected, params ValidatorBundle[] ValidatorBundles)
         {
@@ -212,17 +220,21 @@ namespace DynamicStructureObjects
         {
             return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, validatorBundles);
         }
-        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, int ind, params ValidatorBundle[] validatorBundles)
+        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string placeholder, params ValidatorBundle[] validatorBundles)
         {
-            return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, ind, validatorBundles);
+            return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, placeholder, validatorBundles);
         }
-        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string description, int ind, params ValidatorBundle[] validatorBundles)
+        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string placeholder, int ind, params ValidatorBundle[] validatorBundles)
         {
-            return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, description, ind, validatorBundles);
+            return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, placeholder, ind, validatorBundles);
         }
-        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable,ShowTypes showType, string description, string displayName, int ind, params ValidatorBundle[] validatorBundles)
+        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string description, string placeholder, int ind, params ValidatorBundle[] validatorBundles)
         {
-            return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, description, displayName, ind, validatorBundles);
+            return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, description, placeholder, ind, validatorBundles);
+        }
+        public async static Task<DynamicController> addPropriety(this Task<DynamicController> task, string Name, bool IsMain, bool IsUpdatable,ShowTypes showType, string displayName, string description, string placeholder, int ind, params ValidatorBundle[] validatorBundles)
+        {
+            return await (await task).addPropriety(Name, IsMain, IsUpdatable, showType, displayName, description, placeholder, ind, validatorBundles);
         }/*
         public async static Task<DynamicController> addValidatorForPropriety(this Task<DynamicController> task, string ProprietyName, string Value, ValidatorTypes ValidatorType)
         {

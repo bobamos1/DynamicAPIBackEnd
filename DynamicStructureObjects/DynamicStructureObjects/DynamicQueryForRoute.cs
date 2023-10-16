@@ -48,9 +48,10 @@ namespace DynamicStructureObjects
                 query.ParamsInfos.Add(paramInfo.VarAffected, await DynamicSQLParamInfo.init(paramInfo));
             return query;
         }
-        public static DynamicQueryForRoute addEmptyQuery()
+        public static Task<DynamicQueryForRoute> addEmptyQuery(long routeID)
         {
-            return new DynamicQueryForRoute();
+
+            return addRouteQuery(0, "", QueryTypes.NONE, routeID, false, false, false);
         }
         public async static Task<DynamicQueryForRoute> addRouteQuery(int index, string queryString, QueryTypes QueryType, long RouteID, bool CompleteAuth, bool CompleteCheck, bool withVar)
         {

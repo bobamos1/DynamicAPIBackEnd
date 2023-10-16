@@ -41,7 +41,8 @@ CREATE TABLE Proprieties (
     id_controller BIGINT,
     ind INT,
     displayName VARCHAR(100),
-    description VARCHAR(1000)
+    description VARCHAR(1000),
+    placeholder VARCHAR(100)
 )
 CREATE TABLE CSharpTypes (
     id BIGINT IDENTITY(1,1),
@@ -133,7 +134,8 @@ CREATE TABLE Filters (
     description VARCHAR(1000),
     ind INT,
     id_showType BIGINT,
-    id_route BIGINT
+    id_route BIGINT,
+    placeholder VARCHAR(100)
 )
 CREATE TABLE FiltersSQLParamsInfo (
     ind INT,
