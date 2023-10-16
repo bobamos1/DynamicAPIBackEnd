@@ -613,7 +613,7 @@ namespace APIDynamic
                         .bindParamToUserID("ClientID")
                     .addRouteQueryNoVar("EXEC CheckoutPanier(@ClientID, @ProduitParCommande)", QueryTypes.STOREPROCEDURE)
                         .bindParamToUserID("ClientID")
-                    .addRouteQuery("EXEC FinaliseCommande(@ClientID)", QueryTypes.STOREPROCEDURE)
+                    .addRouteQuery("EXEC FinaliseCommande(@ClientID, @NoCiviqueLivraison, @RueLivraison)", QueryTypes.STOREPROCEDURE)
                         .bindParamToUserID("ClientID")
 
             ;
