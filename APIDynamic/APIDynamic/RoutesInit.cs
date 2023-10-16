@@ -172,19 +172,19 @@ namespace APIDynamic
                 {
 
 
-                    /*
+                    
                     var idClient = bodyData.UserID();
                     var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
 
                     foreach (long idProduitParCommande in ProduitsParCommande) {
 
-                        if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande))) == 0)
+                        if ((await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande))) == 0)
                             return Results.Forbid();
                     }
 
-                    if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
+                    if ((await executorData.ExecuteQueryWithTransaction(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
-                    */
+                    
                     try
                     {
                         // Calculate the total amount based on the percentage (e.g., 10% of 2000 = 200)
