@@ -12,6 +12,8 @@ namespace DynamicStructureObjects
         internal static readonly Query insertRouteQuery = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO RouteQueries (ind, SQLString, id_queryType, id_route, CompleteAuth, CompleteCheck) VALUES (@Index, @SQLString, @QueryTypeID, @RouteID, @CompleteAuth, @CompleteCheck)", true);
         internal static readonly Query updateSQLParamInfo = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE SQLParamInfos SET id_Propriety = @ProprietyID WHERE varAffected = @VarAffected AND id_RouteQuery = @RouteQueryID", true, false);
         internal static readonly Query deleteSQLParamInfoRequired = Query.fromQueryString(QueryTypes.DELETE, "DELETE ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @ID AND id_ValidatorType = 1", true);
+        internal static readonly Query deleteSQLParamInfoValidators = Query.fromQueryString(QueryTypes.DELETE, "DELETE ValidatorSQLParamInfoValues WHERE id_SQLParamInfo = @ID", true);
+        internal static readonly Query deleteSQLParamInfo = Query.fromQueryString(QueryTypes.DELETE, "DELETE SQLParamInfos WHERE id = @ID", true);
         private string lastSQLParamAdded;
         internal DynamicQueryForRoute(long id, string queryString, long QueryTypeID, bool CompleteAuth, bool CompleteCheck)
         {
@@ -113,6 +115,17 @@ namespace DynamicStructureObjects
                 var modifiedParam = ParamsInfos[VarAffected];
                 await DynamicController.executor.ExecuteQueryWithTransaction(deleteSQLParamInfoRequired.setParam("ID", modifiedParam.id));
                 modifiedParam.isRequired = false;
+            }
+            return this;
+        }
+        public async Task<DynamicQueryForRoute> removeParams(params string[] VarsAffected)
+        {
+            foreach (var VarAffected in VarsAffected)
+            {
+                var modifiedParam = ParamsInfos[VarAffected];
+                await DynamicController.executor.ExecuteQueryWithTransaction(deleteSQLParamInfoValidators.setParam("ID", modifiedParam.id));
+                await DynamicController.executor.ExecuteQueryWithTransaction(deleteSQLParamInfo.setParam("ID", modifiedParam.id));
+                ParamsInfos.Remove(VarAffected);
             }
             return this;
         }

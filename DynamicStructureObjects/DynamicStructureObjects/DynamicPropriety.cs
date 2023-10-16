@@ -64,7 +64,7 @@ namespace DynamicStructureObjects
                 propriety.roles[AnonymousRoleID] = false;
             return propriety;
         }
-        public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string description, string displayName, int ind, long ControllerID, params ValidatorBundle[] validatorBundle)
+        public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string displayName, string description, int ind, long ControllerID, params ValidatorBundle[] validatorBundle)
         {
             var dynamicPropriety = new DynamicPropriety(
                 await DynamicController.executor.ExecuteInsertWithLastID(

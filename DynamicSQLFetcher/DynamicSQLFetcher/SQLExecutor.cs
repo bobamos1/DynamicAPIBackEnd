@@ -15,6 +15,10 @@ namespace DynamicSQLFetcher
         {
             return enumerable.Select(value => new KeyValuePair<TK, TV>(getKey(value), getValue(value)));
         }
+        public static IEnumerable<KeyValuePair<TK, TV>> toOrderedPairs<T, TK, TV>(this IEnumerable<T> enumerable, Func<T, int, TK> getKey, Func<T, TV> getValue)
+        {
+            return enumerable.Select((value, i) => new KeyValuePair<TK, TV>(getKey(value, i), getValue(value)));
+        }
         public static IEnumerable<KeyValuePair<string, DynamicParameters>> toOrderedPairs(this IEnumerable<Query> queries)
         {
             return queries.toOrderedPairs(query => query.Parse(), query => query.getParameters());
@@ -23,6 +27,11 @@ namespace DynamicSQLFetcher
         {
             query.clearParams();
             return multiplesValues.toOrderedPairs(value => query.setParam(paramNameChanging, value).setParam(paramNameStatic, staticValue).Parse(), _ => query.getParameters());
+        }
+        public static IEnumerable<KeyValuePair<string, DynamicParameters>> toOrderedPairs<TS, TM>(this Query query, string paramNameChanging, string paramNameStatic, TS staticValue, IEnumerable<TM> multiplesValues, Func<Query, int, Query> moreSetParam)
+        {
+            query.clearParams();
+            return multiplesValues.toOrderedPairs((value, i) => moreSetParam(query.setParam(paramNameChanging, value).setParam(paramNameStatic, staticValue), i).Parse(), _ => query.getParameters());
         }
     }
     public class SQLExecutor
