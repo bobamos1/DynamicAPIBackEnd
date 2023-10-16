@@ -68,32 +68,33 @@ namespace DynamicStructureObjects
 
             var getAllRoute = controller.Routes.FirstOrDefault(route => route.Name == BaseRoutes.GETALL.Value());
             var ids = controller.GetIDProprieties();
+            controller.Roles = controller.Proprieties.SelectMany(prop => prop.roles.Select(role => role.Key)).Distinct();
             if (getAllRoute is null)
-                    throw new Exception($"Need getAll for controller {controller.Name}");
+                return controller;
+                //throw new Exception($"Need getAll for controller {controller.Name}");
             if (!controller.hasRoute(BaseRoutes.GETALLDETAILED.Value()))
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETALLDETAILED, new string[0]));
             if (!controller.hasRoute(BaseRoutes.GET.Value()))
             {
                 var paramInfos = getAllRoute.Queries.First().ParamsInfos;
                 if (!ids.Any() || ids.Any(id => !paramInfos.ContainsKey(id)))
-                    throw new Exception($"Need all ids in route GetAll {controller.Name}");
+                    return controller;
+                    //throw new Exception($"Need all ids in route GetAll {controller.Name}");
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GET, ids));
                 if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
                     controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, ids));
             }
             else if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, new string[0]));
-
-            controller.Roles = controller.Proprieties.SelectMany(prop => prop.roles.Select(role => role.Key)).Concat(controller.Routes.SelectMany(route => route.Roles)).Distinct();
             return controller;
         }
         public string BaseRouteString(BaseRoutes baseRoute)
         {
-            return getRoute(BaseRoutes.CBO.Value()).FirstQuery.originalQuery;
+            return getRoute(baseRoute.Value()).FirstQuery.originalQuery;
         }
         public Query BaseRouteQuery(BaseRoutes baseRoute)
         {
-            return getRoute(BaseRoutes.CBO.Value()).FirstQuery;
+            return getRoute(baseRoute.Value()).FirstQuery;
         }
         public static async Task<Dictionary<string, DynamicController>> initControllers(SQLExecutor executor, string apiKey)
         {
@@ -414,8 +415,6 @@ namespace DynamicStructureObjects
             if (onlyModify)
                 return Proprieties.Where(propriety => propriety.CanModify(roles));
             return Proprieties.Where(propriety => propriety.CanSee(roles));
-
-
         }
         public IEnumerable<DynamicRoute> getAuthorizedRoutes(IEnumerable<long> roles)
         {
