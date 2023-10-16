@@ -614,9 +614,7 @@ namespace APIDynamic
                     .addRouteQuery("SELECT pc.id AS ProduitParCommande FROM produits_par_commande AS pc INNER JOIN commandes AS c ON c.id = pc.id_commande WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.ARRAY)
                         .bindParamToUserID("ClientID")
                     .addRouteQueryNoVar("EXEC CheckoutPanier(@ClientID, @ProduitParCommande)", QueryTypes.STOREPROCEDURE)
-                        .bindParamToUserID("ClientID")
                     .addRouteQuery("EXEC FinaliseCommande(@ClientID)", QueryTypes.STOREPROCEDURE)
-                        .bindParamToUserID("ClientID")
 
             ;
             #endregion
