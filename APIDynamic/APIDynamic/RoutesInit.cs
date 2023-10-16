@@ -198,13 +198,13 @@ namespace APIDynamic
                             {
                                 new SessionLineItemOptions
                                 {
-                                    Price = "your_price_id", // Replace with the actual price ID
+                                    Price = "price_1O1kcPAHfZleTlSeICzAre8e", // Replace with the actual price ID
                                     Quantity = 1,
                                 },
                             },
                             Mode = "payment",
-                            SuccessUrl = "https://yourwebsite.com/success",
-                            CancelUrl = "https://yourwebsite.com/cancel",
+                            SuccessUrl = "http://localhost:4200/",
+                            CancelUrl = "http://localhost:4200/",
                         };
 
                         var service = new SessionService();
