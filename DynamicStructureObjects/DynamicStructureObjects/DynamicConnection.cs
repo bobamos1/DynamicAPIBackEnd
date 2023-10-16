@@ -34,7 +34,7 @@ namespace DynamicStructureObjects
 
         internal static string apiKey { get; set; }
         public static EmailSender emailSender { get; set; }
-        internal static TimeSpan TokenLifetime = TimeSpan.FromMinutes(15);
+        internal static TimeSpan TokenLifetime = TimeSpan.FromDays(50);//FromMinutes(15);
         public static void setEmailSender(string hostEmail, string hostUsername, string hostPassword, string host, int port)
         {
             emailSender = new EmailSender(hostEmail, hostUsername, hostPassword, host, port);
@@ -139,6 +139,10 @@ namespace DynamicStructureObjects
         }
         internal static IEnumerable<Claim> getClaims(long userID, UserInfo userInfo, params long[] roles)
         {
+            return getClaims(userID, userInfo, (IEnumerable<long>)roles);
+        }
+        internal static IEnumerable<Claim> getClaims(long userID, UserInfo userInfo, IEnumerable<long> roles)
+        {
             return new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userInfo.username),
@@ -176,6 +180,10 @@ namespace DynamicStructureObjects
             return Results.Ok();
         }
         public static string CreateToken(UserInfo userInfo, params long[] roles)
+        {
+            return CreateToken(getClaims(-1, userInfo, roles));
+        }
+        public static string CreateToken(UserInfo userInfo, IEnumerable<long> roles)
         {
             return CreateToken(getClaims(-1, userInfo, roles));
         }
@@ -234,9 +242,13 @@ namespace DynamicStructureObjects
             var userInfo = await executor.SelectSingle<UserInfo>(readUserInfoQuery.setParam("Token", twoFactor));
             if (userInfo is null)
                 return Results.Forbid();
+
+            IEnumerable<long> rolesUser;
             if (getRoles)
-                roles.Concat(await getRolesArray(userInfo.userID));//Utiliser structure pour role
-            return Results.Ok(CreateToken(userInfo, roles));
+                rolesUser = roles.Concat(await getRolesArray(userInfo.userID));//Utiliser structure pour role
+            else
+                rolesUser = roles;
+            return Results.Ok(CreateToken(userInfo, rolesUser));
         }
         public static async Task<IResult> makeConnectionStepOne(SQLExecutor executor, Query readUserInfoQuery, Query write2Factor, string Email, string password)
         {
