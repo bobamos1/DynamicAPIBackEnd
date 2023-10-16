@@ -420,6 +420,16 @@ namespace DynamicStructureObjects
                     return Results.Forbid();
                 return Results.Ok(result);
             });
+            app.MapGet("Info/Controllers", ([FromHeader(Name = "Authorization")] string? JWT) =>
+            {
+                /*
+                if (JWT is null)
+                    return Results.Forbid();
+                var token = DynamicConnection.ParseClaim(JWT);
+                if (DynamicConnection.ParseRoles(token).Contains(2) || token.ValidTo < DateTime.UtcNow)
+                    return Results.Forbid();*/
+                return Results.Ok(controllers.Values);
+            });
             foreach (var controller in controllers)
                 controller.Value.setBaseInfoRoutes();
             app.MapPost("AddRoleToUser", async ([FromHeader(Name = "Authorization")] string? JWT, RequestForRoleID requestForRole) =>
