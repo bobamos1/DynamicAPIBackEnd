@@ -215,9 +215,9 @@ namespace DynamicStructureObjects
                 return null;
             return userInfo;
         }
-        public static async Task<long[]> getRolesArray(long userID)
+        public static async Task<IEnumerable<long>> getRolesArray(long userID)
         {
-            return (await DynamicController.executor.SelectArray<long>(getRolesQuery.setParam("UserID", userID))).ToArray();
+            return await DynamicController.executor.SelectArray<long>(getRolesQuery.setParam("UserID", userID));
         }/*
         public static async Task<IResult> makeConnection(SQLExecutor executor, string Email, string password, Query readUserInfoQuery, Query getRolesQuery = null, long defaultRole = -1)
         {
