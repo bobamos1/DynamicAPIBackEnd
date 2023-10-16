@@ -3,6 +3,8 @@ using DynamicSQLFetcher;
 using DynamicStructureObjects;
 using ParserLib;
 using Stripe;
+using Stripe.BillingPortal;
+using Stripe.Checkout;
 using System;
 using System.Collections.Immutable;
 
@@ -158,10 +160,16 @@ namespace APIDynamic
                     return Results.Ok();
                 }
             );
-            
+
+            var stripeApiKey = "sk_test_51O1boKAHfZleTlSeTjEqgkKrxHVsyKDs5R0fUpfGTpvtqGwkhxkjVNVA11waQoRLfFTvHej7Nq6t1apDKGFMqkhB00mDMWqPQl";
+            StripeConfiguration.ApiKey = stripeApiKey;
+
             controllers["Commandes"].mapRoute("CheckoutPanier",
                 async (queries, bodyData) =>
                 {
+
+
+
                     var idClient = bodyData.UserID();
                     var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
 
@@ -174,11 +182,36 @@ namespace APIDynamic
                     if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
 
-                    return Results.Ok();
+                    var paymentIntentId = bodyData.SafeGet<string>("sessionId");
+
+                    try
+                    {
+                        var service = new PaymentIntentService();
+                        var paymentIntent = service.Confirm(
+                            paymentIntentId,
+                            new PaymentIntentConfirmOptions { });
+
+                        if (paymentIntent.Status == "succeeded")
+                        {
+                            // Payment is successful
+                            return Results.Ok();
+                        }
+                        else
+                        {
+                            // Payment failed
+                            return Results.Forbid();
+                        }
+                    }
+                    catch (StripeException e)
+                    {
+                        return Results.Forbid();
+                    }
+
 
                 }
 
             );
+
             controllers["ProduitsParCommande"].mapRoute("MoveToPanier",
                 async (queries, bodyData) =>
                 {
