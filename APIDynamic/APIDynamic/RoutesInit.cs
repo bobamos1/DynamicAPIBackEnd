@@ -177,21 +177,19 @@ namespace APIDynamic
 
                     foreach (long idProduitParCommande in ProduitsParCommande) {
 
-                        if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("clientID", idClient).setParam("produitParCommandeID", idProduitParCommande))) == 0)
+                        if ((await executorData.ExecuteQueryWithTransaction(queries[1].setParam("clientID", idClient).setParam("produitParCommandeID", idProduitParCommande))) == 0)
                             return Results.Forbid();
                     }
 
-                    if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("clientID", idClient).setParam("noCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("rueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("villeID", bodyData.SafeGet<string>("VilleID"))) == 0))
+                    if ((await executorData.ExecuteQueryWithTransaction(queries[2].setParam("clientID", idClient).setParam("noCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("rueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("villeID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
 
                     var paymentIntentId = bodyData.SafeGet<string>("sessionId");
 
                     try
                     {
-                        // Calculate the total amount based on the percentage (e.g., 10% of 2000 = 200)
-                        int percentage = 10; // Replace with your desired percentage
-                        int baseAmount = 2000; // Replace with your base amount
-                        int totalAmount = (int)(baseAmount * (percentage / 100.0));
+                        float totalPrice = 20.50f; // Replace with your desired total price
+                        int totalAmount = (int)(totalPrice * 100); // Convert to cents
 
                         var options = new SessionCreateOptions
                         {
@@ -200,7 +198,15 @@ namespace APIDynamic
                             {
                                 new SessionLineItemOptions
                                 {
-                                    Price = "your_price_id", // Replace with the actual price ID
+                                    PriceData = new PriceDataOptions
+                                    {
+                                        Currency = "usd",
+                                        ProductData = new PriceDataProductDataOptions
+                                        {
+                                            Name = "Votre commande",
+                                        },
+                                        UnitAmount = totalAmount,
+                                    },
                                     Quantity = 1,
                                 },
                             },
