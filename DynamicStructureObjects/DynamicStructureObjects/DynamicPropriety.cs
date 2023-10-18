@@ -147,7 +147,7 @@ namespace DynamicStructureObjects
         }
         internal bool CanSee(IEnumerable<long> rolesUser)
         {
-            return roles.ContainsKey(AnonymousRoleID) || rolesUser.Any(role => roles.ContainsKey(role));
+            return true;//roles.ContainsKey(AnonymousRoleID) || rolesUser.Any(role => roles.ContainsKey(role));
         }
         internal bool CanModify(IEnumerable<long> rolesUser)
         {
