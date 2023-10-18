@@ -422,7 +422,7 @@ namespace DynamicStructureObjects
         }
         public object InfoObject()
         {
-            return new { IsMain = this.IsMain, Name = this.Name, id = this.id };
+            return new { id = this.id, Name = this.Name, IsMain = this.IsMain };
         }
         public object InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
         {
