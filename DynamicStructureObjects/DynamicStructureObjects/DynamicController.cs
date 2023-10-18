@@ -426,8 +426,11 @@ namespace DynamicStructureObjects
         }
         public object InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
         {
-            getRoute(BaseRoutes.GETALL.Value()).Queries.First();
             return proprieties.Select(prop => new { prop.id, prop.Name, prop.IsMain, prop.Validators, prop.description, prop.displayName, prop.placeholder, prop.ind, prop.ShowType });
+        }
+        public object InfoObjectFiltres(IEnumerable<DynamicFilter> filters)
+        {
+            return filters;//.Select(prop => new { prop.id, prop.Name, prop.IsMain, prop.Validators, prop.description, prop.displayName, prop.placeholder, prop.ind, prop.ShowType });
         }
         public bool CanUse(IEnumerable<long> roles)
         {
@@ -490,6 +493,12 @@ namespace DynamicStructureObjects
         }
         internal void setBaseInfoRoutes()
         {
+
+            var getAllRoute = getRoute(BaseRoutes.GETALL.Value());
+            app.MapGet($"/{Name}/Info/Filters", ([FromHeader(Name = "Authorization")] string? JWT) =>
+            {
+                return Results.Ok(InfoObjectFiltres(getAllRoute.Filters));
+            }).WithName($"{Name}InfoFilters");
             app.MapGet($"/{Name}/Info/Proprieties", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
                 var roles = getRolesInfo(JWT);
