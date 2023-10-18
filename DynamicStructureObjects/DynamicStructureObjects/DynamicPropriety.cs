@@ -10,6 +10,7 @@ namespace DynamicStructureObjects
         public bool IsUpdatable { get; internal set; }
         public string description { get; internal set; }
         public string displayName { get; internal set; }
+        public string placeholder { get; internal set; }
         public int ind { get; internal set; }
         public List<DynamicValidator> Validators { get; internal set; }
         public ShowTypes ShowType { get; internal set; }
@@ -19,9 +20,9 @@ namespace DynamicStructureObjects
         internal static readonly Query getRoles = Query.fromQueryString(QueryTypes.CBO, "SELECT id, canModify FROM PermissionProprieties INNER JOIN Roles ON id = id_role WHERE id_propriety = @ProprietyID");
         internal static readonly Query getValidators = Query.fromQueryString(QueryTypes.SELECT, "SELECT value AS Value, id_ValidatorType AS ValidatorTypeID, message FROM ValidatorProprietyValues WHERE id_Propriety = @ProprietyID", true);
         internal static readonly Query getMapperGenerator = Query.fromQueryString(QueryTypes.SELECT, "SELECT lnk.id AS id, c.id AS controllerID, c.Name AS controllerName, urlR.id AS routeID, SQLString AS QueryString, id_queryType AS QueryTypeID, completeCheck AS CompleteCheck, completeAuth AS CompleteAuth, p.name AS ProprietyName FROM LinkProprietiesControllers lnk INNER JOIN Controllers c ON c.id = lnk.id_controller INNER JOIN URLRoutes urlR ON urlR.id_controller = c.id INNER JOIN RouteQueries rq ON rq.id_route = urlR.id INNER JOIN Proprieties p ON p.id = lnk.id_propriety WHERE urlR.id_baseRoute = @BaseRouteID AND rq.ind = 1 AND lnk.id_propriety = @ProprietyID", true);
-        internal static readonly Query insertPropriety = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Proprieties (name, isMain, isUpdatable, id_ShowType, id_controller, ind, displayName, description) VALUES (@Name, @IsMain, @IsUpdatable, @ShowTypeID, @ControllerID, @ind, @displayName, @description)", true);
+        internal static readonly Query insertPropriety = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Proprieties (name, isMain, isUpdatable, id_ShowType, id_controller, ind, displayName, description, placeholder) VALUES (@Name, @IsMain, @IsUpdatable, @ShowTypeID, @ControllerID, @ind, @displayName, @description, @placeholder)", true);
         internal static readonly Query insertRole = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO PermissionProprieties (id_propriety, id_role, canModify) VALUES (@ProprietyID, @RoleID, @CanModify)", true);
-        internal DynamicPropriety(long id, string Name, bool IsMain, bool IsUpdatable, long ShowTypeID, int ind, string description, string displayName)
+        internal DynamicPropriety(long id, string Name, bool IsMain, bool IsUpdatable, long ShowTypeID, int ind, string description, string displayName, string placeholder)
         {
             this.id = id;
             this.Name = Name;
@@ -34,6 +35,7 @@ namespace DynamicStructureObjects
             this.ind = ind;
             this.description = description;
             this.displayName = displayName;
+            this.placeholder = placeholder;
         }
         internal static async Task<DynamicPropriety> init(DynamicPropriety propriety)
         {
@@ -64,7 +66,7 @@ namespace DynamicStructureObjects
                 propriety.roles[AnonymousRoleID] = false;
             return propriety;
         }
-        public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string displayName, string description, int ind, long ControllerID, params ValidatorBundle[] validatorBundle)
+        public async static Task<DynamicPropriety> addPropriety(string Name, bool IsMain, bool IsUpdatable, ShowTypes showType, string displayName, string description, string placeholder, int ind, long ControllerID, params ValidatorBundle[] validatorBundle)
         {
             var dynamicPropriety = new DynamicPropriety(
                 await DynamicController.executor.ExecuteInsertWithLastID(
@@ -77,6 +79,7 @@ namespace DynamicStructureObjects
                         .setParam("ind", ind)
                         .setParam("description", description)
                         .setParam("displayName", displayName)
+                        .setParam("placeholder", placeholder)
                     )
                 , Name
                 , IsMain
@@ -85,6 +88,7 @@ namespace DynamicStructureObjects
                 , ind
                 , description
                 , displayName
+                , placeholder
             );
 
             foreach (var validator in validatorBundle)
@@ -143,7 +147,7 @@ namespace DynamicStructureObjects
         }
         internal bool CanSee(IEnumerable<long> rolesUser)
         {
-            return roles.ContainsKey(AnonymousRoleID) || rolesUser.Any(role => roles.ContainsKey(role));
+            return true;//roles.ContainsKey(AnonymousRoleID) || rolesUser.Any(role => roles.ContainsKey(role));
         }
         internal bool CanModify(IEnumerable<long> rolesUser)
         {

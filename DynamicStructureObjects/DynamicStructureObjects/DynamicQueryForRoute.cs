@@ -29,15 +29,16 @@ namespace DynamicStructureObjects
             this.ParamsInfos = new Dictionary<string, DynamicSQLParamInfo>();
             this.CompleteAuth = true;
         }
-        internal DynamicQueryForRoute(DynamicQueryForRoute dynamicQuery, bool requiredID)
+        internal DynamicQueryForRoute(DynamicQueryForRoute dynamicQuery, IEnumerable<string> idParams)
         {
             this.id = dynamicQuery.id;
             this.query = dynamicQuery.query;
             this.ParamsInfos = dynamicQuery.ParamsInfos.ToDictionary(param => param.Key, param => param.Value);
             this.CompleteAuth = dynamicQuery.CompleteAuth;
             DynamicSQLParamInfo paramInfo;
-            if (requiredID && ParamsInfos.TryGetValue("ID", out paramInfo))
-                ParamsInfos["ID"] = new DynamicSQLParamInfo(paramInfo, true);
+            foreach (var param in idParams)
+                if (ParamsInfos.TryGetValue(param, out paramInfo))
+                    ParamsInfos[param] = new DynamicSQLParamInfo(paramInfo, true);
         }
         internal static async Task<DynamicQueryForRoute> init(DynamicQueryForRoute query)
         {
@@ -48,9 +49,10 @@ namespace DynamicStructureObjects
                 query.ParamsInfos.Add(paramInfo.VarAffected, await DynamicSQLParamInfo.init(paramInfo));
             return query;
         }
-        public static DynamicQueryForRoute addEmptyQuery()
+        public static Task<DynamicQueryForRoute> addEmptyQuery(long routeID)
         {
-            return new DynamicQueryForRoute();
+
+            return addRouteQuery(0, "", QueryTypes.NONE, routeID, false, false, false);
         }
         public async static Task<DynamicQueryForRoute> addRouteQuery(int index, string queryString, QueryTypes QueryType, long RouteID, bool CompleteAuth, bool CompleteCheck, bool withVar)
         {

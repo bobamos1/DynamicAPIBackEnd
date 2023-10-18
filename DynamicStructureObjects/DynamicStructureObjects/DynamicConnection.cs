@@ -33,8 +33,8 @@ namespace DynamicStructureObjects
         private const int HashSize = 64; // 64 bytes for the hash
 
         internal static string apiKey { get; set; }
-        internal static EmailSender emailSender { get; set; }
-        internal static TimeSpan TokenLifetime = TimeSpan.FromMinutes(15);
+        public static EmailSender emailSender { get; set; }
+        internal static TimeSpan TokenLifetime = TimeSpan.FromDays(50);//FromMinutes(15);
         public static void setEmailSender(string hostEmail, string hostUsername, string hostPassword, string host, int port)
         {
             emailSender = new EmailSender(hostEmail, hostUsername, hostPassword, host, port);
@@ -139,6 +139,10 @@ namespace DynamicStructureObjects
         }
         internal static IEnumerable<Claim> getClaims(long userID, UserInfo userInfo, params long[] roles)
         {
+            return getClaims(userID, userInfo, (IEnumerable<long>)roles);
+        }
+        internal static IEnumerable<Claim> getClaims(long userID, UserInfo userInfo, IEnumerable<long> roles)
+        {
             return new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userInfo.username),
@@ -179,6 +183,10 @@ namespace DynamicStructureObjects
         {
             return CreateToken(getClaims(-1, userInfo, roles));
         }
+        public static string CreateToken(UserInfo userInfo, IEnumerable<long> roles)
+        {
+            return CreateToken(getClaims(-1, userInfo, roles));
+        }
         public static string CreateToken(long userID, UserInfo userInfo, params long[] roles)
         {
             return CreateToken(getClaims(userID, userInfo, roles));
@@ -207,9 +215,9 @@ namespace DynamicStructureObjects
                 return null;
             return userInfo;
         }
-        public static async Task<long[]> getRolesArray(long userID)
+        public static async Task<IEnumerable<long>> getRolesArray(long userID)
         {
-            return (await DynamicController.executor.SelectArray<long>(getRolesQuery.setParam("UserID", userID))).ToArray();
+            return await DynamicController.executor.SelectArray<long>(getRolesQuery.setParam("UserID", userID));
         }/*
         public static async Task<IResult> makeConnection(SQLExecutor executor, string Email, string password, Query readUserInfoQuery, Query getRolesQuery = null, long defaultRole = -1)
         {
@@ -234,9 +242,13 @@ namespace DynamicStructureObjects
             var userInfo = await executor.SelectSingle<UserInfo>(readUserInfoQuery.setParam("Token", twoFactor));
             if (userInfo is null)
                 return Results.Forbid();
+
+            IEnumerable<long> rolesUser;
             if (getRoles)
-                roles.Concat(await getRolesArray(userInfo.userID));//Utiliser structure pour role
-            return Results.Ok(CreateToken(userInfo, roles));
+                rolesUser = roles.Concat(await getRolesArray(userInfo.userID));//Utiliser structure pour role
+            else
+                rolesUser = roles;
+            return Results.Ok(CreateToken(userInfo, rolesUser));
         }
         public static async Task<IResult> makeConnectionStepOne(SQLExecutor executor, Query readUserInfoQuery, Query write2Factor, string Email, string password)
         {

@@ -12,7 +12,7 @@ namespace APIDynamic
             var isDate = ValidatorTypes.REGEX.SetValue("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$", "");
             var isTelephone = ValidatorTypes.REGEX.SetValue("*", "");
 
-            await DynamicConnection.addRoleToUser(1, Roles.Admin.ID());
+            await DynamicConnection.addRoleToUser(3, Roles.Admin.ID());
             var controllers = new Dictionary<string, DynamicController>();
             #region AddControllers
             await controllers
@@ -67,7 +67,7 @@ namespace APIDynamic
                     .Anonymous()
                 .addRoute(BaseRoutes.GETALL)
                     //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID AND a.nom = @_Nom", QueryTypes.SELECT)
                 
                 .addRoute(BaseRoutes.INSERT)
                     //.Authorize(Roles.Admin.ID())
@@ -616,8 +616,8 @@ namespace APIDynamic
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT pc.id AS ProduitParCommande FROM produits_par_commande AS pc INNER JOIN commandes AS c ON c.id = pc.id_commande WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.ARRAY)
                         .bindParamToUserID("ClientID")
-                    .addRouteQueryNoVar("EXEC CheckoutPanier @ClientID = @clientID, @ProduitParCommande = @produitParCommandeID)", QueryTypes.STOREPROCEDURE)
-                    .addRouteQuery("EXEC FinaliseCommande(@ClientID = @clientID, @NoCiviqueLivraison = @noCiviqueLivraison, @RueLivraison = @rueLivraison, @VilleID = @villeID)", QueryTypes.STOREPROCEDURE)
+                    .addRouteQueryNoVar("EXEC CheckoutPanier @ClientID, @ProduitParCommandeID", QueryTypes.STOREPROCEDURE)
+                    .addRouteQuery("EXEC FinaliseCommande @ClientID, @NoCiviqueLivraison, @RueLivraison, @VilleID", QueryTypes.STOREPROCEDURE)
 
             ;
             #endregion
@@ -696,6 +696,13 @@ namespace APIDynamic
 
                 .addRoute("CheckEmail", RouteTypes.GET)
                     .addRouteQuery("SELECT COUNT(*) FROM Clients WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
+
+                .addRoute("Contacter", RouteTypes.POST)
+                .Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .addEmptyQuery()
+                        .addFilterParam("Email", ShowTypes.NONE)
+                        .addFilterParam("Sujet", ShowTypes.STRING)
+                        .addFilterParam("Contenu", ShowTypes.STRING)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom) FROM clients", QueryTypes.CBO)
