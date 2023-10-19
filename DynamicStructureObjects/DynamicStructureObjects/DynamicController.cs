@@ -165,7 +165,7 @@ namespace DynamicStructureObjects
         {
             if (proprietyName is null)
                 return 1;
-            var bindedPropriety = Proprieties.FirstOrDefault(propriety => propriety.Name == proprietyName);
+            var bindedPropriety = Proprieties.FirstOrDefault(propriety => propriety.Name == proprietyName || (propriety.ShowType.IsID() && $"{propriety.Name}New" == proprietyName));
             if (bindedPropriety is not null)
                 return bindedPropriety.id;
             return 1;
@@ -424,10 +424,38 @@ namespace DynamicStructureObjects
         {
             return new { id = this.id, Name = this.Name, IsMain = this.IsMain };
         }
-        public object InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
+        public IEnumerable<object> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
         {
-            getRoute(BaseRoutes.GETALL.Value()).Queries.First();
-            return proprieties.Select(prop => new { prop.id, prop.Name, prop.IsMain, prop.Validators, prop.description, prop.displayName, prop.placeholder, prop.ind, prop.ShowType });
+            return proprieties.Select(prop => new ParamInfoResume(prop.displayName, prop.IsMain, prop.description, prop.placeholder, (long)prop.ShowType, prop.ind, new ParamAffectedResume(prop.Name, false, prop.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray())));
+        }
+        public IEnumerable<object> InfoObjectRoutes(IEnumerable<DynamicRoute> routes)
+        {
+            return routes.Select(route => new {Name = route.Name, RouteDisplay = (long)route.routeDisplayType});
+        }
+        public IEnumerable<object> InfoObjectFiltres(IEnumerable<DynamicFilter> filters)
+        {
+            return filters.Select(filter => new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, filter.ind, filter.AffectedVars.Select(affected => new ParamAffectedResume(affected.VarAffected, affected.isRequired, affected.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray())).ToArray()));
+        }
+        public IEnumerable<ParamInfoResume> InfoObjectSQLParam(DynamicRoute route)
+        {
+            foreach (var paramInfo in route.Queries.SelectMany(query => query.ParamsInfos.Values))
+            {
+                var paramAffected = new ParamAffectedResume(paramInfo.VarAffected, paramInfo.isRequired, paramInfo.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray());
+                if (paramInfo.ProprietyID != 1)
+                {
+                    var propriety = Proprieties.First(prop => prop.id == paramInfo.ProprietyID);
+                    yield return new ParamInfoResume(propriety.displayName, propriety.IsMain, propriety.description, propriety.placeholder, (long)propriety.ShowType, propriety.ind, paramAffected);
+                }
+                else if (paramInfo.VarAffected == Query.ORDERBYVARKEY)
+                {
+                    continue;
+                }
+                else
+                {
+                    var filter = route.Filters.First(filter => filter.AffectedVars.Any(affectedVar => affectedVar.VarAffected == paramInfo.VarAffected));
+                    yield return new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, filter.ind, paramAffected);
+                }
+            }
         }
         public bool CanUse(IEnumerable<long> roles)
         {
@@ -490,11 +518,18 @@ namespace DynamicStructureObjects
         }
         internal void setBaseInfoRoutes()
         {
+
+            var getAllRoute = getRoute(BaseRoutes.GETALL.Value());
+            var infoObjectFilters = InfoObjectFiltres(getAllRoute.Filters).ToArray();
+            app.MapGet($"/{Name}/Info/Filters", () =>
+            {
+                return Results.Ok(infoObjectFilters);
+            }).WithName($"{Name}InfoFilters");
             app.MapGet($"/{Name}/Info/Proprieties", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
                 var roles = getRolesInfo(JWT);
-                /*if (!roles.Any())
-                    return Results.Forbid();*/
+                if (!roles.Any())
+                    return Results.Forbid();
                 return Results.Ok(InfoObjectPropreties(getAuthorizedProprieties(false, roles)));
             }).WithName($"{Name}InfoProprieties");
             app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string? JWT) =>
@@ -506,14 +541,13 @@ namespace DynamicStructureObjects
             }).WithName($"{Name}InfoRoutes");
             foreach (var route in Routes)
             {
-                app.MapGet($"/{Name}/Info/RouteVariables/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
+                var infoObjectSQLParam = InfoObjectSQLParam(route).ToArray();
+                app.MapGet($"/{Name}/InfoRoute/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
                 {
                     var roles = getRolesInfo(JWT);
-                    if (!roles.Any())
+                    if (!roles.Any() || !route.CanUse(roles))
                         return Results.Forbid();
-                    if (!route.CanUse(roles))
-                        return Results.Forbid();
-                    return Results.Ok(route.Queries.SelectMany(query => query.ParamsInfos.Values));
+                    return Results.Ok(infoObjectSQLParam);
                 }).WithName($"{Name}Info{route.Name}Variables");
             }
         }
