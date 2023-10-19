@@ -1,16 +1,14 @@
-﻿using System.ComponentModel;
-
-namespace DynamicStructureObjects
+﻿namespace DynamicStructureObjects
 {
-    public record ParamInfoResume(string Name, bool IsMain, string Description, string Placeholder, long ShowTypeID, int ind, params ParamAffectedResume[] ParamAffecteds)
+    public record ParamInfoResume(string name, bool isMain, string description, string placeholder, long showTypeID, int ind, params ParamAffectedResume[] paramAffecteds)
     {
 
     }
-    public record ParamAffectedResume(string Name, bool IsRequired, params ValidatorResume[] Validators)
+    public record ParamAffectedResume(string name, bool isRequired, params ValidatorResume[] validators)
     {
 
     }
-    public record ValidatorResume(object ValueToUse, long ValidatorTypeID, string Message)
+    public record ValidatorResume(object valueToUse, long validatorTypeID, string message)
     {
 
     }

@@ -342,9 +342,9 @@ namespace APIDynamic
                 .addPropriety("TypeFormatID", true, true, ShowTypes.CBO).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT fp.id AS ID, fp.nom AS Nom, fp.descriptions AS Description, tfp.id AS TypeFormatID, tfp.nom AS TypeFormat FROM formats_produit fp INNER JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @_ID AND fp.id IN (SELECT id_format_choisi FROM format_produit_produits_commande WHERE id_produit_commande = @#ProduitParCommandeID)", QueryTypes.SELECT)
-                .addRoute("FormatDispoProduits", RouteTypes.GET)
-                    .addRouteQuery("SELECT fp.id AS ID, fp.nom AS Nom, fp.descriptions AS Description, tfp.id = TypeFormatID, tfp.nom AS TypeFormat FROM formats_produit fp LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit LEFT JOIN formats_produit_produits AS fpp ON fpp.id_format_produit = fp.id WHERE fpp.id_produit = @_ProduitID AND fp.id = @_ID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT fp.id AS ID, fp.nom AS Nom, fp.descriptions AS Description, tfp.id AS TypeFormatID, tfp.nom AS TypeFormat FROM formats_produit fp INNER JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @_ID AND fp.id IN (SELECT id_format_choisi FROM format_produit_produits_commande WHERE id_produit_commande = @#ProduitParCommandeID) AND fp.id IN (SELECT id_format_choisi FROM formats_produit_produits WHERE id_produit = @#ProduitID)", QueryTypes.SELECT)
+                    .addFilter("ProduitParCommandeID", "", ShowTypes.STRING, 100, "ProduitParCommandeID")
+                    .addFilter("ProduitID", "", ShowTypes.STRING, 100, "ProduitID")
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
@@ -369,7 +369,7 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT fpp.id_format_produit AS FormatID, fp.nom AS Format, fpp.id_produit AS ProduitID, p.nom AS Produit, fp.descriptions AS Description, tfp.nom AS TypeFormat FROM formats_produit_produits fpp INNER JOIN formats_produit fp ON fp.id = fpp.id_format_produit LEFT JOIN produits AS p ON fpp.id_produit = p.id LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE fpp.id_produit = @_ProduitID AND fp.id = @_ID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT fpp.id_format_produit AS FormatID, fp.nom AS Format, fpp.id_produit AS ProduitID, p.nom AS Produit, fp.descriptions AS Description, tfp.nom AS TypeFormat FROM formats_produit_produits fpp INNER JOIN formats_produit fp ON fp.id = fpp.id_format_produit LEFT JOIN produits AS p ON fpp.id_produit = p.id LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE fpp.id_produit = @_ProduitID AND fp.id = @_FormatID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
@@ -417,7 +417,7 @@ namespace APIDynamic
                 .addPropriety("TypeAffectation", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS Produit, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_produits apro INNER JOIN affectation_prix ap ON ap.id = apro.id_affectation_prix INNER JOIN produits p ON p.id = apro.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_ID AND p.id = @_ProduitID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS Produit, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_produits apro INNER JOIN affectation_prix ap ON ap.id = apro.id_affectation_prix INNER JOIN produits p ON p.id = apro.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_AffectationPrixID AND p.id = @_ProduitID", QueryTypes.SELECT)
             ;
             #endregion
             #region AffectationsPrixLorsCommande
@@ -435,7 +435,7 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT ppc.id AS ProduitParCommandeID, p.nom AS ProduitParCommande, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_lors_commande aplc INNER JOIN affectation_prix ap ON ap.id = aplc.id_affectation_prix INNER JOIN produits_par_commande ppc ON ppc.id = aplc.id_produit_par_commande INNER JOIN produits p ON p.id = ppc.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_ID AND ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT ppc.id AS ProduitParCommandeID, p.nom AS ProduitParCommande, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_lors_commande aplc INNER JOIN affectation_prix ap ON ap.id = aplc.id_affectation_prix INNER JOIN produits_par_commande ppc ON ppc.id = aplc.id_produit_par_commande INNER JOIN produits p ON p.id = ppc.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_AffectationPrixID AND ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
             ;
             #endregion
             #region Taxes
@@ -531,12 +531,14 @@ namespace APIDynamic
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 4", QueryTypes.INSERT)
                         .bindParamToUserID("id_client")
+                    .addFilter("ClientID", "", ShowTypes.STRING, 10, "id_client")
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
                 .addRoute("InsertWishList", RouteTypes.POST)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 5", QueryTypes.INSERT)
                         .bindParamToUserID("id_client")
+                    .addFilter("ClientID", "", ShowTypes.STRING, 10, "id_client")
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
                 .addRoute("DeletePanier", RouteTypes.DELETE)
@@ -546,6 +548,7 @@ namespace APIDynamic
                 .addRoute("MoveToPanier", RouteTypes.PUT)
                     .addRouteQuery("UPDATE produits_par_commande SET id_commande = (SELECT TOP(1) id FROM commandes WHERE id_client = @ClientID AND id_etat_commande = 4) WHERE id = @id", QueryTypes.UPDATE)
                         .bindParamToUserID("ClientID")
+                    .addFilter("ClientID", "", ShowTypes.STRING, 10, "ClientID")
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT ppc.id, p.nom FROM produits_par_commande ppc INNER JOIN produits p ON p.id = ppc.id_produit", QueryTypes.CBO)
@@ -617,7 +620,8 @@ namespace APIDynamic
                     .addRouteQuery("SELECT pc.id AS ProduitParCommande FROM produits_par_commande AS pc INNER JOIN commandes AS c ON c.id = pc.id_commande WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.ARRAY)
                         .bindParamToUserID("ClientID")
                     .addRouteQueryNoVar("EXEC CheckoutPanier @ClientID, @ProduitParCommandeID", QueryTypes.STOREPROCEDURE)
-                    .addRouteQuery("EXEC FinaliseCommande @ClientID, @NoCiviqueLivraison, @RueLivraison, @VilleID", QueryTypes.STOREPROCEDURE)
+                    //.addFilter("ProduitParCommandeID", "", ShowTypes.STRING, 100, "ProduitParCommandeID")
+                    .addRouteQuery("EXEC FinaliseCommande @ClientID, @no_civique, @rue, @VilleID", QueryTypes.STOREPROCEDURE)
 
             ;
             #endregion
@@ -780,10 +784,10 @@ namespace APIDynamic
                     .addRouteQuery("SELECT id AS ID, nom AS Nom, telephone AS Telephone, adresse_courriel AS AdresseCourriel, contact AS Contact FROM compagnies WHERE id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
-                    .addRouteQuery("INSERT INTO compagnies (nom, telephone, adresse_courriel, contact) VALUES (@Nom, @Telephone, @Email, @Contact)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO compagnies (nom, telephone, adresse_courriel, contact) VALUES (@Nom, @Telephone, @AdresseCourriel, @Contact)", QueryTypes.INSERT)
 
                .addRoute(BaseRoutes.UPDATE)
-                    .addRouteQuery("UPDATE compagnies SET nom = @_Nom, telephone = @_Telephone, adresse_courriel = @_Email, contact = @_Contact WHERE id = @ID", QueryTypes.UPDATE)
+                    .addRouteQuery("UPDATE compagnies SET nom = @_Nom, telephone = @_Telephone, adresse_courriel = @_AdresseCourriel, contact = @_Contact WHERE id = @ID", QueryTypes.UPDATE)
                 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM compagnies", QueryTypes.CBO)
@@ -823,7 +827,8 @@ namespace APIDynamic
                 .addPropriety("URL", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT ip.id AS ID, ip.url AS URL, ip.descriptions AS Description FROM images_produit ip LEFT JOIN images_produit_produits ipp ON ipp.id_image_produit = ip.id WHERE id = @_ID AND ipp.id_produit = @_ProduitID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT ip.id AS ID, ip.url AS URL, ip.descriptions AS Description FROM images_produit ip WHERE id = @_ID AND ip.id IN (SELECT id_image_produit FROM images_produit_produits WHERE id_produit = @#ProduitID)", QueryTypes.SELECT)
+                    .addFilter("ProduitID", "", ShowTypes.STRING, 100, "ProduitID")
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, url FROM images_produit", QueryTypes.CBO)
             ;
@@ -845,7 +850,7 @@ namespace APIDynamic
             
             .addRoute(BaseRoutes.INSERT)
                 .Authorize(Roles.Admin.ID())
-                .addRouteQuery("INSERT INTO images_produit (url, descriptions) VALUES (@URL, @Descriptions)", QueryTypes.INSERT)
+                .addRouteQuery("INSERT INTO images_produit (url, descriptions) VALUES (@URL, @Description)", QueryTypes.INSERT)
                 .addRouteQuery("INSERT INTO images_produit_produits (id_image_produit, id_produit) VALUES (@ImageID, @ProduitID)", QueryTypes.INSERT)
 
             /*.addRoute(BaseRoutes.UPDATE)
