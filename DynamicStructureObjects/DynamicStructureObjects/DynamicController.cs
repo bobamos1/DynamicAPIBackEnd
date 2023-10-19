@@ -424,13 +424,13 @@ namespace DynamicStructureObjects
         {
             return new { id = this.id, Name = this.Name, IsMain = this.IsMain };
         }
-        public object InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
+        public IEnumerable<object> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
         {
-            return proprieties.Select(prop => new { prop.id, prop.Name, prop.IsMain, prop.Validators, prop.description, prop.displayName, prop.placeholder, prop.ind, prop.ShowType });
+            return proprieties.Select(prop => new ParamInfoResume(prop.displayName, prop.IsMain, prop.description, prop.placeholder, (long)prop.ShowType, prop.ind, new ParamAffectedResume(prop.Name, false, prop.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray())));
         }
-        public object InfoObjectFiltres(IEnumerable<DynamicFilter> filters)
+        public IEnumerable<object> InfoObjectFiltres(IEnumerable<DynamicFilter> filters)
         {
-            return filters;//.Select(prop => new { prop.id, prop.Name, prop.IsMain, prop.Validators, prop.description, prop.displayName, prop.placeholder, prop.ind, prop.ShowType });
+            return filters.Select(filter => new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, filter.ind, filter.AffectedVars.Select(affected => new ParamAffectedResume(affected.VarAffected, affected.isRequired, affected.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray())).ToArray()));
         }
         public bool CanUse(IEnumerable<long> roles)
         {
@@ -495,7 +495,7 @@ namespace DynamicStructureObjects
         {
 
             var getAllRoute = getRoute(BaseRoutes.GETALL.Value());
-            app.MapGet($"/{Name}/Info/Filters", ([FromHeader(Name = "Authorization")] string? JWT) =>
+            app.MapGet($"/{Name}/Info/Filters", () =>
             {
                 return Results.Ok(InfoObjectFiltres(getAllRoute.Filters));
             }).WithName($"{Name}InfoFilters");
