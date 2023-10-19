@@ -34,7 +34,7 @@ namespace DynamicStructureObjects
             this.roles = new Dictionary<long, bool>();
             this.ind = ind;
             this.description = description;
-            this.displayName = displayName;
+            this.displayName = string.IsNullOrEmpty(displayName) ? Name : displayName;
             this.placeholder = placeholder;
         }
         internal static async Task<DynamicPropriety> init(DynamicPropriety propriety)

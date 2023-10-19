@@ -422,7 +422,7 @@ namespace DynamicStructureObjects
         }
         public object InfoObject()
         {
-            return new { id = this.id, Name = this.Name, IsMain = this.IsMain };
+            return new { id = this.id, name = this.Name, isMain = this.IsMain };
         }
         public IEnumerable<object> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
         {
@@ -430,7 +430,7 @@ namespace DynamicStructureObjects
         }
         public IEnumerable<object> InfoObjectRoutes(IEnumerable<DynamicRoute> routes)
         {
-            return routes.Select(route => new {Name = route.Name, RouteDisplay = (long)route.routeDisplayType});
+            return routes.Select(route => new {name = route.Name, routeDisplay = (long)route.routeDisplayType});
         }
         public IEnumerable<object> InfoObjectFiltres(IEnumerable<DynamicFilter> filters)
         {
