@@ -1,4 +1,5 @@
 ﻿using DynamicSQLFetcher;
+using System.Linq;
 
 namespace DynamicStructureObjects
 {
@@ -85,6 +86,15 @@ namespace DynamicStructureObjects
                 {
                     var prop = proprieties.First(prop => prop.id == param.ProprietyID);
                     route.Filters.Add(new DynamicFilter(string.IsNullOrEmpty(prop.displayName) ? prop.Name : prop.displayName, prop.description, prop.placeholder, prop.ShowType, prop.ind, param));
+                }
+            }
+            foreach (var filter in route.Filters)
+            {
+                foreach (var AffectedVar in filter.AffectedVars)
+                {
+                    var queryRoute = route.Queries.FirstOrDefault(query => query.ParamsInfos.ContainsKey(AffectedVar.VarAffected));
+                    if (queryRoute is not null)
+                        filter.Validators = queryRoute.ParamsInfos[AffectedVar.VarAffected].Validators;
                 }
             }
 

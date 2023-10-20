@@ -18,6 +18,7 @@ namespace DynamicStructureObjects
         public string Placeholder { get; internal set; }
         public ShowTypes ShowType { get; internal set; }
         public int ind { get; internal set; }
+        public IEnumerable<DynamicValidator> Validators { get; internal set; }
         public IEnumerable<DynamicSQLParamInfo> AffectedVars { get; internal set; }
         internal static readonly Query insertFilter = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO Filters (displayName, description, ind, id_showType, id_route, placeholder) VALUES (@DisplayName, @Description, @ind, @ShowTypeID, @RouteID, @placeholder)");
         internal static readonly Query insertFilterBinder = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO FiltersSQLParamsInfo (id_filter, id_SQLParamInfo, ind) VALUES (@FilterID, @SQLParamInfoID, @ind)");
@@ -30,6 +31,7 @@ namespace DynamicStructureObjects
             this.ShowType = (ShowTypes)ShowTypeID;
             this.AffectedVars = new List<DynamicSQLParamInfo>();
             this.Placeholder = placeholder;
+            this.Validators = new DynamicValidator[0];
         }
         public DynamicFilter(string DisplayName, string Description, string placeholder, ShowTypes ShowType, int ind, params DynamicSQLParamInfo[] AffectedVars) : this(DisplayName, Description, placeholder, ShowType, ind, (IEnumerable<DynamicSQLParamInfo>)AffectedVars)
         { }
@@ -41,6 +43,7 @@ namespace DynamicStructureObjects
             this.ShowType = ShowType;
             this.AffectedVars = AffectedVars;
             this.Placeholder = placeholder;
+            this.Validators = new DynamicValidator[0];
         }
         public static Task<DynamicFilter> addFilter(string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, long RouteID, params DynamicSQLParamInfo[] SQLVariables)
         {
