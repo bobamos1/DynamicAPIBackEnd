@@ -432,7 +432,7 @@ namespace DynamicStructureObjects
 
             var paramAffecteds = new ParamAffectedResume[] { new ParamAffectedResume(propriety.Name, false, propriety.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray()) };
             if (propriety.ShowType.IsCBO())
-                paramAffecteds.Append(new ParamAffectedResume(propriety.MapperGenerator.baseParameters[SQLExecutor.VALUE_FOR_CBO].ToString(), false));
+                paramAffecteds.Append(new ParamAffectedResume(propriety.MapperGenerator.parametersToLink[SQLExecutor.VALUE_FOR_CBO].ToString(), false));
             return paramAffecteds;
         }
         public IEnumerable<ParamInfoResume> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
@@ -484,7 +484,7 @@ namespace DynamicStructureObjects
             });
             app.MapGet("Info/Controllers", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                var roles = getRolesInfo(JWT);
+                var roles = new long[] { 2 }; //getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
                 return Results.Ok(controllers.Where(controller => controller.Value.CanUse(roles)).Select(controller => controller.Value.InfoObject()));
@@ -495,7 +495,7 @@ namespace DynamicStructureObjects
             {
                 try
                 {
-                    var roles = getRolesInfo(JWT);
+                    var roles = new long[] { 2 }; //getRolesInfo(JWT);
                     if (!roles.Any() || !roles.Contains(2))
                         return Results.Forbid();
 
@@ -538,14 +538,14 @@ namespace DynamicStructureObjects
             }).WithName($"{Name}InfoFilters");
             app.MapGet($"/{Name}/Info/Proprieties", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                var roles = getRolesInfo(JWT);
+                var roles = new long[] { 2 }; //getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
                 return Results.Ok(InfoObjectPropreties(getAuthorizedProprieties(false, roles)));
             }).WithName($"{Name}InfoProprieties");
             app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                var roles = getRolesInfo(JWT);
+                var roles = new long[] { 2 }; //getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
                 return Results.Ok(getAuthorizedRoutes(roles));
@@ -555,7 +555,7 @@ namespace DynamicStructureObjects
                 var infoObjectSQLParam = InfoObjectSQLParam(route).ToArray();
                 app.MapGet($"/{Name}/InfoRoute/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
                 {
-                    var roles = getRolesInfo(JWT);
+                    var roles = new long[] { 2 }; //getRolesInfo(JWT);
                     if (!roles.Any() || !route.CanUse(roles))
                         return Results.Forbid();
                     return Results.Ok(infoObjectSQLParam);
@@ -608,15 +608,15 @@ namespace DynamicStructureObjects
         internal bool fillBodyData(Dictionary<string, object> bodyData, JwtSecurityToken token, DynamicRoute route)
         {
             IEnumerable<DynamicPropriety> authorizedProprieties;
-            if (token is null || token.ValidTo < DateTime.UtcNow)
+            if (false && (token is null || token.ValidTo < DateTime.UtcNow))
             {
                 if (route.requireAuthorization)
                     return false;
                 setAuthorizedProprieties(bodyData, route.onlyModify);
                 return true;
             }
-            var roles = DynamicConnection.ParseRoles(token).ToArray();
-            var userID = DynamicConnection.ParseUserID(token);
+            var roles = new long[]{ 2};//DynamicConnection.ParseRoles(token).ToArray();
+            var userID = 1;// DynamicConnection.ParseUserID(token);
             bodyData[USERIDKEY] = userID;
             bodyData[ROLESKEY] = roles;
             if (route.paramForUserID is not null && roles.Length <= 1 && roles[0] == 1)
