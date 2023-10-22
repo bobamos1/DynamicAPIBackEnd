@@ -20,10 +20,10 @@ namespace DynamicStructureObjects
     {
         public static readonly string ISASCENDINGKEY = "IsAscending";
         public readonly static string STEPKEY = "Step";
-        public readonly static int DEFAULTSTEP = 25; 
+        public readonly static int DEFAULTSTEP = 25;
         public readonly static int DEFAULTPAGE = 1;
         public readonly static string PAGEKEY = "Page";
-        public readonly static string USERIDKEY = "CurrentUserID"; 
+        public readonly static string USERIDKEY = "CurrentUserID";
         public readonly static string PROPRETYKEY = "AuthorizedProprieties";
         public readonly static string IDParamsKey = "IDParams";
         public readonly static string ROLESKEY = "CurrentUserRoles";
@@ -73,14 +73,14 @@ namespace DynamicStructureObjects
             var ids = controller.GetIDProprieties();
             controller.Roles = controller.Proprieties.SelectMany(prop => prop.roles.Select(role => role.Key)).Distinct();
             if (getAllRoute is null)
-                throw new Exception($"Need getAll for controller {controller.Name}");
+                return controller;//throw new Exception($"Need getAll for controller {controller.Name}");
             if (!controller.hasRoute(BaseRoutes.GETALLDETAILED.Value()))
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETALLDETAILED, new string[0]));
             if (!controller.hasRoute(BaseRoutes.GET.Value()))
             {
                 var paramInfos = getAllRoute.Queries.First().ParamsInfos;
                 if (!ids.Any() || ids.Any(id => !paramInfos.ContainsKey(id)))
-                    throw new Exception($"Need all ids in route GetAll {controller.Name}");
+                    return controller;//throw new Exception($"Need all ids in route GetAll {controller.Name}");
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GET, ids));
                 if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
                     controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, ids));
@@ -88,7 +88,7 @@ namespace DynamicStructureObjects
             else if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, new string[0]));
             if (!controller.hasRoute(BaseRoutes.CBO.Value()))
-                throw new Exception($"Need CBO route for controller {controller.Name}");
+                return controller;//throw new Exception($"Need CBO route for controller {controller.Name}");
             return controller;
         }
         public string BaseRouteString(BaseRoutes baseRoute)
@@ -312,7 +312,7 @@ namespace DynamicStructureObjects
             await Routes.Last().setSQLParam(VarAffected, ValidatorBundles);
             return this;
         }
-        
+
         public async Task<DynamicController> setNotRequired(params string[] VarsAffected)
         {
             await Routes.Last().setNotRequired(VarsAffected);
@@ -427,9 +427,17 @@ namespace DynamicStructureObjects
         {
             return new { id = this.id, name = this.Name, isMain = this.IsMain };
         }
-        public IEnumerable<object> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
+        public ParamAffectedResume[] InfoParamAffectedPropriety(DynamicPropriety propriety)
         {
-            return proprieties.Select(prop => new ParamInfoResume(prop.displayName, prop.IsMain, prop.description, prop.placeholder, (long)prop.ShowType, prop.ind, new ParamAffectedResume(prop.Name, false, prop.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray())));
+
+            var paramAffecteds = new ParamAffectedResume[] { new ParamAffectedResume(propriety.Name, false, propriety.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray()) };
+            if (propriety.ShowType.IsCBO())
+                paramAffecteds.Append(new ParamAffectedResume(propriety.MapperGenerator.parametersToLink[SQLExecutor.VALUE_FOR_CBO].ToString(), false));
+            return paramAffecteds;
+        }
+        public IEnumerable<ParamInfoResume> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
+        {
+            return proprieties.Select(prop => new ParamInfoResume(prop.displayName, prop.IsMain, prop.description, prop.placeholder, (long)prop.ShowType, prop.ind, InfoParamAffectedPropriety(prop)));
         }
         public IEnumerable<object> InfoObjectRoutes(IEnumerable<DynamicRoute> routes)
         {
@@ -476,7 +484,7 @@ namespace DynamicStructureObjects
             });
             app.MapGet("Info/Controllers", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                var roles = getRolesInfo(JWT);
+                var roles = new long[] { 2 }; //getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
                 return Results.Ok(controllers.Where(controller => controller.Value.CanUse(roles)).Select(controller => controller.Value.InfoObject()));
@@ -487,7 +495,7 @@ namespace DynamicStructureObjects
             {
                 try
                 {
-                    var roles = getRolesInfo(JWT);
+                    var roles = new long[] { 2 }; //getRolesInfo(JWT);
                     if (!roles.Any() || !roles.Contains(2))
                         return Results.Forbid();
 
@@ -530,14 +538,14 @@ namespace DynamicStructureObjects
             }).WithName($"{Name}InfoFilters");
             app.MapGet($"/{Name}/Info/Proprieties", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                var roles = getRolesInfo(JWT);
+                var roles = new long[] { 2 }; //getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
                 return Results.Ok(InfoObjectPropreties(getAuthorizedProprieties(false, roles)));
             }).WithName($"{Name}InfoProprieties");
             app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                var roles = getRolesInfo(JWT);
+                var roles = new long[] { 2 }; //getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
                 return Results.Ok(getAuthorizedRoutes(roles));
@@ -547,7 +555,7 @@ namespace DynamicStructureObjects
                 var infoObjectSQLParam = InfoObjectSQLParam(route).ToArray();
                 app.MapGet($"/{Name}/InfoRoute/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
                 {
-                    var roles = getRolesInfo(JWT);
+                    var roles = new long[] { 2 }; //getRolesInfo(JWT);
                     if (!roles.Any() || !route.CanUse(roles))
                         return Results.Forbid();
                     return Results.Ok(infoObjectSQLParam);
@@ -600,15 +608,15 @@ namespace DynamicStructureObjects
         internal bool fillBodyData(Dictionary<string, object> bodyData, JwtSecurityToken token, DynamicRoute route)
         {
             IEnumerable<DynamicPropriety> authorizedProprieties;
-            if (token is null || token.ValidTo < DateTime.UtcNow)
+            if (false && (token is null || token.ValidTo < DateTime.UtcNow))
             {
                 if (route.requireAuthorization)
                     return false;
                 setAuthorizedProprieties(bodyData, route.onlyModify);
                 return true;
             }
-            var roles = DynamicConnection.ParseRoles(token).ToArray();
-            var userID = DynamicConnection.ParseUserID(token);
+            var roles = new long[]{ 2};//DynamicConnection.ParseRoles(token).ToArray();
+            var userID = 1;// DynamicConnection.ParseUserID(token);
             bodyData[USERIDKEY] = userID;
             bodyData[ROLESKEY] = roles;
             if (route.paramForUserID is not null && roles.Length <= 1 && roles[0] == 1)

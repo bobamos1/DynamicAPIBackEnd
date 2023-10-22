@@ -6,6 +6,7 @@ namespace DynamicStructureObjects
     {
         public long id { get; internal set; }
         public string Name { get; internal set; }
+        public string associatedVar { get; internal set; }
         public bool IsMain { get; internal set; }
         public bool IsUpdatable { get; internal set; }
         public string description { get; internal set; }
@@ -36,6 +37,7 @@ namespace DynamicStructureObjects
             this.description = description;
             this.displayName = string.IsNullOrEmpty(displayName) ? Name : displayName;
             this.placeholder = placeholder;
+            this.associatedVar = null;
         }
         internal static async Task<DynamicPropriety> init(DynamicPropriety propriety)
         {
