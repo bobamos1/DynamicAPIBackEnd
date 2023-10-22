@@ -417,6 +417,8 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS Produit, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_produits apro INNER JOIN affectation_prix ap ON ap.id = apro.id_affectation_prix INNER JOIN produits p ON p.id = apro.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_AffectationPrixID AND p.id = @_ProduitID", QueryTypes.SELECT)
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id_produit, montant FROM affectation_prix_produits", QueryTypes.CBO)
             ;
             #endregion
             #region AffectationsPrixLorsCommande
@@ -435,8 +437,8 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT ppc.id AS ProduitParCommandeID, p.nom AS ProduitParCommande, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_lors_commande aplc INNER JOIN affectation_prix ap ON ap.id = aplc.id_affectation_prix INNER JOIN produits_par_commande ppc ON ppc.id = aplc.id_produit_par_commande INNER JOIN produits p ON p.id = ppc.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_AffectationPrixID AND ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
-                /*.addRoute(BaseRoutes.CBO)
-                    .addRouteQuery("", QueryTypes.CBO)*/
+            .addRoute(BaseRoutes.CBO)
+                .addRouteQuery("SELECT id_produit_par_commande, id_affectation_prix, montant FROM affectation_prix_lors_commande", QueryTypes.CBO)
             ;
             #endregion
             #region AffectationsPrix
@@ -772,17 +774,21 @@ namespace APIDynamic
             #region CollaborateursReseauxSociaux
             await controllers["CollaborateursReseauxSociaux"]
 
+                .addPropriety("CollaborateurID", true, true, ShowTypes.CBOID).Anonymous()
+                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                .addPropriety("CollaborateurNom", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("ReseauxSociauxID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("ReseauxSociauxNom", true, true, ShowTypes.STRING).Anonymous()
-
-                .addPropriety("CollaborateurID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
                 .addPropriety("Liens", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT crs.id_collaborateur AS CollaborateurID, CONCAT(coll.prenom,' ', coll.nom) AS CollaborateurNom, crs.id_reseaux_sociaux AS ReseauxSociauxID, rs.nom AS ReseauxSociauxNom, crs.liens AS Liens FROM collaborateurs_reseaux_sociaux AS crs LEFT JOIN collaborateurs AS coll ON coll.id = crs.id_collaborateur LEFT JOIN reseaux_sociaux AS rs ON rs.id = crs.id_reseaux_sociaux WHERE crs.id_collaborateur = @_CollaborateurID AND crs.id_reseaux_sociaux = @_ReseauxSociauxID", QueryTypes.SELECT)
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id_collaborateur, liens FROM collaborateurs_reseaux_sociaux", QueryTypes.CBO)
 
             ;
             #endregion
@@ -817,20 +823,25 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("ProduitID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Produit", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT ip.id AS ImageID, ip.url AS URL, p.id AS ProduitID, p.nom AS Produit, ip.descriptions AS Description FROM images_produit_produits AS ipp INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit INNER JOIN produits p ON p.id = ipp.id_produit WHERE ipp.id_produit = @_ProduitID", QueryTypes.SELECT)
             
-            .addRoute(BaseRoutes.INSERT)
-                .Authorize(Roles.Admin.ID())
-                .addRouteQuery("INSERT INTO images_produit (url, descriptions) VALUES (@URL, @Description)", QueryTypes.INSERT)
-                .addRouteQuery("INSERT INTO images_produit_produits (id_image_produit, id_produit) VALUES (@ImageID, @ProduitID)", QueryTypes.INSERT)
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO images_produit (url, descriptions) VALUES (@URL, @Description)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO images_produit_produits (id_image_produit, id_produit) VALUES (@ImageID, @ProduitID)", QueryTypes.INSERT)
 
-            /*.addRoute(BaseRoutes.UPDATE)
-                .addRouteQuery("UPDATE image_produit SET ")*/
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE image_produit SET id_image_produit = @_ImageProduitID, id_produit = @_ProduitID", QueryTypes.UPDATE)
 
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id_image_produit, id_produit FROM images_produit_produits", QueryTypes.CBO)
             ;
 
 
