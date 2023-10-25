@@ -46,6 +46,7 @@ namespace DynamicStructureObjects
             this.AffectedVars = AffectedVars;
             this.Placeholder = placeholder;
             this.Validators = new DynamicValidator[0];
+            this.RefController = refController;
         }
         public static Task<DynamicFilter> addFilter(string DisplayName, string Description, string placeholder, ShowTypes showType, string refController, int ind, long RouteID, params DynamicSQLParamInfo[] SQLVariables)
         {

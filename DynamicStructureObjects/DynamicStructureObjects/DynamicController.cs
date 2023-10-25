@@ -437,7 +437,7 @@ namespace DynamicStructureObjects
 
             var paramAffecteds = new ParamAffectedResume[] { new ParamAffectedResume(propriety.Name, false, propriety.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray()) };
             if (propriety.ShowType.IsCBO())
-                paramAffecteds.Append(new ParamAffectedResume(propriety.MapperGenerator.parametersToLink[SQLExecutor.VALUE_FOR_CBO].ToString(), false));
+                paramAffecteds = paramAffecteds.Append(new ParamAffectedResume(propriety.MapperGenerator.parametersToLink[SQLExecutor.VALUE_FOR_CBO].ToString(), false)).ToArray();
             return paramAffecteds;
         }
         public IEnumerable<ParamInfoResume> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
