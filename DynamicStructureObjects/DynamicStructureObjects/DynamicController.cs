@@ -247,56 +247,61 @@ namespace DynamicStructureObjects
             await Routes.Last().addSQLParam(ParamName, 1, addRequired, ValidatorBundles);
             return this;
         }
-        public Task<DynamicController> addFilterParamOptional(string varAffected, string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public Task<DynamicController> addFilterParamOptional(string varAffected, string DisplayName, string Description, string placeholder, ShowTypes showType, string refController, int ind, params ValidatorBundle[] ValidatorBundles)
         {
-            return addFilterParam(varAffected, 1, DisplayName, Description, placeholder, showType, ind, false, ValidatorBundles);
+            return addFilterParam(varAffected, 1, DisplayName, Description, placeholder, showType, refController, ind, false, ValidatorBundles);
         }
         public Task<DynamicController> addFilterParam(string varAffected, ShowTypes showType, params ValidatorBundle[] ValidatorBundles)
         {
-            return addFilterParam(varAffected, 1, "", "", "", showType, true, ValidatorBundles);
+            return addFilterParam(varAffected, 1, "", "", "", showType, "", true, ValidatorBundles);
         }
         public Task<DynamicController> addFilterParam(string varAffected, string placeholder, ShowTypes showType, params ValidatorBundle[] ValidatorBundles)
         {
-            return addFilterParam(varAffected, 1, "", "", placeholder, showType, true, ValidatorBundles);
+            return addFilterParam(varAffected, 1, "", "", placeholder, showType, "", true, ValidatorBundles);
         }
         public Task<DynamicController> addFilterParam(string varAffected, string Description, string placeholder, ShowTypes showType, params ValidatorBundle[] ValidatorBundles)
         {
-            return addFilterParam(varAffected, 1, "", Description, placeholder, showType, true, ValidatorBundles);
+            return addFilterParam(varAffected, 1, "", Description, placeholder, showType, "", true, ValidatorBundles);
         }
         public Task<DynamicController> addFilterParam(string varAffected, string placeholder, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
         {
-            return addFilterParam(varAffected, 1, "", "", placeholder, showType, ind, true, ValidatorBundles);
+            return addFilterParam(varAffected, 1, "", "", placeholder, showType, "", ind, true, ValidatorBundles);
         }
-        public Task<DynamicController> addFilterParam(string varAffected, string Description, string placeholder, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public Task<DynamicController> addFilterParam(string varAffected, string Description, string placeholder, ShowTypes showType, string refController, int ind, params ValidatorBundle[] ValidatorBundles)
         {
-            return addFilterParam(varAffected, 1, "", Description, placeholder, showType, ind, true, ValidatorBundles);
+            return addFilterParam(varAffected, 1, "", Description, placeholder, showType, refController, ind, true, ValidatorBundles);
         }
-        public Task<DynamicController> addFilterParam(string varAffected, string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, params ValidatorBundle[] ValidatorBundles)
+        public Task<DynamicController> addFilterParam(string varAffected, string DisplayName, string Description, string placeholder, ShowTypes showType, string refController, int ind, params ValidatorBundle[] ValidatorBundles)
         {
-            return addFilterParam(varAffected, 1, DisplayName, Description, placeholder, showType, ind, true, ValidatorBundles);
+            return addFilterParam(varAffected, 1, DisplayName, Description, placeholder, showType, refController, ind, true, ValidatorBundles);
         }
-        public Task<DynamicController> addFilterParam(string varAffected, string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        public Task<DynamicController> addFilterParam(string varAffected, string DisplayName, string Description, string placeholder, ShowTypes showType, string refController, int ind, bool addRequired, params ValidatorBundle[] ValidatorBundles)
         {
-            return addFilterParam(varAffected, 1, DisplayName, Description, placeholder, showType, ind, addRequired, ValidatorBundles);
+            return addFilterParam(varAffected, 1, DisplayName, Description, placeholder, showType, refController, ind, addRequired, ValidatorBundles);
         }
-        public async Task<DynamicController> addFilterParam(string varAffected, long ProprietyID, string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> addFilterParam(string varAffected, long ProprietyID, string DisplayName, string Description, string placeholder, ShowTypes showType, string refController, int ind, bool addRequired, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().addFilterParam(varAffected, ProprietyID, DisplayName, Description, placeholder, showType, ind, addRequired, ValidatorBundles);
+            await Routes.Last().addFilterParam(varAffected, ProprietyID, DisplayName, Description, placeholder, showType, refController, ind, addRequired, ValidatorBundles);
             return this;
         }
-        public async Task<DynamicController> addFilterParam(string varAffected, long ProprietyID, string DisplayName, string Description, string placeholder, ShowTypes showType, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicController> addFilterParam(string varAffected, long ProprietyID, string DisplayName, string Description, string placeholder, ShowTypes showType, string refController, bool addRequired, params ValidatorBundle[] ValidatorBundles)
         {
-            await Routes.Last().addFilterParam(varAffected, ProprietyID, DisplayName, Description, placeholder, showType, addRequired, ValidatorBundles);
+            await Routes.Last().addFilterParam(varAffected, ProprietyID, DisplayName, Description, placeholder, showType, refController, addRequired, ValidatorBundles);
             return this;
         }
         public async Task<DynamicController> addFilter(string DisplayName, string Description, ShowTypes showType, int ind, params string[] SQLVariables)
         {
-            await Routes.Last().addFilter(DisplayName, Description, "", showType, ind, SQLVariables);
+            await Routes.Last().addFilter(DisplayName, Description, "", showType, "", ind, SQLVariables);
             return this;
         }
-        public async Task<DynamicController> addFilter(string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, params string[] SQLVariables)
+        public async Task<DynamicController> addFilter(string DisplayName, string Description, ShowTypes showType, string refController, int ind, params string[] SQLVariables)
         {
-            await Routes.Last().addFilter(DisplayName, Description, placeholder, showType, ind, SQLVariables);
+            await Routes.Last().addFilter(DisplayName, Description, "", showType, refController, ind, SQLVariables);
+            return this;
+        }
+        public async Task<DynamicController> addFilter(string DisplayName, string Description, string placeholder, ShowTypes showType, string refController, int ind, params string[] SQLVariables)
+        {
+            await Routes.Last().addFilter(DisplayName, Description, placeholder, showType, refController, ind, SQLVariables);
             return this;
         }
         public async Task<DynamicController> setSQLParam(string VarAffected, string ProprietyName, params ValidatorBundle[] ValidatorBundles)
@@ -437,7 +442,7 @@ namespace DynamicStructureObjects
         }
         public IEnumerable<ParamInfoResume> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
         {
-            return proprieties.Select(prop => new ParamInfoResume(prop.displayName, prop.IsMain, prop.description, prop.placeholder, (long)prop.ShowType, prop.ind, InfoParamAffectedPropriety(prop)));
+            return proprieties.Select(prop => new ParamInfoResume(prop.displayName, prop.IsMain, prop.description, prop.placeholder, (long)prop.ShowType, prop.MapperGenerator is null ? "" : prop.MapperGenerator.controllerName, prop.ind, InfoParamAffectedPropriety(prop)));
         }
         public IEnumerable<object> InfoObjectRoutes(IEnumerable<DynamicRoute> routes)
         {
@@ -445,7 +450,7 @@ namespace DynamicStructureObjects
         }
         public IEnumerable<object> InfoObjectFiltres(IEnumerable<DynamicFilter> filters)
         {
-            return filters.Select(filter => new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, filter.ind, filter.AffectedVars.Select(affected => new ParamAffectedResume(affected.VarAffected, affected.isRequired, affected.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray())).ToArray()));
+            return filters.Select(filter => new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, filter.RefController, filter.ind, filter.AffectedVars.Select(affected => new ParamAffectedResume(affected.VarAffected, affected.isRequired, affected.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray())).ToArray()));
         }
         public IEnumerable<ParamInfoResume> InfoObjectSQLParam(DynamicRoute route)
         {
@@ -455,7 +460,7 @@ namespace DynamicStructureObjects
                 if (paramInfo.ProprietyID != 1)
                 {
                     var propriety = Proprieties.First(prop => prop.id == paramInfo.ProprietyID);
-                    yield return new ParamInfoResume(propriety.displayName, propriety.IsMain, propriety.description, propriety.placeholder, (long)propriety.ShowType, propriety.ind, paramAffected);
+                    yield return new ParamInfoResume(propriety.displayName, propriety.IsMain, propriety.description, propriety.placeholder, (long)propriety.ShowType, propriety.MapperGenerator is null ? "" : propriety.MapperGenerator.controllerName, propriety.ind, paramAffected);
                 }
                 else if (paramInfo.VarAffected == Query.ORDERBYVARKEY)
                 {
@@ -464,7 +469,7 @@ namespace DynamicStructureObjects
                 else
                 {
                     var filter = route.Filters.First(filter => filter.AffectedVars.Any(affectedVar => affectedVar.VarAffected == paramInfo.VarAffected));
-                    yield return new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, filter.ind, paramAffected);
+                    yield return new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, filter.RefController, filter.ind, paramAffected);
                 }
             }
         }

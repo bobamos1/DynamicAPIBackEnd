@@ -25,7 +25,7 @@ namespace DynamicStructureObjects
         internal static readonly Query getBaseRouteName = Query.fromQueryString(QueryTypes.VALUE, "SELECT Name FROM BaseRoutes WHERE id = @BaseRouteID");
         internal static readonly Query updateRequired = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE URLRoutes SET requireAuthorization = 1 WHERE @ID = id", true);
         internal static readonly Query updateParamForUserID = Query.fromQueryString(QueryTypes.UPDATE, "UPDATE URLRoutes SET paramForUserID = @paramForUserID WHERE id = @ID", true);
-        internal static readonly Query selectFilters = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, displayName AS DisplayName, description AS Description, id_showType AS ShowTypeID, ind AS ind, placeholder AS placeholder FROM Filters WHERE id_route = @RouteID", true);
+        internal static readonly Query selectFilters = Query.fromQueryString(QueryTypes.SELECT, "SELECT id AS id, displayName AS DisplayName, description AS Description, id_showType AS ShowTypeID, ind AS ind, placeholder AS placeholder, refController AS refController FROM Filters WHERE id_route = @RouteID", true);
         internal static readonly Query selectFiltersParamInfo = Query.fromQueryString(QueryTypes.CBO, "SELECT id_SQLParamInfo, ind FROM FiltersSQLParamsInfo WHERE id_filter = @FilterID");
         internal DynamicRoute(long id, string Name, long RouteTypeID, bool requireAuthorization, bool getAuthorizedCols, bool onlyModify, string paramForUserID, long routeDisplayTypeID)
         {
@@ -85,7 +85,7 @@ namespace DynamicStructureObjects
                 if (param.ProprietyID != 1)
                 {
                     var prop = proprieties.First(prop => prop.id == param.ProprietyID);
-                    route.Filters.Add(new DynamicFilter(string.IsNullOrEmpty(prop.displayName) ? prop.Name : prop.displayName, prop.description, prop.placeholder, prop.ShowType, prop.ind, param));
+                    route.Filters.Add(new DynamicFilter(string.IsNullOrEmpty(prop.displayName) ? prop.Name : prop.displayName, prop.description, prop.placeholder, prop.ShowType, prop.MapperGenerator is null ? "" : prop.MapperGenerator.controllerName, prop.ind, param));
                 }
             }
             foreach (var filter in route.Filters)
@@ -174,20 +174,20 @@ namespace DynamicStructureObjects
                 await addValidator(varAffected, addRequired, ValidatorBundles);
             return this;
         }
-        public Task<DynamicRoute> addFilterParam(string varAffected, long ProprietyID, string DisplayName, string Description, string placeholder, ShowTypes showType, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        public Task<DynamicRoute> addFilterParam(string varAffected, long ProprietyID, string DisplayName, string Description, string placeholder, ShowTypes showType, string refController, bool addRequired, params ValidatorBundle[] ValidatorBundles)
         {
-            return addFilterParam(varAffected, ProprietyID, DisplayName, Description, placeholder, showType, Filters.Count, addRequired, ValidatorBundles);
+            return addFilterParam(varAffected, ProprietyID, DisplayName, Description, placeholder, showType, refController, Filters.Count, addRequired, ValidatorBundles);
         }
-        public async Task<DynamicRoute> addFilterParam(string varAffected, long ProprietyID, string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, bool addRequired, params ValidatorBundle[] ValidatorBundles)
+        public async Task<DynamicRoute> addFilterParam(string varAffected, long ProprietyID, string DisplayName, string Description, string placeholder, ShowTypes showType, string refController, int ind, bool addRequired, params ValidatorBundle[] ValidatorBundles)
         {
             await Queries.Last().addSQLParam(varAffected, ProprietyID);
             if (ValidatorBundles.Any())
                 await addValidator(varAffected, addRequired, ValidatorBundles);
-            return await addFilter(DisplayName, Description, placeholder, showType, ind, varAffected);
+            return await addFilter(DisplayName, Description, placeholder, showType, refController, ind, varAffected);
         }
-        public async Task<DynamicRoute> addFilter(string DisplayName, string Description, string placeholder, ShowTypes showType, int ind, params string[] SQLVariables)
+        public async Task<DynamicRoute> addFilter(string DisplayName, string Description, string placeholder, ShowTypes showType, string refController, int ind, params string[] SQLVariables)
         {
-            Filters.Add(await DynamicFilter.addFilter(DisplayName, Description, placeholder, showType, ind, id, Queries.SelectMany(query => query.ParamsInfos.Where(param => SQLVariables.Contains(param.Key)).Select(param => param.Value))));
+            Filters.Add(await DynamicFilter.addFilter(DisplayName, Description, placeholder, showType, refController, ind, id, Queries.SelectMany(query => query.ParamsInfos.Where(param => SQLVariables.Contains(param.Key)).Select(param => param.Value))));
             return this;
         }
 
