@@ -135,7 +135,8 @@ CREATE TABLE Filters (
     ind INT,
     id_showType BIGINT,
     id_route BIGINT,
-    placeholder VARCHAR(100)
+    placeholder VARCHAR(100),
+    refController VARCHAR(100)
 )
 CREATE TABLE FiltersSQLParamsInfo (
     ind INT,

@@ -66,7 +66,7 @@ namespace APIDynamic
                     .Anonymous()
                 .addRoute(BaseRoutes.GETALL)
                     //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID AND a.nom = @_Nom", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID AND a.nom LIKE CONCAT('%', @#Nom, '%')", QueryTypes.SELECT)
                 
                 .addRoute(BaseRoutes.INSERT)
                     //.Authorize(Roles.Admin.ID())
