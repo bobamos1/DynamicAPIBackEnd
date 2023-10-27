@@ -187,10 +187,8 @@ namespace APIDynamic
                     
                     try
                     {
-                        // Calculate the total amount based on the percentage (e.g., 10% of 2000 = 200)
-                        int percentage = 10; // Replace with your desired percentage
-                        int baseAmount = 2000; // Replace with your base amount
-                        int totalAmount = (int)(baseAmount * (percentage / 100.0));
+                        float totalPrice = 20.50f; // Replace with your desired total price
+                        int totalAmount = (int)(totalPrice * 100); // Convert to cents
 
                         var options = new SessionCreateOptions
                         {
@@ -199,7 +197,15 @@ namespace APIDynamic
                             {
                                 new SessionLineItemOptions
                                 {
-                                    Price = "price_1O1kcPAHfZleTlSeICzAre8e", // Replace with the actual price ID
+                                    PriceData = new PriceDataOptions
+                                    {
+                                        Currency = "usd",
+                                        ProductData = new PriceDataProductDataOptions
+                                        {
+                                            Name = "Votre commande",
+                                        },
+                                        UnitAmount = totalAmount,
+                                    },
                                     Quantity = 1,
                                 },
                             },

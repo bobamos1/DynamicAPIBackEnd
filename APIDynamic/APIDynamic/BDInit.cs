@@ -26,7 +26,6 @@ namespace APIDynamic
                 .addController("ProduitsParCommande", true)
                 .addController("Formats", false)
                 .addController("FormatsProduits", false)
-                .addController("Taxes", false)
                 .addController("AffectationsPrix", false)
                 .addController("AffectationsPrixLorsCommande", false)
                 .addController("AffectationsPrixProduits", false)
@@ -67,7 +66,7 @@ namespace APIDynamic
                     .Anonymous()
                 .addRoute(BaseRoutes.GETALL)
                     //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID AND a.nom = @_Nom", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID AND a.nom LIKE CONCAT('%', @#Nom, '%')", QueryTypes.SELECT)
                 
                 .addRoute(BaseRoutes.INSERT)
                     //.Authorize(Roles.Admin.ID())
@@ -436,33 +435,9 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT ppc.id AS ProduitParCommandeID, p.nom AS ProduitParCommande, ap.id AS AffectationPrixID, ap.nom AS AffectationPrix, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_lors_commande aplc INNER JOIN affectation_prix ap ON ap.id = aplc.id_affectation_prix INNER JOIN produits_par_commande ppc ON ppc.id = aplc.id_produit_par_commande INNER JOIN produits p ON p.id = ppc.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_AffectationPrixID AND ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
+                /*.addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("", QueryTypes.CBO)*/
             ;
-            #endregion
-            #region Taxes
-            await controllers["Taxes"]
-                .addPropriety("ProduitID", true, true, ShowTypes.ID,
-                    minOrEqualZeroBundle
-                ).Anonymous()
-                .addPropriety("AffectationPrixID", true, true, ShowTypes.CBOID).Anonymous()
-                .addPropriety("Taxe", true, false, ShowTypes.STRING).Anonymous()
-                .addPropriety("Descriptions", true, false, ShowTypes.STRING).Anonymous()
-                .addPropriety("Montant", true, false, ShowTypes.STRING).Anonymous()
-                .addPropriety("TypeAffectation", true, false, ShowTypes.STRING).Anonymous()
-                .addPropriety("Montant", true, true, ShowTypes.FLOAT,
-                    minOrEqualZeroBundle
-                ).Anonymous()
-                .addPropriety("TypeAffectation", true, false, ShowTypes.STRING).Anonymous()
-                .addPropriety("FacteurAffectation", true, false, ShowTypes.INT,
-                    minOrEqualZeroBundle
-                ).Anonymous()
-                .addPropriety("TypeAffectationDescriptions", true, false, ShowTypes.STRING).Anonymous()
-
-                .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT app.id_produit AS ProduitID, app.id_affectation_prix AS AffectationPrixID, ap.nom AS Taxe, ap.descriptions AS Descriptions, app.montant AS Montant, ta.nom AS TypeAffectation, ta.facteur_affectation AS FacteurAffectation, ta.descriptions AS TypeAffectationDescriptions FROM affectation_prix AS ap INNER JOIN affectation_prix_produits AS app ON app.id_affectation_prix = ap.id INNER JOIN types_affectation AS ta ON ta.id = ap.id_types_affectation WHERE app.id_produit = @_ProduitID", QueryTypes.SELECT)
-
-                //.addRoute(BaseRoutes.GET) ->Si j'en veux une pcq y'a pas de ID unique à la table on utilise un "combo id"
-            ;
-
             #endregion
             #region AffectationsPrix
             await controllers["AffectationsPrix"]
@@ -921,9 +896,6 @@ namespace APIDynamic
             await controllers["ImagesProduits"]
                 .addCBOInfo("ProduitID", "Produits", "Produit")
                 .addCBOInfo("ImageID", "Images", "URL")
-            ;
-            await controllers["Taxes"]
-                .addCBOInfo("AffectationPrixID", "AffectationsPrix", "Taxe")
             ;
             await controllers["ProduitsParCommande"]
                 .addCBOInfo("id_produit", "Produits", "nom")
