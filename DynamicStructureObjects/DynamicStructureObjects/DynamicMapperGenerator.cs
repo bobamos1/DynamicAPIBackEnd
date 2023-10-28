@@ -92,5 +92,9 @@ namespace DynamicStructureObjects
                 parametersToLink.Add(initializer.AssociatedVarName, paramLinker.value);
             return this;
         }
+        internal MapperResume toResume()
+        {
+            return new MapperResume(controllerName, parametersToLink, baseParameters);
+        }
     }
 }
