@@ -548,12 +548,15 @@ namespace DynamicStructureObjects
                     return Results.Forbid();
                 return Results.Ok(InfoObjectPropreties(getAuthorizedProprieties(false, roles)));
             }).WithName($"{Name}InfoProprieties");
+
+            var infoRoutesObjectSQLParam = Routes.Select(route => new { route = new RouteResume(route.Name, route.routeDisplayType, route.requireAuthorization, route.Roles), paramsInfo = InfoObjectSQLParam(route) });
             app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
                 var roles = new long[] { 2 }; //getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
-                return Results.Ok(getAuthorizedRoutes(roles));
+                //return Results.Ok(getAuthorizedRoutes(roles));
+                return Results.Ok(infoRoutesObjectSQLParam.Where(info => info.route.CanUse(roles)));
             }).WithName($"{Name}InfoRoutes");
             foreach (var route in Routes)
             {

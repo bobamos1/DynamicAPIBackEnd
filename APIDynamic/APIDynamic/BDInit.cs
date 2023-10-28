@@ -69,10 +69,10 @@ namespace APIDynamic
                     .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID AND a.nom LIKE CONCAT('%', @#Nom, '%')", QueryTypes.SELECT)
                 
                 .addRoute(BaseRoutes.INSERT)
-                    //.Authorize(Roles.Admin.ID())
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO categories (nom, descriptions, id_categorie_mere) VALUES (@Nom, @Description, @CategorieMereID)", QueryTypes.INSERT)             
                 .addRoute(BaseRoutes.UPDATE)
-                    //.Authorize(Roles.Admin.ID())
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE categories SET nom = @_Nom, descriptions = @_Description, id_categorie_mere = @_CategorieMereID WHERE id = @ID", QueryTypes.UPDATE)
                         
                 .addRoute(BaseRoutes.CBO)
@@ -813,7 +813,7 @@ namespace APIDynamic
 
                 .addPropriety("ImageID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("URL", true, false, ShowTypes.Ref).Anonymous()
+                .addPropriety("URL", true, false, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("ProduitID", true, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
