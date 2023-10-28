@@ -442,7 +442,7 @@ namespace DynamicStructureObjects
         }
         public IEnumerable<ParamInfoResume> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
         {
-            return proprieties.Select(prop => new ParamInfoResume(prop.displayName, prop.IsMain, prop.description, prop.placeholder, (long)prop.ShowType, prop.MapperGenerator is null ? "" : prop.MapperGenerator.controllerName, prop.ind, InfoParamAffectedPropriety(prop)));
+            return proprieties.Select(prop => new ParamInfoResume(prop.displayName, prop.IsMain, prop.description, prop.placeholder, (long)prop.ShowType, prop.MapperGenerator?.toResume(), prop.ind, InfoParamAffectedPropriety(prop)));
         }
         public IEnumerable<object> InfoObjectRoutes(IEnumerable<DynamicRoute> routes)
         {
@@ -450,7 +450,7 @@ namespace DynamicStructureObjects
         }
         public IEnumerable<object> InfoObjectFiltres(IEnumerable<DynamicFilter> filters)
         {
-            return filters.Select(filter => new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, filter.RefController, filter.ind, filter.AffectedVars.Select(affected => new ParamAffectedResume(affected.VarAffected, affected.isRequired, affected.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray())).ToArray()));
+            return filters.Select(filter => new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, new MapperResume(filter.RefController, null, null), filter.ind, filter.AffectedVars.Select(affected => new ParamAffectedResume(affected.VarAffected, affected.isRequired, affected.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray())).ToArray()));
         }
         public IEnumerable<ParamInfoResume> InfoObjectSQLParam(DynamicRoute route)
         {
@@ -460,7 +460,7 @@ namespace DynamicStructureObjects
                 if (paramInfo.ProprietyID != 1)
                 {
                     var propriety = Proprieties.First(prop => prop.id == paramInfo.ProprietyID);
-                    yield return new ParamInfoResume(propriety.displayName, propriety.IsMain, propriety.description, propriety.placeholder, (long)propriety.ShowType, propriety.MapperGenerator is null ? "" : propriety.MapperGenerator.controllerName, propriety.ind, paramAffected);
+                    yield return new ParamInfoResume(propriety.displayName, propriety.IsMain, propriety.description, propriety.placeholder, (long)propriety.ShowType, propriety.MapperGenerator?.toResume(), propriety.ind, paramAffected);
                 }
                 else if (paramInfo.VarAffected == Query.ORDERBYVARKEY)
                 {
@@ -469,7 +469,7 @@ namespace DynamicStructureObjects
                 else
                 {
                     var filter = route.Filters.First(filter => filter.AffectedVars.Any(affectedVar => affectedVar.VarAffected == paramInfo.VarAffected));
-                    yield return new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, filter.RefController, filter.ind, paramAffected);
+                    yield return new ParamInfoResume(filter.Name, true, filter.Description, filter.Placeholder, (long)filter.ShowType, new MapperResume(filter.RefController, null, null), filter.ind, paramAffected);
                 }
             }
         }
