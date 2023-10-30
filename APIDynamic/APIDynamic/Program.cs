@@ -82,6 +82,16 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+/* Set Courriel body and subject*/
+string courrielBody = File.ReadAllText("./Emailtemplates/emailToken.html");
+string courrielSubject = "Token De Double Authentification";
+DynamicConnection.SetTokenCourriel(courrielSubject, courrielBody);
+
+string courrielBodyRecover = File.ReadAllText("./Emailtemplates/emailTokenRecovery.html");
+string courrielSubjectRecover = "Token De Récupération";
+DynamicConnection.SetTokenCourriel(courrielSubjectRecover, courrielBodyRecover);
+
+
 Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure, builder.Configuration["JwtSettings:Key"]); //
 RoutesInit.InitRoutes(controllers, app, connectionStrings);
 app.Run();
