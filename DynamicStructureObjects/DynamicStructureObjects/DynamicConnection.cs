@@ -23,10 +23,11 @@ namespace DynamicStructureObjects
     }
     public static class DynamicConnection
     {
-        public static readonly string CourrielTokenBody = "Votre identifiant a 2 facteur est {0}";
-        public static readonly string CourrielTokenSubject = "Votre identifiant a 2 facteur est {0}";
-        public static readonly string CourrielTokenBodyRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
-        public static readonly string CourrielTokenSubjectRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
+        public static string CourrielTokenBody;//"Votre identifiant a 2 facteur est {0}";
+        // "./Emailtemplates/emailToken.html"
+        public static string CourrielTokenSubject = "Votre identifiant a 2 facteur est {0}";
+        public static string CourrielTokenBodyRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
+        public static string CourrielTokenSubjectRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
         internal static readonly Query getRolesQuery = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id_role FROM UsersRoles WHERE id_user = @UserID");
         internal static readonly Query insertRoles = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO UsersRoles (id_user, id_role) VALUES (@UserID, @RoleID)", true);
         private const int SaltSize = 16; // 16 bytes for the salt
@@ -293,5 +294,16 @@ namespace DynamicStructureObjects
                 roles.Concat(await getRolesArray(userInfo.userID));
             return Results.Ok(CreateToken(userInfo, roles));
         }
+        public static void SetTokenCourriel(string subject, string body)
+        {
+            CourrielTokenBody = body;
+            CourrielTokenSubject = subject;
+        }
+        public static void SetTokenCourrielRecovery(string subject, string body)
+        {
+            CourrielTokenBodyRecovery = body;
+            CourrielTokenSubjectRecovery = subject;
+        }
+
     }
 }

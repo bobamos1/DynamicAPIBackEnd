@@ -140,7 +140,7 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.INSERT)
                     //.Authorize(Roles.Admin.ID())
-                    .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@Nom, @Descriptions, @Prix, @CategorieID, @EtatProduitID)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@Nom, @Descriptions, @Ingrediants, @Prix, @QuantiteInventaire, @CategorieID, @EtatProduitID)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
@@ -745,8 +745,6 @@ namespace APIDynamic
                 .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify())
-                .addPropriety("Prenom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Telephone", true, true, ShowTypes.INT).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
