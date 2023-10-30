@@ -73,14 +73,14 @@ namespace DynamicStructureObjects
             var ids = controller.GetIDProprieties();
             controller.Roles = controller.Proprieties.SelectMany(prop => prop.roles.Select(role => role.Key)).Distinct();
             if (getAllRoute is null)
-                return controller;//throw new Exception($"Need getAll for controller {controller.Name}");
+                throw new Exception($"Need getAll for controller {controller.Name}");
             if (!controller.hasRoute(BaseRoutes.GETALLDETAILED.Value()))
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETALLDETAILED, new string[0]));
             if (!controller.hasRoute(BaseRoutes.GET.Value()))
             {
                 var paramInfos = getAllRoute.Queries.First().ParamsInfos;
                 if (!ids.Any() || ids.Any(id => !paramInfos.ContainsKey(id)))
-                    return controller;//throw new Exception($"Need all ids in route GetAll {controller.Name}");
+                    throw new Exception($"Need all ids in route GetAll {controller.Name}");
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GET, ids));
                 if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
                     controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, ids));
@@ -88,7 +88,7 @@ namespace DynamicStructureObjects
             else if (!controller.hasRoute(BaseRoutes.GETDETAILED.Value()))
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, new string[0]));
             if (!controller.hasRoute(BaseRoutes.CBO.Value()))
-                return controller;//throw new Exception($"Need CBO route for controller {controller.Name}");
+                throw new Exception($"Need CBO route for controller {controller.Name}");
             return controller;
         }
         public string BaseRouteString(BaseRoutes baseRoute)
