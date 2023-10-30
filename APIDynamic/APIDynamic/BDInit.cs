@@ -836,7 +836,7 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("UPDATE image_produit SET id_image_produit = @_ImageProduitID, id_produit = @_ProduitID", QueryTypes.UPDATE)
+                    .addRouteQuery("UPDATE image_produit SET id_image_produit = @_ImageID, id_produit = @_ProduitID", QueryTypes.UPDATE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_image_produit, id_produit FROM images_produit_produits", QueryTypes.CBO)
