@@ -101,6 +101,10 @@ namespace DynamicStructureObjects
         }
         public static async Task<Dictionary<string, DynamicController>> initControllers(SQLExecutor executor, string apiKey)
         {
+            if (DynamicConnection.CourrielTokenBody is null || DynamicConnection.CourrielTokenSubject is null)
+                throw new Exception("CourrielTokenBody ou CourrielTokenSubject ne peut pas être null");
+            if (DynamicConnection.CourrielTokenSubjectRecovery is null || DynamicConnection.CourrielTokenBodyRecovery is null)
+                throw new Exception("CourrielTokenSubjectRecovery ou CourrielTokenBodyRecovery ne peut pas être null");
             DynamicConnection.apiKey = apiKey;
             DynamicController.executor = executor;
             RolesAvailable = await executor.SelectDictionary<string, long>(getRoles);

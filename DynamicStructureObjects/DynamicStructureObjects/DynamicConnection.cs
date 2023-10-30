@@ -25,9 +25,11 @@ namespace DynamicStructureObjects
     {
         public static string CourrielTokenBody;//"Votre identifiant a 2 facteur est {0}";
         // "./Emailtemplates/emailToken.html"
-        public static string CourrielTokenSubject = "Votre identifiant a 2 facteur est {0}";
-        public static string CourrielTokenBodyRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
-        public static string CourrielTokenSubjectRecovery = "Votre identifiant a 2 facteur pour recuperer votre mot de passe est {0}";
+        public static string CourrielTokenSubject;
+        public static string CourrielTokenBodyRecovery;
+        public static string CourrielTokenSubjectRecovery;
+        public static bool SubjectTokenHasPlaceholder;
+        public static bool SubjectTokenHasPlaceholderRecovery;
         internal static readonly Query getRolesQuery = Query.fromQueryString(QueryTypes.ARRAY, "SELECT id_role FROM UsersRoles WHERE id_user = @UserID");
         internal static readonly Query insertRoles = Query.fromQueryString(QueryTypes.INSERT, "INSERT INTO UsersRoles (id_user, id_role) VALUES (@UserID, @RoleID)", true);
         private const int SaltSize = 16; // 16 bytes for the salt
@@ -161,7 +163,7 @@ namespace DynamicStructureObjects
             var userInfo = await DynamicController.executor.SelectValue<UserInfo>(getUserInfoQuery.setParam("Email", Email));
 
             var randomToken = GetRandom();
-            string subject = string.Format(CourrielTokenSubject, randomToken);
+            string subject = SubjectTokenHasPlaceholderRecovery ? string.Format(CourrielTokenSubjectRecovery, randomToken) : CourrielTokenSubjectRecovery;
             string message = string.Format(CourrielTokenBody, randomToken);
             emailSender.SendEmail(userInfo.Email, subject, message);
 
@@ -257,7 +259,7 @@ namespace DynamicStructureObjects
             if (userInfo is null)
                 return Results.Forbid();
             var randomToken = GetRandom();
-            string subject = string.Format(CourrielTokenSubject, randomToken);
+            string subject = SubjectTokenHasPlaceholder ? string.Format(CourrielTokenSubject, randomToken) : CourrielTokenSubject;
             string message = string.Format(CourrielTokenBody, randomToken);
             if (await executor.ExecuteQueryWithTransaction(write2Factor.setParam("Token", randomToken).setParam("ID", userInfo.userID)) > 0)
             {
@@ -271,8 +273,8 @@ namespace DynamicStructureObjects
             var userID = await executor.SelectValue<long>(readUserInfoQuery.setParam("Email", Email));
             if (userID == default)
                 return Results.Forbid();
-            var randomToken = GetRandom(); 
-            string subject = string.Format(CourrielTokenSubjectRecovery, randomToken);
+            var randomToken = GetRandom();
+            string subject = SubjectTokenHasPlaceholder ? string.Format(CourrielTokenSubject, randomToken) : CourrielTokenSubject;
             string message = string.Format(CourrielTokenBodyRecovery, randomToken);
             if (await executor.ExecuteQueryWithTransaction(write2Factor.setParam("Token", randomToken).setParam("ID", userID)) > 0)
             {
@@ -298,11 +300,19 @@ namespace DynamicStructureObjects
         {
             CourrielTokenBody = body;
             CourrielTokenSubject = subject;
+
+            if (!CourrielTokenBody.Contains("{0}"))
+                throw new Exception("CourrielTokenBody ne contient pas d'emplacement pour le token : ajouter {0}");
+            SubjectTokenHasPlaceholder = CourrielTokenSubject.Contains("{0}");
         }
         public static void SetTokenCourrielRecovery(string subject, string body)
         {
             CourrielTokenBodyRecovery = body;
             CourrielTokenSubjectRecovery = subject;
+
+            if (!CourrielTokenBodyRecovery.Contains("{0}"))
+                throw new Exception("CourrielTokenBody ne contient pas d'emplacement pour le token : ajouter {0}");
+            SubjectTokenHasPlaceholder = CourrielTokenSubjectRecovery.Contains("{0}");
         }
 
     }
