@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Net.Mail;
 
 namespace sendEmail
@@ -41,7 +43,7 @@ namespace sendEmail
             _smtpUsername = smtpUsername;
             _smtpPassword = smtpPassword;
         }
-        public static void SendEmail(string fromEmail, List<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword)
+        public static void SendEmail(string fromEmail, List<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, bool isHtml = false)
         {
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = new MailAddress(fromEmail);
@@ -52,8 +54,16 @@ namespace sendEmail
             }
 
             mailMessage.Subject = subject;
-            mailMessage.Body = body;
 
+            if (isHtml)
+            {
+                mailMessage.IsBodyHtml = true;
+                mailMessage.Body = body;
+            }
+            else
+            {
+                mailMessage.Body = body;
+            }
             SmtpClient smtpClient = new SmtpClient();
             smtpClient.Host = "smtp.gmail.com";
             smtpClient.Port = 587;
@@ -71,35 +81,53 @@ namespace sendEmail
                 Console.WriteLine("Error: " + ex.Message);
             }
         }
-
-        public void SendEmail(IEnumerable<string> toEmails, string subject, string body)
+        public void SendEmail(IEnumerable<string> toEmails, string subject, string body, List<Attachment> attachments = null, bool isHtml = false)
         {
-            MailMessage mailMessage = new MailMessage();
-            mailMessage.From = new MailAddress(_from);
-
-            foreach (var toEmail in toEmails)
+            using (var mailMessage = new MailMessage())
             {
-                mailMessage.To.Add(toEmail);
-            }
+                mailMessage.From = new MailAddress(_from);
 
-            mailMessage.Subject = subject;
-            mailMessage.Body = body;
+                foreach (var toEmail in toEmails)
+                {
+                    mailMessage.To.Add(toEmail);
+                }
 
-            SmtpClient smtpClient = new SmtpClient();
-            smtpClient.Host = "smtp.gmail.com";
-            smtpClient.Port = 587;
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
-            smtpClient.EnableSsl = true;
+                mailMessage.Subject = subject;
+                if (isHtml)
+                {
+                    mailMessage.IsBodyHtml = true;
+                    mailMessage.Body = body;
+                }
+                else
+                {
+                    mailMessage.Body = body;
+                }
 
-            try
-            {
-                smtpClient.Send(mailMessage);
-                Console.WriteLine("Email Sent Successfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message);
+                if (attachments != null)
+                {
+                    foreach (var attachment in attachments)
+                    {
+                        mailMessage.Attachments.Add(attachment);
+                    }
+                }
+
+                using (var smtpClient = new SmtpClient("smtp.gmail.com"))
+                {
+                    smtpClient.Port = 587;
+                    smtpClient.UseDefaultCredentials = false;
+                    smtpClient.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
+                    smtpClient.EnableSsl = true;
+
+                    try
+                    {
+                        smtpClient.Send(mailMessage);
+                        Console.WriteLine("Email Sent Successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error: " + ex.Message);
+                    }
+                }
             }
         }
         public void SendEmail(string toEmail, string subject, string body)

@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 Dictionary<string, string> connectionStrings = InitializationFile.LoadConnectionStrings(builder.Configuration);
@@ -82,14 +83,38 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+/* Set attachments aux courriels*/
+List<Attachment> attachments = new List<Attachment>();
+
+var attachment1 = new Attachment("Emailtemplates\\images\\devanyChai.png");
+attachment1.Name = "DevanyChai";
+attachment1.ContentId = "DevanyChai";
+
+var attachment2 = new Attachment("Emailtemplates\\images\\facebook.png");
+attachment2.Name = "Facebook";
+attachment2.ContentId = "Facebook";
+
+var attachment3 = new Attachment("Emailtemplates\\images\\instagram.png");
+attachment2.Name = "Instagram";
+attachment2.ContentId = "Instagram";
+
+var attachment4 = new Attachment("Emailtemplates\\images\\logo.png");
+attachment2.Name = "Logo";
+attachment2.ContentId = "Logo";
+
+attachments.Add(attachment1);
+attachments.Add(attachment2);
+attachments.Add(attachment3);
+attachments.Add(attachment4);
+
 /* Set Courriel body and subject*/
 string courrielBody = File.ReadAllText("./Emailtemplates/emailToken.html");
 string courrielSubject = "Token De Double Authentification";
-DynamicConnection.SetTokenCourriel(courrielSubject, courrielBody);
+DynamicConnection.SetTokenCourriel(courrielSubject, courrielBody, attachments, true);
 
 string courrielBodyRecover = File.ReadAllText("./Emailtemplates/emailTokenRecovery.html");
 string courrielSubjectRecover = "Token De Récupération";
-DynamicConnection.SetTokenCourrielRecovery(courrielSubjectRecover, courrielBodyRecover);
+DynamicConnection.SetTokenCourrielRecovery(courrielSubjectRecover, courrielBodyRecover, attachments, true);
 
 
 Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure, builder.Configuration["JwtSettings:Key"]); //
