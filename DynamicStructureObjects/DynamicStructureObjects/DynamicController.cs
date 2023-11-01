@@ -1,4 +1,4 @@
-﻿using DynamicSQLFetcher;
+using DynamicSQLFetcher;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -556,7 +556,7 @@ namespace DynamicStructureObjects
                 return Results.Ok(InfoObjectPropreties(getAuthorizedProprieties(false, roles)));
             }).WithName($"{Name}InfoProprieties");
 
-            var infoRoutesObjectSQLParam = Routes.Select(route => new { route = new RouteResume(route.Name, route.routeDisplayType, route.requireAuthorization, route.Roles), paramsInfo = InfoObjectSQLParam(route) });
+            var infoRoutesObjectSQLParam = Routes.Select(route => new { route = new RouteResume(route.Name, route.routeDisplayType, route.RouteType, route.requireAuthorization, route.Roles), paramsInfo = InfoObjectSQLParam(route) });
             app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
                 var roles = new long[] { 2 }; //getRolesInfo(JWT);
