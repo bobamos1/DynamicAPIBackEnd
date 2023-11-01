@@ -18,12 +18,12 @@ namespace DynamicStructureObjects
     {
 
     }
-    public record RouteResume(string name, RouteDisplayTypes routeDisplayType)
+    public record RouteResume(string name, RouteDisplayTypes routeDisplayType, RouteTypes routeType)
     {
         internal bool RequireAuthorization { get; }
         internal List<long> Roles { get; }
 
-        internal RouteResume(string name, RouteDisplayTypes routeDisplayType, bool requireAuthorization, List<long> roles) : this(name, routeDisplayType)
+        internal RouteResume(string name, RouteDisplayTypes routeDisplayType, RouteTypes routeType, bool requireAuthorization, List<long> roles) : this(name, routeDisplayType, routeType)
         {
             this.RequireAuthorization = requireAuthorization;
             this.Roles = roles;
