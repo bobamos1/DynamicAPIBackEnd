@@ -89,7 +89,7 @@ DynamicConnection.SetTokenCourriel(courrielSubject, courrielBody);
 
 string courrielBodyRecover = File.ReadAllText("./Emailtemplates/emailTokenRecovery.html");
 string courrielSubjectRecover = "Token De Récupération";
-DynamicConnection.SetTokenCourriel(courrielSubjectRecover, courrielBodyRecover);
+DynamicConnection.SetTokenCourrielRecovery(courrielSubjectRecover, courrielBodyRecover);
 
 
 Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure, builder.Configuration["JwtSettings:Key"]); //
