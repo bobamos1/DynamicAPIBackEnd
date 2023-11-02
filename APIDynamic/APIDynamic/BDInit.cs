@@ -62,10 +62,8 @@ namespace APIDynamic
                     .Anonymous()
                 .addPropriety("CategorieMereID", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
-                )
-                    .Anonymous()
-                .addPropriety("CategorieMere", true, true, ShowTypes.STRING)
-                    .Anonymous()
+                ).Anonymous()
+
                 .addRoute(BaseRoutes.GETALL)
                     //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID AND a.nom LIKE CONCAT('%', @#Nom, '%')", QueryTypes.SELECT)
