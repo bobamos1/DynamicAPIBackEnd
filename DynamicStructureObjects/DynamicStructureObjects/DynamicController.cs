@@ -89,10 +89,8 @@ namespace DynamicStructureObjects
                 controller.Routes.Add(new DynamicRoute(getAllRoute, BaseRoutes.GETDETAILED, new string[0]));
             if (!controller.hasRoute(BaseRoutes.CBO.Value()))
                 throw new Exception($"Need CBO route for controller {controller.Name}");
-            var allParams = getAllRoute.Queries.SelectMany(query => query.ParamsInfos.Keys);
-                return controller;//throw new Exception($"Need CBO route for controller {controller.Name}");
             var allParams = getAllRoute.Queries.SelectMany(query => query.query.selectColumns.Keys);
-            if (!controller.Proprieties.All(prop => !prop.ShowType.IsRef() && allParams.Contains(prop.Name)))
+            if (!controller.Proprieties.All(prop => (prop.ShowType.IsRef() || allParams.Contains(prop.Name)) /*!prop.ShowType.IsRef() && allParams.Contains(prop.Name)*/))
                 throw new Exception($"Need all prop for getAll route for controller {controller.Name}");
             return controller;
         }
