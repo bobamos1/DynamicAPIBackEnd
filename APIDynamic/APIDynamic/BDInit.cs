@@ -265,16 +265,17 @@ namespace APIDynamic
                                                                               //isEmail
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify())
+                    /*
                 .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Token", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Sel", false, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+                    .Authorize(Roles.Client.CanModify())*/
                 .addPropriety("Actif", true, true, ShowTypes.INT).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+                    .Authorize(Roles.Client.CanModify())/*
                 .addPropriety("ExpirationToken", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+                    .Authorize(Roles.Client.CanModify())*/
 
 
                 .addRoute(BaseRoutes.GETALL)
@@ -615,19 +616,21 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
-                .addPropriety("Email", true, true, ShowTypes.STRING
+                .addPropriety("Email", true, true, ShowTypes.STRING//,
+                                                                              //isEmail
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify())
-                .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
+                /*.addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Token", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Sel", false, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+                    .Authorize(Roles.Client.CanModify())*/
                 .addPropriety("Actif", true, true, ShowTypes.INT).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+                    .Authorize(Roles.Client.CanModify())/*
                 .addPropriety("ExpirationToken", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+                    .Authorize(Roles.Client.CanModify())*/
+                .addPropriety("Commandes", true, true, ShowTypes.Ref)//.Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT cli.id AS ID, cli.nom AS Nom, cli.prenom AS Prenom, cli.date_naissance AS DateNaissance, cli.adresse_courriel AS Email, cli.actif AS Actif FROM clients AS cli WHERE cli.id = @_ID", QueryTypes.SELECT)
@@ -727,7 +730,7 @@ namespace APIDynamic
 
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT coll.id AS ID, coll.nom AS Nom, coll.prenom AS Prenom, coll.telephone AS Telephone, coll.adresse_courriel AS AdresseCourriel, coll.id_compagnie AS CompagnieID, comp.nom AS Compagnie FROM collaborateurs AS coll LEFT JOIN compagnies AS comp ON comp.id = coll.id_compagnie WHERE coll.id = @_ID AND coll.id_compagnie = @_CompagnieID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT coll.id AS ID, coll.nom AS Nom, coll.prenom AS Prenom, coll.telephone AS Telephone, coll.adresse_courriel AS Email, coll.id_compagnie AS CompagnieID, comp.nom AS Compagnie FROM collaborateurs AS coll LEFT JOIN compagnies AS comp ON comp.id = coll.id_compagnie WHERE coll.id = @_ID AND coll.id_compagnie = @_CompagnieID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
                     .addRouteQuery("INSERT INTO collaborateurs (nom, prenom, telephone, adresse_courriel, id_compagnie) VALUES (@Nom, @Prenom, @Telephone, @Email, @CompagnieID)", QueryTypes.INSERT)
