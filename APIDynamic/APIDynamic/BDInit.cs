@@ -102,7 +102,7 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Descriptions", false, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
                 .addPropriety("Ingrediants", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())

@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 Dictionary<string, string> connectionStrings = InitializationFile.LoadConnectionStrings(builder.Configuration);
@@ -77,6 +78,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseFileServer(new FileServerOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
+    RequestPath = "/Images",
+});
 app.UseCors("NgOrigins");
 app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -94,6 +100,17 @@ DynamicConnection.SetTokenCourriel(courrielSubjectRecover, courrielBodyRecover);
 
 Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure, builder.Configuration["JwtSettings:Key"]); //
 RoutesInit.InitRoutes(controllers, app, connectionStrings);
+app.MapGet("/GetImage/{**imagePath}", (string imagePath) =>
+{
+    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", imagePath);
+
+    if (File.Exists(filePath))
+        return Results.File(filePath, "image/*");
+    else
+        return Results.NotFound();
+});
+
+
 app.Run();
 
 
