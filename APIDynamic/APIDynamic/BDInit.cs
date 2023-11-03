@@ -36,9 +36,9 @@ namespace APIDynamic
                 .addController("Compagnies", true)
                 .addController("Employes", true)
                 .addController("ImagesProduits", false)
-                .addController("TypesPreferencesGraphique", false)
-                .addController("Couleurs", false)
-                .addController("PreferencesGraphiques", false)
+                //.addController("TypesPreferencesGraphique", false)
+                //.addController("Couleurs", false)
+                //.addController("PreferencesGraphiques", false)
                 .addController("TypesMedias", false)
                 .addController("Medias", false)
                 .addController("Images", false)
@@ -46,7 +46,7 @@ namespace APIDynamic
                 .addController("TypeValeurs", false)
                 .addController("TypeAffectations", false)
                 .addController("FormatsProduitsCommandes", false)
-                .addController("Roles", false)
+                //.addController("Roles", false)
                 ;
             #endregion
             #region Categories
@@ -396,7 +396,7 @@ namespace APIDynamic
                 .addPropriety("type_format_selected", true, true, ShowTypes.STRING).Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT fp.id AS FormatID, fp.nom AS Format, ppc.id_produit AS ProduitParCommandeID, p.nom AS ProduitParCommande, fp.descriptions AS Description, tfp.nom AS TypeFormat, fppc.format_choisi AS format_selected, fppc.type_format AS type_format_selected FROM format_produit_produits_commande fppc INNER JOIN formats_produit fp ON fp.id = fppc.id_format_choisi INNER JOIN produits_par_commande AS ppc ON ppc.id = fppc.id_produit_commande INNER JOIN produits AS p ON ppc.id_produit = p.id LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT fp.id AS FormatID, fp.nom AS Format, ppc.id_produit AS ProduitParCommandeID, p.nom AS ProduitParCommande, fp.descriptions AS Description, tfp.nom AS TypeFormat, fppc.format_choisi AS format_selected, fppc.type_format AS type_format_selected FROM format_produit_produits_commande fppc INNER JOIN formats_produit fp ON fp.id = fppc.id_format_choisi INNER JOIN produits_par_commande AS ppc ON ppc.id = fppc.id_produit_commande INNER JOIN produits AS p ON ppc.id_produit = p.id LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE ppc.id = @_ProduitParCommandeID AND fp.id = @_FormatID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
@@ -828,7 +828,7 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT ip.id AS ImageID, ip.url AS URL, p.id AS ProduitID, p.nom AS Produit, ip.descriptions AS Description FROM images_produit_produits AS ipp INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit INNER JOIN produits p ON p.id = ipp.id_produit WHERE ipp.id_produit = @_ProduitID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT ip.id AS ImageID, ip.url AS URL, p.id AS ProduitID, p.nom AS Produit, ip.descriptions AS Description FROM images_produit_produits AS ipp INNER JOIN images_produit AS ip ON ip.id = ipp.id_image_produit INNER JOIN produits p ON p.id = ipp.id_produit WHERE ip.id = @_ImageID AND ipp.id_produit = @_ProduitID", QueryTypes.SELECT)
             
                 .addRoute(BaseRoutes.INSERT)
                     .Authorize(Roles.Admin.ID())
@@ -863,7 +863,7 @@ namespace APIDynamic
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                 .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT id AS ID, nom AS Nom FROM types_medias WHERE id = @_ID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Description FROM types_medias WHERE id = @_ID", QueryTypes.SELECT)
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM types_medias", QueryTypes.CBO)
             ;
