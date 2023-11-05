@@ -25,7 +25,7 @@ namespace DynamicStructureObjects
             this.Port = port;
             this.displayName = null;
         }
-        public static bool SendEmail(string fromEmail, IEnumerable<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, string host = defaultHost, int port = defaultPort, string displayName = null)
+        public static bool SendEmail(string fromEmail, IEnumerable<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, string host = defaultHost, int port = defaultPort, string displayName = null, List<Attachment> attachments = null, bool isHtml = false)
         {
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = displayName is null ? new MailAddress(fromEmail) : new MailAddress(fromEmail, displayName);
@@ -34,7 +34,23 @@ namespace DynamicStructureObjects
                 mailMessage.To.Add(toEmail);
 
             mailMessage.Subject = subject;
-            mailMessage.Body = body;
+            if (isHtml)
+            {
+                mailMessage.IsBodyHtml = true;
+                mailMessage.Body = body;
+            }
+            else
+            {
+                mailMessage.Body = body;
+            }
+
+            if (attachments != null)
+            {
+                foreach (var attachment in attachments)
+                {
+                    mailMessage.Attachments.Add(attachment);
+                }
+            }
 
             SmtpClient smtpClient = new SmtpClient();
             smtpClient.Host = host;
@@ -53,17 +69,17 @@ namespace DynamicStructureObjects
                 return false;
             }
         }
-        public bool SendEmail(IEnumerable<string> toEmails, string subject, string body)
+        public bool SendEmail(IEnumerable<string> toEmails, string subject, string body, List<Attachment> attachments = null, bool isHtml = false)
         {
-            return SendEmail(from, toEmails, subject, body, smtpUsername, smtpPassword, Host, Port, displayName);
+            return SendEmail(from, toEmails, subject, body, smtpUsername, smtpPassword, Host, Port, displayName, attachments, isHtml);
         }
-        public bool SendEmail(string toEmail, string subject, string body)
+        public bool SendEmail(string toEmail, string subject, string body, List<Attachment> attachments = null, bool isHtml = false)
         {
-            return SendEmail(new string[] { toEmail }, subject, body);
+            return SendEmail(new string[] { toEmail }, subject, body, attachments, isHtml);
         }
-        public bool SendEmail(string subject, string body, params string[] toEmails)
+        public bool SendEmail(string subject, string body, List<Attachment> attachments = null, bool isHtml = false, params string[] toEmails)
         {
-            return SendEmail(toEmails, subject, body);
+            return SendEmail(toEmails, subject, body, attachments, isHtml);
         }
     }
 }
