@@ -297,6 +297,7 @@ namespace APIDynamic
 
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
+                        .addFilter("Token", "", ShowTypes.STRING, 10, "Token")
 
                 .addRoute("InscriptionEmploye", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
@@ -311,6 +312,7 @@ namespace APIDynamic
                 .addRoute("RecuperationStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
                         .addFilterParam("NewPassword", ShowTypes.STRING)
+                        .addFilter("Token", "", ShowTypes.STRING, 10, "Token")
                     .addRouteQueryNoVar(updatePasswordEmployes, QueryTypes.UPDATE, true)
 
                 .addRoute("ChangePassword", RouteTypes.PUT)
@@ -652,7 +654,7 @@ namespace APIDynamic
 
                 .addRoute("ConnexionStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStart + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
-                    .addFilterParam("Token", ShowTypes.INT)
+                        .addFilter("Token", "", ShowTypes.STRING, 10, "Token")
 
                 .addRoute("InscriptionClient", RouteTypes.POST)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
@@ -668,6 +670,7 @@ namespace APIDynamic
                 .addRoute("RecuperationStepTwo", RouteTypes.POST)
                     .addRouteQuery(selectUserInfoStart + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
                         .addFilterParam("NewPassword", ShowTypes.STRING)
+                        .addFilter("Token", "", ShowTypes.STRING, 10, "Token")
                     .addRouteQueryNoVar(updatePassword, QueryTypes.UPDATE, true)
 
                 .addRoute("ChangePassword", RouteTypes.PUT)

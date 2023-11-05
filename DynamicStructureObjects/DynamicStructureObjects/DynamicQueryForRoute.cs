@@ -86,8 +86,15 @@ namespace DynamicStructureObjects
         }
         public async Task<DynamicQueryForRoute> addSQLParam(string varAffected, long ProprietyID)
         {
-            ParamsInfos.Add(varAffected, await DynamicSQLParamInfo.addSQLParam(varAffected, ProprietyID, id));
-            lastSQLParamAdded = varAffected;
+            try
+            {
+                ParamsInfos.Add(varAffected, await DynamicSQLParamInfo.addSQLParam(varAffected, ProprietyID, id));
+                lastSQLParamAdded = varAffected;
+            }
+            catch (Exception ex)
+            {
+                var item = ex;
+            }
             return this;
         }
         public Task<DynamicQueryForRoute> addSQLParam(string varAffected)
