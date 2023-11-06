@@ -463,7 +463,7 @@ namespace DynamicStructureObjects
         {
             foreach (var paramInfo in route.Queries.SelectMany(query => query.ParamsInfos.Values))
             {
-                var paramAffected = new ParamAffectedResume(paramInfo.VarAffected, paramInfo.isRequired, paramInfo.Validators.Select(validator => new ValidatorResume(validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray());
+                var paramAffected = new ParamAffectedResume(paramInfo.VarAffected, paramInfo.isRequired, paramInfo.Validators.Select(validator => new ValidatorResume(validator.ValidatorType == ValidatorTypes.REGEX? validator.Value.ToString() : validator.Value, (long)validator.ValidatorType, validator.Message)).ToArray());
                 if (paramInfo.ProprietyID != 1)
                 {
                     var propriety = Proprieties.First(prop => prop.id == paramInfo.ProprietyID);

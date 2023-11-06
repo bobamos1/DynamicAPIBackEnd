@@ -17,7 +17,10 @@
         [Value("CBOID")]
         CBOID = 7,
         [Value("ID")]
-        ID = 8
+        ID = 8,
+        [Value("BOOLEAN")]
+        BOOLEAN = 9,
+
     }
     public static class ShowTypesHelper
     {

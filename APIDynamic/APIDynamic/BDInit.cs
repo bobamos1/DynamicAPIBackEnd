@@ -7,8 +7,8 @@ namespace APIDynamic
     {
         public async static Task InitDB()
         {
-            var minOrEqualZeroBundle = ValidatorTypes.MINOREQUAL.SetValue("0", "Must be greater or equal to 0");
-            var isEmail = ValidatorTypes.REGEX.SetValue(@"/^[\w-.]+@([\w-]+.)+[\w-]{2,3}$/", "");
+            var minOrEqualZeroBundle = ValidatorTypes.MINOREQUAL.SetValue("0", "la valeur doit être de 0 ou plus");
+            var isEmail = ValidatorTypes.REGEX.SetValue("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", "la valeur doit être un courriel valide");
             var isDate = ValidatorTypes.REGEX.SetValue("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$", "");
             var isTelephone = ValidatorTypes.REGEX.SetValue("*", "");
 
@@ -139,7 +139,7 @@ namespace APIDynamic
                     .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS CategorieID, c.nom AS Categorie, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatsProduitNom FROM produits AS p LEFT JOIN categories AS c ON c.id = p.id_categorie LEFT JOIN etats_produit AS ep ON ep.id = p.id_etat_produit WHERE p.id = @_ID AND p.id_categorie = @_CategorieID AND p.id_etat_produit = @_EtatProduitID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
-                    //.Authorize(Roles.Admin.ID())
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO produits (nom, descriptions, ingrediants, prix, quantite_inventaire, id_categorie, id_etat_produit) VALUES (@Nom, @Descriptions, @Ingrediants, @Prix, @QuantiteInventaire, @CategorieID, @EtatProduitID)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
@@ -254,17 +254,17 @@ namespace APIDynamic
             string updatePasswordEmployes = "UPDATE employes SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID";
             await controllers["Employes"]
                 .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Prenom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Email", true, true, ShowTypes.STRING//,
                                                                               //isEmail
                 ).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                     /*
                 .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
@@ -272,8 +272,8 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Sel", false, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())*/
-                .addPropriety("Actif", true, true, ShowTypes.INT).Anonymous()
-                    .Authorize(Roles.Client.CanModify())/*
+                .addPropriety("Actif", true, true, ShowTypes.BOOLEAN).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())/*
                 .addPropriety("ExpirationToken", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())*/
 
@@ -285,9 +285,9 @@ namespace APIDynamic
                     .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, actif) VALUES (@ID, @Nom, @Prenom, @DateNaissance, @Email, @Actif)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
-                    .Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE employes SET nom = @_Nom, prenom = @_Prenom, date_naissance = @_DateNaissance, adresse_courriel = @_Email, actif = @_Actif WHERE id = @ID", QueryTypes.UPDATE)
-                        .bindParamToUserID("ID")
+                        
 
 
                 .addRoute("ConnexionStepOne", RouteTypes.POST)
@@ -618,8 +618,8 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
-                .addPropriety("Email", true, true, ShowTypes.STRING//,
-                                                                              //isEmail
+                .addPropriety("Email", true, true, ShowTypes.STRING
+                    ,isEmail
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 /*.addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
@@ -639,6 +639,7 @@ namespace APIDynamic
                         .bindParamToUserID("ID")
                         
                 .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, actif) VALUES (@ID, @Nom, @Prenom, @DateNaissance, @Email, @Actif)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
@@ -841,7 +842,7 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("UPDATE image_produit SET id_image_produit = @_ImageID, id_produit = @_ProduitID", QueryTypes.UPDATE)
+                    .addRouteQuery("UPDATE images_produit_produits SET id_image_produit = @_ImageIDNew, id_produit = @_ProduitIDNew WHERE id_image_produit = @ImageID AND id_produit = @ProduitID", QueryTypes.UPDATE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_image_produit, id_produit FROM images_produit_produits", QueryTypes.CBO)
