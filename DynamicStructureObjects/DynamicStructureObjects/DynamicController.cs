@@ -496,7 +496,7 @@ namespace DynamicStructureObjects
             });
             app.MapGet("Info/Controllers", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                var roles = new long[] { 2 }; //getRolesInfo(JWT);
+                var roles = getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
                 return Results.Ok(controllers.Where(controller => controller.Value.CanUse(roles)).Select(controller => controller.Value.InfoObject()));
@@ -507,7 +507,7 @@ namespace DynamicStructureObjects
             {
                 try
                 {
-                    var roles = new long[] { 2 }; //getRolesInfo(JWT);
+                    var roles = getRolesInfo(JWT);
                     if (!roles.Any() || !roles.Contains(2))
                         return Results.Forbid();
 
@@ -550,7 +550,7 @@ namespace DynamicStructureObjects
             }).WithName($"{Name}InfoFilters");
             app.MapGet($"/{Name}/Info/Proprieties", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                var roles = new long[] { 2 }; //getRolesInfo(JWT);
+                var roles = getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
                 return Results.Ok(InfoObjectPropreties(getAuthorizedProprieties(false, roles)));
@@ -559,7 +559,7 @@ namespace DynamicStructureObjects
             var infoRoutesObjectSQLParam = Routes.Select(route => new { route = new RouteResume(route.Name, route.routeDisplayType, route.RouteType, route.requireAuthorization, route.Roles), paramsInfo = InfoObjectSQLParam(route) });
             app.MapGet($"/{Name}/Info/Routes", ([FromHeader(Name = "Authorization")] string? JWT) =>
             {
-                var roles = new long[] { 2 }; //getRolesInfo(JWT);
+                var roles = getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
                 //return Results.Ok(getAuthorizedRoutes(roles));
@@ -570,7 +570,7 @@ namespace DynamicStructureObjects
                 var infoObjectSQLParam = InfoObjectSQLParam(route).ToArray();
                 app.MapGet($"/{Name}/InfoRoute/{route.Name}", ([FromHeader(Name = "Authorization")] string? JWT) =>
                 {
-                    var roles = new long[] { 2 }; //getRolesInfo(JWT);
+                    var roles = getRolesInfo(JWT);
                     if (!roles.Any() || !route.CanUse(roles))
                         return Results.Forbid();
                     return Results.Ok(infoObjectSQLParam);
@@ -630,8 +630,8 @@ namespace DynamicStructureObjects
                 setAuthorizedProprieties(bodyData, route.onlyModify);
                 return true;
             }
-            var roles = new long[]{ 2};//DynamicConnection.ParseRoles(token).ToArray();
-            var userID = 1;// DynamicConnection.ParseUserID(token);
+            var roles = DynamicConnection.ParseRoles(token).ToArray();
+            var userID = DynamicConnection.ParseUserID(token);
             bodyData[USERIDKEY] = userID;
             bodyData[ROLESKEY] = roles;
             if (route.paramForUserID is not null && roles.Length <= 1 && roles[0] == 1)

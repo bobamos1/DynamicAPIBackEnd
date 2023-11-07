@@ -954,7 +954,7 @@ namespace APIDynamic
 
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT id AS ID, nom AS Nom FROM types_format_produit WHERE id = @_ID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Description FROM types_format_produit WHERE id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
                     .Authorize(Roles.Admin.ID())
