@@ -14,6 +14,7 @@ namespace APIDynamic
 
             await DynamicConnection.addRoleToUser(3, Roles.Admin.ID());
             var controllers = new Dictionary<string, DynamicController>();
+
             #region AddControllers
             await controllers
                 .addController("Categories", true)
@@ -52,17 +53,20 @@ namespace APIDynamic
             #region Categories
             await controllers["Categories"]
                 
-                .addPropriety("ID", true, true, ShowTypes.ID,
+                .addPropriety("ID", false, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 )
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING)
                     .Anonymous()
-                .addPropriety("Description", true, true, ShowTypes.INT)
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION)
                     .Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("CategorieMereID", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
@@ -70,7 +74,8 @@ namespace APIDynamic
                 
                 .addRoute(BaseRoutes.INSERT)
                     .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("INSERT INTO categories (nom, descriptions, id_categorie_mere) VALUES (@Nom, @Description, @CategorieMereID)", QueryTypes.INSERT)             
+                    .addRouteQuery("INSERT INTO categories (nom, descriptions, id_categorie_mere) VALUES (@Nom, @Description, @CategorieMereID)", QueryTypes.INSERT)   
+                    
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE categories SET nom = @_Nom, descriptions = @_Description, id_categorie_mere = @_CategorieMereID WHERE id = @ID", QueryTypes.UPDATE)
@@ -82,12 +87,26 @@ namespace APIDynamic
             #endregion
             #region EtatsProduit
             await controllers["EtatsProduit"]
-                .addPropriety("ID", true, true, ShowTypes.ID, minOrEqualZeroBundle).Anonymous()
-                .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("ID", false, true, ShowTypes.ID, minOrEqualZeroBundle)
+                .Anonymous()
+                .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Nom", true, true, ShowTypes.STRING)
+                .Anonymous()
+                .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Descriptions", false, true, ShowTypes.DESCRIPTION)
+                .Anonymous()
+                .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Descriptions FROM etats_produit WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO etats_produit (nom, descriptions) VALUES (@Nom, @Descriptions)", QueryTypes.INSERT)
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE etats_produit SET nom = @_Nom, descriptions = @_Descriptions WHERE id = @ID", QueryTypes.UPDATE)
+
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM etats_produit", QueryTypes.CBO)
@@ -96,16 +115,16 @@ namespace APIDynamic
             #endregion
             #region Produits
             await controllers["Produits"]
-                .addPropriety("ID", true, true, ShowTypes.ID,
+                .addPropriety("ID", false, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Descriptions", false, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Ingrediants", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Descriptions", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Ingrediants", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Prix", true, true, ShowTypes.FLOAT,
                     minOrEqualZeroBundle
                 ).Anonymous()
@@ -153,16 +172,24 @@ namespace APIDynamic
             #endregion
             #region Provinces
             await controllers["Provinces"]
-                .addPropriety("ID", true, true, ShowTypes.ID,
+                .addPropriety("ID", false, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING)
                     .Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM provinces WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO provinces (nom) VALUES (@Nom)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE provinces SET nom = @_Nom WHERE id = @ID", QueryTypes.UPDATE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM provinces", QueryTypes.CBO)
@@ -172,7 +199,7 @@ namespace APIDynamic
             #region Villes
             await controllers["Villes"]
 
-                .addPropriety("ID", true, true, ShowTypes.ID,
+                .addPropriety("ID", false, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -186,6 +213,14 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT v.id AS ID, v.nom AS Nom, v.id_province AS ProvinceID FROM villes AS v INNER JOIN provinces AS pro ON pro.id = v.id_province WHERE pro.id = @_ProvinceID AND v.id = @_ID", QueryTypes.SELECT)
 
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO villes (nom, id_province) VALUES (@Nom, @ProvinceID)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE villes SET nom = @_Nom, id_province = @_ProvinceID WHERE id = @ID", QueryTypes.UPDATE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM villes", QueryTypes.CBO)
             ;
@@ -194,17 +229,24 @@ namespace APIDynamic
             #region TypeValeurs
             await controllers["TypeValeurs"]
 
-                .addPropriety("ID", true, true, ShowTypes.ID,
+                .addPropriety("ID", false, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Description FROM types_valeur WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO types_valeur (nom, descriptions) VALUES (@Nom, @Description)", QueryTypes.INSERT)
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE types_valeur SET nom = @_Nom, descriptions = @_Description WHERE id = @ID", QueryTypes.UPDATE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM types_valeur", QueryTypes.CBO)
@@ -213,19 +255,27 @@ namespace APIDynamic
             #region TypeAffectations
             await controllers["TypeAffectations"]
 
-                .addPropriety("ID", true, true, ShowTypes.ID,
+                .addPropriety("ID", false, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("FacteurAffectation", true, true, ShowTypes.INT).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("EstTaxe", false, true, ShowTypes.BOOLEAN).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Description, facteur_affectation AS FacteurAffectation FROM types_affectation WHERE id = @_ID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Description, facteur_affectation AS EstTaxe FROM types_affectation WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO types_affectation (nom, descriptions, facteur_affectation) VALUES (@Nom, @Description, @EstTaxe)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE types_affectation SET nom = @_Nom, descriptions = @_Description, facteur_affectation = @_EstTaxe WHERE id = @ID", QueryTypes.UPDATE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM types_valeur", QueryTypes.CBO)
@@ -233,15 +283,23 @@ namespace APIDynamic
             #endregion
             #region EtatsCommandes
             await controllers["EtatsCommandes"]
-                .addPropriety("ID", true, true, ShowTypes.ID, minOrEqualZeroBundle).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                .addPropriety("ID", false, true, ShowTypes.ID, minOrEqualZeroBundle).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Descriptions", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Descriptions", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Descriptions FROM etats_commandes WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO etats_commandes (nom, descriptions) VALUES (@Nom, @Descriptions)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE etats_commandes SET nom = @_Nom, descriptions = @_Descriptions WHERE id = @ID", QueryTypes.UPDATE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM etats_commandes", QueryTypes.CBO)
@@ -253,36 +311,27 @@ namespace APIDynamic
             string updateTokenEmployes = "UPDATE employes SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID";
             string updatePasswordEmployes = "UPDATE employes SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID";
             await controllers["Employes"]
-                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
 
+                .addPropriety("ID", false, true, ShowTypes.ID).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Prenom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("DateNaissance", false, true, ShowTypes.DATE).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("Email", true, true, ShowTypes.STRING//,
-                                                                              //isEmail
+                .addPropriety("Email", true, true, ShowTypes.STRING, 
+                        isEmail
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                    /*
-                .addPropriety("MDP", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
-                .addPropriety("Token", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())
-                .addPropriety("Sel", false, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())*/
-                .addPropriety("Actif", true, true, ShowTypes.BOOLEAN).Anonymous()
-                    .Authorize(Roles.Admin.CanModify())/*
-                .addPropriety("ExpirationToken", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanModify())*/
-
+                .addPropriety("Actif", false, true, ShowTypes.BOOLEAN).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT emp.id AS ID, emp.nom AS Nom, emp.prenom AS Prenom, emp.date_naissance AS DateNaissance, emp.adresse_courriel AS Email, emp.actif AS Actif FROM employes AS emp WHERE emp.id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
-                    .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, actif) VALUES (@ID, @Nom, @Prenom, @DateNaissance, @Email, @Actif)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @Actif)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
@@ -299,23 +348,23 @@ namespace APIDynamic
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
                         .addFilter("Token", "", ShowTypes.STRING, 10, "Token")
 
-                .addRoute("InscriptionEmploye", RouteTypes.POST)
+                .addRoute("InscriptionEmploye", RouteTypes.POST, RouteDisplayTypes.MULTIPLE)
                     .addRouteQuery("INSERT INTO employes (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
                         .removeParams("MDP", "Sel", "Token")
                         .addFilterParam("Password", ShowTypes.STRING)
 
 
-                .addRoute("RecuperationStepOne", RouteTypes.POST)
+                .addRoute("RecuperationStepOne", RouteTypes.POST, RouteDisplayTypes.MULTIPLE)
                     .addRouteQuery("SELECT id FROM employes WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
                     .addRouteQueryNoVar(updateTokenEmployes, QueryTypes.UPDATE, true)
 
-                .addRoute("RecuperationStepTwo", RouteTypes.POST)
+                .addRoute("RecuperationStepTwo", RouteTypes.POST, RouteDisplayTypes.MULTIPLE)
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
                         .addFilterParam("NewPassword", ShowTypes.STRING)
                         .addFilter("Token", "", ShowTypes.STRING, 10, "Token")
                     .addRouteQueryNoVar(updatePasswordEmployes, QueryTypes.UPDATE, true)
 
-                .addRoute("ChangePassword", RouteTypes.PUT)
+                .addRoute("ChangePassword", RouteTypes.PUT, RouteDisplayTypes.MULTIPLE)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(selectUserInfoStartEmployes + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
                         .addFilterParam("NewPassword", ShowTypes.STRING)
@@ -333,20 +382,29 @@ namespace APIDynamic
             #region Formats
 
             await controllers["Formats"]
-                .addPropriety("ID", true, true, ShowTypes.ID,
+                .addPropriety("ID", false, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("TypeFormatID", true, true, ShowTypes.CBO).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
+
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT fp.id AS ID, fp.nom AS Nom, fp.descriptions AS Description, tfp.id AS TypeFormatID, tfp.nom AS TypeFormat FROM formats_produit fp INNER JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @_ID AND fp.id IN (SELECT id_format_choisi FROM format_produit_produits_commande WHERE id_produit_commande = @#ProduitParCommandeID) AND fp.id IN (SELECT id_format_choisi FROM formats_produit_produits WHERE id_produit = @#ProduitID)", QueryTypes.SELECT)
                     .addFilter("ProduitParCommandeID", "", ShowTypes.STRING, 100, "ProduitParCommandeID")
                     .addFilter("ProduitID", "", ShowTypes.STRING, 100, "ProduitID")
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO formats_produit (nom, descriptions, id_type_format_produit) VALUES (@Nom, @Description, @TypeFormatID)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE formats_produit SET nom = @_Nom, descriptions = @_Description, id_type_format_produit = @_TypeFormatID WHERE id = @ID ", QueryTypes.UPDATE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
@@ -355,23 +413,31 @@ namespace APIDynamic
             #endregion
             #region FormatsProduits
             await controllers["FormatsProduits"]
-                .addPropriety("ProduitID", true, true, ShowTypes.CBOID,
+                .addPropriety("ProduitID", false, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 )
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("FormatID", true, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 ).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Format", true, false, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Description", true, false, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, false, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("TypeFormat", true, false, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT fpp.id_format_produit AS FormatID, fp.nom AS Format, fpp.id_produit AS ProduitID, p.nom AS Produit, fp.descriptions AS Description, tfp.nom AS TypeFormat FROM formats_produit_produits fpp INNER JOIN formats_produit fp ON fp.id = fpp.id_format_produit LEFT JOIN produits AS p ON fpp.id_produit = p.id LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE fpp.id_produit = @_ProduitID AND fp.id = @_FormatID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO formats_produit_produits (id_format_produit, id_produit) VALUES (@FormatID, @ProduitID)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE formats_produit_produits SET id_format_produit = @_FormatIDNew, id_produit = @_ProduitIDNew WHERE id_format_produit = @FormatID AND id_produit = @ProduitID", QueryTypes.UPDATE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
@@ -380,7 +446,7 @@ namespace APIDynamic
             #endregion
             #region FormatsProduitsCommandes
             await controllers["FormatsProduitsCommandes"]
-                .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBOID,
+                .addPropriety("ProduitParCommandeID", false, true, ShowTypes.CBOID,
                     minOrEqualZeroBundle
                 )
                     .Authorize(Roles.Admin.CanModify())
@@ -390,15 +456,21 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("Format", true, false, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("Description", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", false, false, ShowTypes.DESCRIPTION).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("TypeFormat", true, false, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("format_selected", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("type_format_selected", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT fp.id AS FormatID, fp.nom AS Format, ppc.id_produit AS ProduitParCommandeID, p.nom AS ProduitParCommande, fp.descriptions AS Description, tfp.nom AS TypeFormat, fppc.format_choisi AS format_selected, fppc.type_format AS type_format_selected FROM format_produit_produits_commande fppc INNER JOIN formats_produit fp ON fp.id = fppc.id_format_choisi INNER JOIN produits_par_commande AS ppc ON ppc.id = fppc.id_produit_commande INNER JOIN produits AS p ON ppc.id_produit = p.id LEFT JOIN types_format_produit tfp ON tfp.id = fp.id_type_format_produit WHERE ppc.id = @_ProduitParCommandeID AND fp.id = @_FormatID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) VALUES (@FormatID, @ProduitParCommandeID, @format_selected, @type_format_selected)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
@@ -411,94 +483,147 @@ namespace APIDynamic
             #region AffectationsPrixProduits
             await controllers["AffectationsPrixProduits"]
                 .addPropriety("AffectationPrixID", true, true, ShowTypes.CBOID).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
-                .addPropriety("ProduitID", true, true, ShowTypes.CBOID).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("ProduitID", false, true, ShowTypes.CBOID).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, false, ShowTypes.STRING).Anonymous()
-                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("TypeValeur", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("TypeAffectation", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("TypeValeur", true, false, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("TypeAffectation", true, false, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT p.id AS ProduitID, p.nom AS Produit, ap.id AS AffectationPrixID, ap.nom AS Nom, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_produits apro INNER JOIN affectation_prix ap ON ap.id = apro.id_affectation_prix INNER JOIN produits p ON p.id = apro.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_AffectationPrixID AND p.id = @_ProduitID", QueryTypes.SELECT)
-                .addRoute(BaseRoutes.CBO)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO affectation_prix_produits (id_produit, id_affectation_prix, montant) VALUES (@ProduitID, @AffectationPrixID, @Montant)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE affectation_prix_produits SET id_produit = @_ProduitIDNew, id_affectation_prix = @_AffectationPrixIDNew, montant = @_Montant WHERE id_produit = @ProduitID AND id_affectation_prix = @AffectationPrixID", QueryTypes.UPDATE)
+
+                    .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_produit, montant FROM affectation_prix_produits", QueryTypes.CBO)
             ;
             #endregion
             #region AffectationsPrixLorsCommande
             await controllers["AffectationsPrixLorsCommande"]
-                .addPropriety("AffectationPrixID", true, true, ShowTypes.CBOID).Anonymous()
+                .addPropriety("AffectationPrixID", false, true, ShowTypes.CBOID).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Montant", true, true, ShowTypes.FLOAT).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("ProduitParCommandeID", true, true, ShowTypes.CBOID)
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, false, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("TypeValeur", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
-                .addPropriety("TypeAffectation", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify(), Roles.Client.CanNotModify())
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("TypeValeur", true, false, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("TypeAffectation", true, false, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT ppc.id AS ProduitParCommandeID, p.nom AS ProduitParCommande, ap.id AS AffectationPrixID, ap.nom AS Nom, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.nom AS TypeAffectation, tv.nom AS TypeValeur, montant AS Montant FROM affectation_prix_lors_commande aplc INNER JOIN affectation_prix ap ON ap.id = aplc.id_affectation_prix INNER JOIN produits_par_commande ppc ON ppc.id = aplc.id_produit_par_commande INNER JOIN produits p ON p.id = ppc.id_produit INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_AffectationPrixID AND ppc.id = @_ProduitParCommandeID", QueryTypes.SELECT)
-            .addRoute(BaseRoutes.CBO)
-                .addRouteQuery("SELECT id_produit_par_commande, id_affectation_prix, montant FROM affectation_prix_lors_commande", QueryTypes.CBO)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO affectation_prix_commandes (id_commande, id_affectation_prix, montant) VALUES (@ProduitParCommandeID, @AffectationPrixID, @Montant)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE affectation_prix_commandes SET id_commande = @_ProduitParCommandeIDNew, id_affectation_prix = @_AffectationPrixIDNew, montant = @Montant WHERE id_commande = @ProduitParCommandeID AND id_affectation_prix = @AffectationPrixID", QueryTypes.UPDATE)
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id_produit_par_commande, id_affectation_prix, montant FROM affectation_prix_lors_commande", QueryTypes.CBO)
             ;
             #endregion
             #region AffectationsPrix
             await controllers["AffectationsPrix"]
 
-                .addPropriety("ID", true, true, ShowTypes.ID,
+                .addPropriety("ID", false, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("DateDebut", true, true, ShowTypes.STRING,
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("DateDebut", false, true, ShowTypes.DATE,
                     isDate
                 ).Anonymous()
-                .addPropriety("DateFin", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("DateFin", false, true, ShowTypes.DATE).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("TypeValeurID", true, true, ShowTypes.CBO).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("TypeAffectationID", true, true, ShowTypes.CBO).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT ap.id AS ID, ap.nom AS Nom, ap.date_debut AS DateDebut, ap.date_fin AS DateFin, ap.descriptions AS Description, ta.id AS TypeAffectationID, ta.nom AS TypeAffectation, tv.id AS TypeValeurID, tv.nom AS TypeValeur FROM affectation_prix AS ap INNER JOIN types_valeur tv ON tv.id = ap.id_types_valeur INNER JOIN types_affectation ta ON ta.id = ap.id_types_affectation WHERE ap.id = @_ID", QueryTypes.SELECT)
 
-                .addRoute(BaseRoutes.CBO)
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO affectation_prix(nom, date_debut, date_fin, descriptions, id_types_valeur, id_types_affectation) VALUES(@Nom, @DateDebut, @DateFin, @Description, @TypeValeurID, @TypeAffectationID)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE affectation_prix SET nom = @_Nom, date_debut = @_DateDebut, date_fin = @_DateFin, descriptions = @_Description, id_types_valeur = @_TypeValeurID, id_types_affectation = @_TypeAffectationID) WHERE id = @ID", QueryTypes.UPDATE)
+
+                    .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM affectation_prix", QueryTypes.CBO)
             ;
 
             #endregion
             #region ProduitsParCommande
             var queryInsertPanierDiffEtat = "INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) SELECT @id_produit, c.id, @quantite, 0 FROM commandes AS c";
-            var queryInsertFormat = "INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT fp.id, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatID";
+            var queryInsertFormat = "INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT fp.id, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id @FormatID";
             await controllers["ProduitsParCommande"]
 
-                .addPropriety("id_commande", true, true, ShowTypes.CBO,
+                .addPropriety("id_commande", false, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
                 .addPropriety("id_produit", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
                 .addPropriety("id", true, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify())
-                .addPropriety("description", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("quantite", true, true, ShowTypes.INT,
+                .addPropriety("description", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Client.CanModify())
+                .addPropriety("quantite", false, true, ShowTypes.INT,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify())
-                .addPropriety("quantite_restante", true, true, ShowTypes.INT,
+                .addPropriety("quantite_restante", false, true, ShowTypes.INT,
                     minOrEqualZeroBundle
-                ).Anonymous()/*
+                ).Anonymous()
+                    .Authorize(Roles.Client.CanModify())/*
                 .addPropriety("PrixUnitaire", true, true, ShowTypes.FLOAT,
                     minOrEqualZeroBundle
                 ).Anonymous()*/
-                .addPropriety("format", true, true, ShowTypes.Ref).Anonymous()
-                .addPropriety("taxes", true, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("format", false, true, ShowTypes.Ref).Anonymous()
+                .Authorize(Roles.Client.CanModify())
+                .addPropriety("taxes", false, true, ShowTypes.Ref).Anonymous()
+                .Authorize(Roles.Client.CanModify())
                 .addPropriety("cout", true, true, ShowTypes.FLOAT).Anonymous()
+                .Authorize(Roles.Client.CanModify())
                 .addPropriety("coutProduit", true, false, ShowTypes.FLOAT).Anonymous()
-                .addPropriety("Images", true, true, ShowTypes.Ref).Anonymous()
-                .addPropriety("TaxesProduit", true, true, ShowTypes.Ref).Anonymous()
+                .Authorize(Roles.Client.CanModify())
+                .addPropriety("Images", false, true, ShowTypes.Ref).Anonymous()
+                .Authorize(Roles.Client.CanModify())
+                .addPropriety("TaxesProduit", false, true, ShowTypes.Ref).Anonymous()
+                .Authorize(Roles.Client.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT pc.id_commande AS id_commande, pro.id AS id_produit, pc.id AS id, pro.nom AS nom, pro.descriptions AS description, pc.quantite AS quantite, pro.quantite_inventaire AS quantite_restante, pc.prix_unitaire AS cout, pro.prix AS coutProduit FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id = @_id AND pc.id_commande = @_id_commande", QueryTypes.SELECT)
@@ -507,7 +632,7 @@ namespace APIDynamic
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("UPDATE produits_par_commande SET id_produit = @_id_produit, id_commande = @_id_commande, quantite = @_quantite, prix_unitaire = @_cout WHERE id = @id", QueryTypes.UPDATE)
 
-                .addRoute("InsertPanier", RouteTypes.POST)
+                .addRoute("InsertPanier", RouteTypes.POST, RouteDisplayTypes.MULTIPLE)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 4", QueryTypes.INSERT)
                         .bindParamToUserID("id_client")
@@ -521,7 +646,7 @@ namespace APIDynamic
                     .addFilter("ClientID", "", ShowTypes.STRING, 10, "id_client")
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
-                .addRoute("DeletePanier", RouteTypes.DELETE)
+                .addRoute("DeletePanier", RouteTypes.DELETE, RouteDisplayTypes.SINGLE)
                     .addRouteQuery("DELETE format_produit_produits_commande WHERE id_produit_commande = @id", QueryTypes.DELETE)
                     .addRouteQuery("DELETE FROM affectation_prix_lors_commande WHERE id_produit_par_commande = @id", QueryTypes.DELETE)
                     .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @id", QueryTypes.DELETE)
@@ -537,24 +662,26 @@ namespace APIDynamic
             #endregion
             #region Commandes
             await controllers["Commandes"]
-                .addPropriety("id", true, true, ShowTypes.ID,
+                .addPropriety("id", false, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("MontantBrut", true, true, ShowTypes.FLOAT,
                     minOrEqualZeroBundle
                 ).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("produitsAchetes", false, true, ShowTypes.Ref).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("dateCreation", true, false, ShowTypes.STRING
+                .addPropriety("dateCreation", true, false, ShowTypes.DATE
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("EtatsCommandesID", false, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
-                .addPropriety("no_civique", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("no_civique", false, true, ShowTypes.INT).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("rue", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("rue", false, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("VilleID", false, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
@@ -610,13 +737,13 @@ namespace APIDynamic
             string updateToken = "UPDATE clients SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID";
             string updatePassword = "UPDATE clients SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID";
             await controllers["Clients"]
-                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+                .addPropriety("ID", false, true, ShowTypes.ID).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Prenom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())
-                .addPropriety("DateNaissance", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("DateNaissance", false, true, ShowTypes.DATE).Anonymous()
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Email", true, true, ShowTypes.STRING
                     ,isEmail
@@ -628,11 +755,11 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify())
                 .addPropriety("Sel", false, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())*/
-                .addPropriety("Actif", true, true, ShowTypes.INT).Anonymous()
+                .addPropriety("Actif", false, true, ShowTypes.BOOLEAN).Anonymous()
                     .Authorize(Roles.Client.CanModify())/*
                 .addPropriety("ExpirationToken", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify())*/
-                .addPropriety("Commandes", true, true, ShowTypes.Ref)//.Anonymous()
+                .addPropriety("Commandes", false, true, ShowTypes.Ref)//.Anonymous()
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT cli.id AS ID, cli.nom AS Nom, cli.prenom AS Prenom, cli.date_naissance AS DateNaissance, cli.adresse_courriel AS Email, cli.actif AS Actif FROM clients AS cli WHERE cli.id = @_ID", QueryTypes.SELECT)
@@ -657,24 +784,24 @@ namespace APIDynamic
                     .addRouteQuery(selectUserInfoStart + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
                         .addFilter("Token", "", ShowTypes.STRING, 10, "Token")
 
-                .addRoute("InscriptionClient", RouteTypes.POST)
+                .addRoute("InscriptionClient", RouteTypes.POST, RouteDisplayTypes.MULTIPLE)
                     .addRouteQuery("INSERT INTO clients (nom, prenom, date_naissance, adresse_courriel, mdp, token, sel, actif) VALUES (@Nom, @Prenom, @DateNaissance, @Email, @MDP, @Token, @Sel, @Actif)", QueryTypes.INSERT)
                         .removeParams("MDP", "Sel", "Token")
                         .addFilterParam("Password", ShowTypes.STRING)
                     .addRouteQueryNoVar("INSERT INTO commandes (numero_facture, montant_brut, date_heure_transaction, no_civique_livraison, rue_livraison, id_client, id_etat_commande, id_ville, id_employe) VALUES (NULL, 0, NULL, NULL, NULL, @ClientID, 4, NULL, NULL), (NULL, 0, NULL, NULL, NULL, @ClientID, 5, NULL, NULL)", QueryTypes.INSERT)
                 
 
-                .addRoute("RecuperationStepOne", RouteTypes.POST)
+                .addRoute("RecuperationStepOne", RouteTypes.POST, RouteDisplayTypes.MULTIPLE)
                     .addRouteQuery("SELECT id FROM clients WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
                     .addRouteQueryNoVar(updateToken, QueryTypes.UPDATE, true)
 
-                .addRoute("RecuperationStepTwo", RouteTypes.POST)
+                .addRoute("RecuperationStepTwo", RouteTypes.POST, RouteDisplayTypes.MULTIPLE)
                     .addRouteQuery(selectUserInfoStart + "WHERE token = @Token AND expiration_token > GETDATE()", QueryTypes.ROW, true)
                         .addFilterParam("NewPassword", ShowTypes.STRING)
                         .addFilter("Token", "", ShowTypes.STRING, 10, "Token")
                     .addRouteQueryNoVar(updatePassword, QueryTypes.UPDATE, true)
 
-                .addRoute("ChangePassword", RouteTypes.PUT)
+                .addRoute("ChangePassword", RouteTypes.PUT, RouteDisplayTypes.MULTIPLE)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(selectUserInfoStart + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
                         .addFilterParam("NewPassword", ShowTypes.STRING)
@@ -684,7 +811,7 @@ namespace APIDynamic
                 .addRoute("CheckEmail", RouteTypes.GET)
                     .addRouteQuery("SELECT COUNT(*) FROM Clients WHERE adresse_courriel = @Email", QueryTypes.VALUE, true)
 
-                .addRoute("Contacter", RouteTypes.POST)
+                .addRoute("Contacter", RouteTypes.POST, RouteDisplayTypes.MULTIPLE)
                 .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addEmptyQuery()
                         .addFilterParam("Email", ShowTypes.NONE)
@@ -699,17 +826,23 @@ namespace APIDynamic
             #region ReseauxSociaux
             await controllers["ReseauxSociaux"]
                 
-                .addPropriety("ID", true, true, ShowTypes.ID, minOrEqualZeroBundle).Anonymous()
+                .addPropriety("ID", false, true, ShowTypes.ID, minOrEqualZeroBundle).Anonymous()
+                .Authorize(Roles.Admin.CanModify())
+
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM reseaux_sociaux WHERE ID = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO reseaux_sociaux (nom) VALUES (@Nom)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE reseaux_sociaux SET nom = @_Nom WHERE id = @ID", QueryTypes.UPDATE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM reseaux_sociaux", QueryTypes.CBO)
             ;
@@ -717,7 +850,7 @@ namespace APIDynamic
             #endregion
             #region Collaborateurs
             await controllers["Collaborateurs"]
-                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+                .addPropriety("ID", false, true, ShowTypes.ID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -729,26 +862,29 @@ namespace APIDynamic
                     isEmail
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("CompagnieID", true, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("CompagnieID", false, true, ShowTypes.CBO).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("Reseau", true, true, ShowTypes.Ref).Anonymous()
+                .addPropriety("Reseau", false, true, ShowTypes.Ref).Anonymous()
 
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT coll.id AS ID, coll.nom AS Nom, coll.prenom AS Prenom, coll.telephone AS Telephone, coll.adresse_courriel AS Email, coll.id_compagnie AS CompagnieID, comp.nom AS Compagnie FROM collaborateurs AS coll LEFT JOIN compagnies AS comp ON comp.id = coll.id_compagnie WHERE coll.id = @_ID AND coll.id_compagnie = @_CompagnieID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO collaborateurs (nom, prenom, telephone, adresse_courriel, id_compagnie) VALUES (@Nom, @Prenom, @Telephone, @Email, @CompagnieID)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE collaborateurs SET nom = @_Nom, prenom = @_Prenom, telephone = @_Telephone, adresse_courriel = @_Email, id_compagnie = @_CompagnieID WHERE id = @ID", QueryTypes.UPDATE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom, ' - ', adresse_courriel) FROM collaborateurs", QueryTypes.CBO)
             ;
             #endregion
             #region Compagnies
             await controllers["Compagnies"]
-                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+                .addPropriety("ID", false, true, ShowTypes.ID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
@@ -758,16 +894,18 @@ namespace APIDynamic
                     isEmail
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("Contact", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Contact", false, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom, telephone AS Telephone, adresse_courriel AS AdresseCourriel, contact AS Contact FROM compagnies WHERE id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO compagnies (nom, telephone, adresse_courriel, contact) VALUES (@Nom, @Telephone, @AdresseCourriel, @Contact)", QueryTypes.INSERT)
 
                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE compagnies SET nom = @_Nom, telephone = @_Telephone, adresse_courriel = @_AdresseCourriel, contact = @_Contact WHERE id = @ID", QueryTypes.UPDATE)
                 
                 .addRoute(BaseRoutes.CBO)
@@ -778,19 +916,28 @@ namespace APIDynamic
             #region CollaborateursReseauxSociaux
             await controllers["CollaborateursReseauxSociaux"]
 
-                .addPropriety("CollaborateurID", true, true, ShowTypes.CBOID).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                .addPropriety("CollaborateurID", false, true, ShowTypes.CBOID).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("CollaborateurNom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("ReseauxSociauxID", true, true, ShowTypes.CBOID).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("ReseauxSociauxID", false, true, ShowTypes.CBOID).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("ReseauxSociauxNom", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
-                .addPropriety("Liens", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Client.CanNotModify(), Roles.Admin.CanModify())
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Liens", false, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT crs.id_collaborateur AS CollaborateurID, CONCAT(coll.prenom,' ', coll.nom) AS CollaborateurNom, crs.id_reseaux_sociaux AS ReseauxSociauxID, rs.nom AS ReseauxSociauxNom, crs.liens AS Liens FROM collaborateurs_reseaux_sociaux AS crs LEFT JOIN collaborateurs AS coll ON coll.id = crs.id_collaborateur LEFT JOIN reseaux_sociaux AS rs ON rs.id = crs.id_reseaux_sociaux WHERE crs.id_collaborateur = @_CollaborateurID AND crs.id_reseaux_sociaux = @_ReseauxSociauxID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO collaborateurs_reseaux_sociaux (id_collaborateur, id_reseaux_sociaux, liens) VALUES (@CollaborateurID, @ReseauxSociauxID, @Liens)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE collaborateurs_reseaux_sociaux SET id_collaborateur = @_CollaborateurID, id_reseaux_sociaux = @_ReseauxSociauxID, liens = @Liens WHERE id_collaborateur = @CollaborateurID AND id_reseaux_sociaux = @ReseauxSociauxID", QueryTypes.UPDATE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_collaborateur, liens FROM collaborateurs_reseaux_sociaux", QueryTypes.CBO)
 
@@ -798,22 +945,50 @@ namespace APIDynamic
             #endregion
             #region TypeFormats
             await controllers["TypeFormats"]
-                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+                .addPropriety("ID", false, true, ShowTypes.ID).Anonymous()
+                .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+
+
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM types_format_produit WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO types_format_produit (nom, descriptions) VALUES (@Nom, @Description)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE types_format_produit SET nom = @_Nom, descriptions = @_Description WHERE id = @ID", QueryTypes.UPDATE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM types_format_produit WHERE id = @_ID", QueryTypes.CBO)
             ;
             #endregion
             #region Images
             await controllers["Images"]
-                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
-                .addPropriety("URL", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("ID", false, true, ShowTypes.ID).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("URL", true, true, ShowTypes.IMAGE).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT ip.id AS ID, ip.url AS URL, ip.descriptions AS Description FROM images_produit ip WHERE id = @_ID AND ip.id IN (SELECT id_image_produit FROM images_produit_produits WHERE id_produit = @#ProduitID)", QueryTypes.SELECT)
                     .addFilter("ProduitID", "", ShowTypes.STRING, 100, "ProduitID")
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO images_produit (url, descriptions) VALUES (@URL, @Description)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE images_produit SET url = @_URL, descriptions = @_Description WHERE id = @ID", QueryTypes.UPDATE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, url FROM images_produit", QueryTypes.CBO)
             ;
@@ -821,15 +996,15 @@ namespace APIDynamic
             #region ImagesProduits
             await controllers["ImagesProduits"]
 
-                .addPropriety("ImageID", true, true, ShowTypes.CBOID).Anonymous()
+                .addPropriety("ImageID", false, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("URL", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("URL", true, false, ShowTypes.IMAGE).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("ProduitID", true, true, ShowTypes.CBOID).Anonymous()
+                .addPropriety("ProduitID", false, true, ShowTypes.CBOID).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Produit", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
@@ -852,23 +1027,50 @@ namespace APIDynamic
             #endregion
             #region Medias
             await controllers["Medias"]
-                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+                .addPropriety("ID", false, true, ShowTypes.ID).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Lien", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("TypeMediaID", true, true, ShowTypes.CBO).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT m.id AS ID, m.liens AS Lien, m.Nom AS Nom, tm.id AS TypeMediaID, tm.nom AS TypeMedia FROM media m INNER JOIN types_medias tm ON tm.id = m.id_types_media WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO media (nom, liens, id_types_media) VALUES (@Nom, @Lien, @TypeMediaID)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE media SET nom = @_Nom, liens = @_Lien, id_types_media = @_TypeMediaID WHERE id = @ID", QueryTypes.UPDATE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM media", QueryTypes.CBO)
             ;
             #endregion
             #region TypesMedias
             await controllers["TypesMedias"]
-                .addPropriety("ID", true, true, ShowTypes.ID).Anonymous()
+                .addPropriety("ID", false, true, ShowTypes.ID).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
-                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Description FROM types_medias WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO types_medias (nom, descriptions) VALUES (@Nom, @Description)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE types_medias SET nom = @_Nom, descriptions = @_Description WHERE id = @ID", QueryTypes.UPDATE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM types_medias", QueryTypes.CBO)
             ;
