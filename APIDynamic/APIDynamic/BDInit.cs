@@ -106,10 +106,10 @@ namespace APIDynamic
 
                 .addRoute(BaseRoutes.INSERT)
                     .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("INSERT INTO etats_produit (nom, descriptions) VALUES (@Nom, @_Description)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO etats_produit (nom, descriptions) VALUES (@Nom, @Descriptions)", QueryTypes.INSERT)
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("UPDATE etats_produit SET nom = @_Nom, descriptions = @_Description", QueryTypes.UPDATE)
+                    .addRouteQuery("UPDATE etats_produit SET nom = @_Nom, descriptions = @_Descriptions", QueryTypes.UPDATE)
                 .addRoute(BaseRoutes.DELETE)
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("DELETE FROM etats_produit WHERE id = @ID", QueryTypes.DELETE)
