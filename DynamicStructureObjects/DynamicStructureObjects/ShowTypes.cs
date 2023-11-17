@@ -17,7 +17,16 @@
         [Value("CBOID")]
         CBOID = 7,
         [Value("ID")]
-        ID = 8
+        ID = 8,
+        [Value("Boolean")]
+        BOOLEAN = 9,
+        [Value("Date")]
+        DATE = 10,
+        [Value("Image")]
+        IMAGE = 11,
+        [Value("Description")]
+        DESCRIPTION = 12
+
     }
     public static class ShowTypesHelper
     {
