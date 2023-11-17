@@ -30,6 +30,13 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="images\chandail - Copier\" />
+    <Folder Include="images\dirtyChai - Copier\" />
+    <Folder Include="images\img temp - Copier\" />
+    <Folder Include="images\leChai - Copier\" />
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>

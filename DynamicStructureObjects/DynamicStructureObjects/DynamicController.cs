@@ -623,7 +623,7 @@ namespace DynamicStructureObjects
         internal bool fillBodyData(Dictionary<string, object> bodyData, JwtSecurityToken token, DynamicRoute route)
         {
             IEnumerable<DynamicPropriety> authorizedProprieties;
-            if (false && (token is null || token.ValidTo < DateTime.UtcNow))
+            if (token is null || token.ValidTo < DateTime.UtcNow)
             {
                 if (route.requireAuthorization)
                     return false;

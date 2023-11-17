@@ -130,9 +130,10 @@ app.MapGet("/GetImage/{**imagePath}", (string imagePath) =>
     var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", imagePath);
 
     if (File.Exists(filePath))
-        return Results.File(filePath, "image/*");
+        return Results.File(filePath, "image/*"); //*/*
     else
         return Results.NotFound();
+    /*URL+/GetImage/lechai*/
 });
 
 
