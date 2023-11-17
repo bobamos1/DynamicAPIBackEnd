@@ -215,6 +215,15 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.GETALL)
                     .addRouteQuery("SELECT v.id AS ID, v.nom AS Nom, v.id_province AS ProvinceID FROM villes AS v INNER JOIN provinces AS pro ON pro.id = v.id_province WHERE pro.id = @_ProvinceID AND v.id = @_ID", QueryTypes.SELECT)
 
+                .addRoute(BaseRoutes.INSERT)
+                    .addRouteQuery("INSERT INTO villes (nom, id_province) VALUES (@Nom, @ProvinceID)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .addRouteQuery("UPDATE villes SET nom = @_Nom, id_province = @_ProvinceID WHERE id = @ID", QueryTypes.UPDATE)
+
+                .addRoute(BaseRoutes.DELETE)
+                    .addRouteQuery("DELETE FROM villes WHERE id = @ID", QueryTypes.DELETE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM villes", QueryTypes.CBO)
             ;
