@@ -7,6 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="images\chandail - Copier\**" />
+    <Compile Remove="images\dirtyChai - Copier\**" />
+    <Compile Remove="images\img temp - Copier\**" />
+    <Compile Remove="images\leChai - Copier\**" />
+    <Content Remove="images\chandail - Copier\**" />
+    <Content Remove="images\dirtyChai - Copier\**" />
+    <Content Remove="images\img temp - Copier\**" />
+    <Content Remove="images\leChai - Copier\**" />
+    <EmbeddedResource Remove="images\chandail - Copier\**" />
+    <EmbeddedResource Remove="images\dirtyChai - Copier\**" />
+    <EmbeddedResource Remove="images\img temp - Copier\**" />
+    <EmbeddedResource Remove="images\leChai - Copier\**" />
+    <None Remove="images\chandail - Copier\**" />
+    <None Remove="images\dirtyChai - Copier\**" />
+    <None Remove="images\img temp - Copier\**" />
+    <None Remove="images\leChai - Copier\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.151" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.22" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.32.3" />
@@ -28,13 +47,6 @@
     <Reference Include="ParserLib">
       <HintPath>..\..\ParserLib.dll</HintPath>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="images\chandail - Copier\" />
-    <Folder Include="images\dirtyChai - Copier\" />
-    <Folder Include="images\img temp - Copier\" />
-    <Folder Include="images\leChai - Copier\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

@@ -127,10 +127,10 @@ Dictionary<string, DynamicController> controllers = await DynamicController.init
 RoutesInit.InitRoutes(controllers, app, connectionStrings);
 app.MapGet("/GetImage/{**imagePath}", (string imagePath) =>
 {
-    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", imagePath);
+    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", imagePath+".png");
 
     if (File.Exists(filePath))
-        return Results.File(filePath, "image/*"); //*/*
+        return Results.File(filePath, "images/*"); //*/*
     else
         return Results.NotFound();
     /*URL+/GetImage/lechai*/
