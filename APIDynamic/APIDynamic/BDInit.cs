@@ -38,7 +38,7 @@ namespace APIDynamic
                 .addController("Employes", true)
                 .addController("ImagesProduits", false)
                 //.addController("TypesPreferencesGraphique", false)
-                //.addController("Couleurs", false)
+                .addController("Couleurs", false)
                 //.addController("PreferencesGraphiques", false)
                 .addController("TypesMedias", false)
                 .addController("Medias", false)
@@ -307,7 +307,7 @@ namespace APIDynamic
 
             #endregion
             #region Employes
-            string selectUserInfoStartEmployes = "SELECT emp.id AS userID, emp.adresse_courriel AS username, emp.adresse_courriel AS Email, emp.mdp as passwordHash, emp.sel AS passwordSalt FROM employes AS emp ";
+            string selectUserInfoStartEmployes = "SELECT emp.id AS userID, emp.prenom AS username, emp.adresse_courriel AS Email, emp.mdp as passwordHash, emp.sel AS passwordSalt FROM employes AS emp ";
             string updateTokenEmployes = "UPDATE employes SET token = @Token, expiration_token = DATEADD(MINUTE, 15, GETDATE()) WHERE id = @ID";
             string updatePasswordEmployes = "UPDATE employes SET mdp = @PasswordHash, sel = @PasswordSalt WHERE id = @ID";
             await controllers["Employes"]
@@ -587,7 +587,7 @@ namespace APIDynamic
             var queryInsertFormat = "INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT fp.id, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id @FormatID";
             await controllers["ProduitsParCommande"]
 
-                .addPropriety("id_commande", false, true, ShowTypes.CBO,
+                .addPropriety("id_commande", true, true, ShowTypes.CBO,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify())
@@ -595,7 +595,7 @@ namespace APIDynamic
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify())
-                .addPropriety("id", true, true, ShowTypes.ID,
+                .addPropriety("id", false, true, ShowTypes.ID,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify())
@@ -612,13 +612,13 @@ namespace APIDynamic
                 .addPropriety("PrixUnitaire", true, true, ShowTypes.FLOAT,
                     minOrEqualZeroBundle
                 ).Anonymous()*/
-                .addPropriety("format", false, true, ShowTypes.Ref).Anonymous()
-                .Authorize(Roles.Client.CanModify())
-                .addPropriety("taxes", false, true, ShowTypes.Ref).Anonymous()
-                .Authorize(Roles.Client.CanModify())
                 .addPropriety("cout", true, true, ShowTypes.FLOAT).Anonymous()
                 .Authorize(Roles.Client.CanModify())
                 .addPropriety("coutProduit", true, false, ShowTypes.FLOAT).Anonymous()
+                .Authorize(Roles.Client.CanModify())
+                .addPropriety("format", false, true, ShowTypes.Ref).Anonymous()
+                .Authorize(Roles.Client.CanModify())
+                .addPropriety("taxes", false, true, ShowTypes.Ref).Anonymous()
                 .Authorize(Roles.Client.CanModify())
                 .addPropriety("Images", false, true, ShowTypes.Ref).Anonymous()
                 .Authorize(Roles.Client.CanModify())
@@ -626,7 +626,7 @@ namespace APIDynamic
                 .Authorize(Roles.Client.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT pc.id_commande AS id_commande, pro.id AS id_produit, pc.id AS id, pro.nom AS nom, pro.descriptions AS description, pc.quantite AS quantite, pro.quantite_inventaire AS quantite_restante, pc.prix_unitaire AS cout, pro.prix AS coutProduit FROM produits_par_commande AS pc INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id = @_id AND pc.id_commande = @_id_commande", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT c.id AS id_commande, COALESCE(c.numero_facture, 'Non définie') AS Commande, pro.id AS id_produit, pc.id AS id, pro.nom AS nom, pro.descriptions AS description, pc.quantite AS quantite, pro.quantite_inventaire AS quantite_restante, pc.prix_unitaire AS cout, pro.prix AS coutProduit FROM produits_par_commande AS pc INNER JOIN commandes AS c ON c.id = pc.id_commande INNER JOIN produits AS pro ON pro.id = pc.id_produit LEFT JOIN format_produit_produits_commande AS fppc ON fppc.id_produit_commande = pc.id LEFT JOIN formats_produit AS fp ON fp.id = fppc.id_format_choisi LEFT JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE pc.id = @_id AND pc.id_commande = @_id_commande", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
@@ -670,8 +670,6 @@ namespace APIDynamic
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("produitsAchetes", false, true, ShowTypes.Ref).Anonymous()
-                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("dateCreation", true, false, ShowTypes.DATE
                 ).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
@@ -703,6 +701,8 @@ namespace APIDynamic
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
                 .addPropriety("Province", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
+                .addPropriety("produitsAchetes", false, true, ShowTypes.Ref).Anonymous()
+                    .Authorize(Roles.Client.CanModify(), Roles.Admin.CanModify())
 
              .addRoute(BaseRoutes.GETALL)
                 .addRouteQuery("SELECT c.id AS id, c.montant_brut AS MontantBrut, c.date_heure_transaction AS dateCreation, c.id_etat_commande AS EtatsCommandesID, ec.nom AS etat, c.no_civique_livraison AS no_civique, c.rue_livraison AS rue, c.id_ville AS VilleID, v.nom AS ville, c.numero_facture AS numero_facture, c.id_client AS ClientID, CONCAT(cli.prenom, ' ', cli.nom, ' - ', cli.adresse_courriel) AS Client, pro.nom AS Province, c.id_employe AS EmployeID, c.code_postal AS code_postal, CASE WHEN c.id_employe IS NULL THEN NULL ELSE CONCAT(empl.prenom, ' ', empl.nom, ' - ', empl.adresse_courriel) END AS Employe FROM commandes AS c INNER JOIN etats_commandes AS ec ON ec.id = c.id_etat_commande INNER JOIN clients AS cli ON cli.id = c.id_client LEFT JOIN employes AS empl ON empl.id = c.id_employe LEFT JOIN villes AS v ON v.id = c.id_ville LEFT JOIN provinces AS pro ON pro.id = v.id_province WHERE c.id = @_id AND c.id_client = @_ClientID AND c.id_employe = @_EmployeID AND c.no_civique_livraison = @_no_civique AND dateCreation >= @_DateStart AND dateCreation <= @_DateEnd AND c.id_etat_commande = @_EtatsCommandesID AND c.rue_livraison = @_rue ORDER BY @&SortByCol", QueryTypes.SELECT)
@@ -720,7 +720,7 @@ namespace APIDynamic
                      .addRouteQuery("UPDATE commandes SET numero_facture = @_numero_facture, date_heure_transaction = @_dateCreation, montant_brut = @_MontantBrut, no_civique_livraison = @_no_civique, rue_livraison = @_rue, id_client = @_ClientID, id_etat_commande = @_EtatsCommandesID, id_ville = @_VilleID, id_employe = @_EmployeID WHERE id = @id", QueryTypes.UPDATE)
 
                  .addRoute(BaseRoutes.CBO)
-                     .addRouteQuery("SELECT c.id, CONCAT(c.NumeroFacture, ' - ', cli.prenom, ' ', cli.nom) FROM commandes INNER JOIN clients AS cli ON cli.id = c.id_clients", QueryTypes.CBO)
+                     .addRouteQuery("SELECT c.id, CONCAT(c.numero_facture, ' - ', cli.prenom, ' ', cli.nom) FROM commandes AS c INNER JOIN clients AS cli ON cli.id = c.id_client", QueryTypes.CBO)
 
                 .addRoute("CheckoutPanier", RouteTypes.POST)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
@@ -1074,6 +1074,37 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM types_medias", QueryTypes.CBO)
             ;
+            #endregion
+            #region Couleurs
+
+            await controllers["Couleurs"]
+
+                .addPropriety("ID", false, false, ShowTypes.ID).Anonymous()
+                .addPropriety("NomVariable", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Value", true, true, ShowTypes.COULEUR).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+
+                .addRoute(BaseRoutes.GETALL)
+                    .addRouteQuery("SELECT id AS ID, nom AS NomVariable, code_hex AS Value, description AS Description FROM couleurs WHERE id = @_ID", QueryTypes.SELECT)
+
+                .addRoute(BaseRoutes.INSERT)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("INSERT INTO couleurs (nom, code_hex, description) VALUES (@NomVariable, @Value, @Description)", QueryTypes.INSERT)
+
+                .addRoute(BaseRoutes.UPDATE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("UPDATE couleurs SET nom = @_NomVariable, code_hex = @_Value, description = @_Description WHERE id = @ID", QueryTypes.UPDATE)
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT id, nom FROM couleurs", QueryTypes.CBO)
+
+                .addRoute("GetValues", RouteTypes.GET, RouteDisplayTypes.GET)
+                    .addRouteQuery("SELECT nom, code_hex FROM couleurs", QueryTypes.CBO)
+            ;
+
             #endregion
             #region GÉNÉRATION DE CBO ET MAPGENERATORS
             await controllers["Categories"]

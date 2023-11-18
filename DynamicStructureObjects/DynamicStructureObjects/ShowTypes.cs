@@ -25,7 +25,9 @@
         [Value("Image")]
         IMAGE = 11,
         [Value("Description")]
-        DESCRIPTION = 12
+        DESCRIPTION = 12,
+        [Value("Couleur")]
+        COULEUR = 13
 
     }
     public static class ShowTypesHelper

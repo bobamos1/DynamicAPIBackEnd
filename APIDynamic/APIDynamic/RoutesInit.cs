@@ -24,7 +24,7 @@ namespace APIDynamic
                 (queries, bodyData) => DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"))
             );
             controllers["Clients"].mapRoute("ConnexionStepTwo",
-                (queries, bodyData) => DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, Roles.Client.ID())
+                (queries, bodyData) => DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, false, Roles.Client.ID())
             );
             controllers["Clients"].mapRoute("InscriptionClient",
                 async (queries, bodyData) =>
@@ -85,7 +85,7 @@ namespace APIDynamic
             controllers["Employes"].mapRoute("ConnexionStepTwo",
                 (queries, bodyData) =>
                 {
-                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), true);
+                    return DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), true, true);
                 }
             );
             controllers["Employes"].mapRoute("InscriptionEmploye",
@@ -246,6 +246,12 @@ namespace APIDynamic
                     return Results.Ok();
                 }
             );
+
+            controllers["Couleurs"].mapRoute("GetValues", 
+                async (queries, bodyData) =>
+                {
+                    return Results.Ok(await executorData.SelectDictionary(queries[0]));
+                });
 
 
             /*
