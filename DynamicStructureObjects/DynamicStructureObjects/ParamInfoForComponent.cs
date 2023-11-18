@@ -2,7 +2,7 @@
 
 namespace DynamicStructureObjects
 {
-    public record ParamInfoResume(string name, bool isMain, string description, string placeholder, long showTypeID, MapperResume? mapper, int ind, params ParamAffectedResume[] paramAffecteds)
+    public record ParamInfoResume(string name, bool isMain, bool isUpdatable, string description, string placeholder, long showTypeID, MapperResume? mapper, int ind, params ParamAffectedResume[] paramAffecteds)
     {
 
     }

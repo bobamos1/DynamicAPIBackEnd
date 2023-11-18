@@ -25,7 +25,7 @@ namespace DynamicStructureObjects
             this.Port = port;
             this.displayName = null;
         }
-        public static bool SendEmail(string fromEmail, IEnumerable<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, string host = defaultHost, int port = defaultPort, string displayName = null, List<Attachment> attachments = null, bool isHtml = false)
+        public static bool SendEmail(string fromEmail, IEnumerable<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, string host = defaultHost, int port = defaultPort, string displayName = null, List<Attachment> attachments = null, bool isHtml = true)
         {
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = displayName is null ? new MailAddress(fromEmail) : new MailAddress(fromEmail, displayName);
@@ -69,15 +69,15 @@ namespace DynamicStructureObjects
                 return false;
             }
         }
-        public bool SendEmail(IEnumerable<string> toEmails, string subject, string body, List<Attachment> attachments = null, bool isHtml = false)
+        public bool SendEmail(IEnumerable<string> toEmails, string subject, string body, List<Attachment> attachments = null, bool isHtml = true)
         {
             return SendEmail(from, toEmails, subject, body, smtpUsername, smtpPassword, Host, Port, displayName, attachments, isHtml);
         }
-        public bool SendEmail(string toEmail, string subject, string body, List<Attachment> attachments = null, bool isHtml = false)
+        public bool SendEmail(string toEmail, string subject, string body, List<Attachment> attachments = null, bool isHtml = true)
         {
             return SendEmail(new string[] { toEmail }, subject, body, attachments, isHtml);
         }
-        public bool SendEmail(string subject, string body, List<Attachment> attachments = null, bool isHtml = false, params string[] toEmails)
+        public bool SendEmail(string subject, string body, List<Attachment> attachments = null, bool isHtml = true, params string[] toEmails)
         {
             return SendEmail(toEmails, subject, body, attachments, isHtml);
         }

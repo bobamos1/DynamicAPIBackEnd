@@ -245,7 +245,7 @@ namespace DynamicStructureObjects
                 return false;
             return true;
         }
-        public static async Task<IResult> makeConnectionStepTwo(SQLExecutor executor, Query readUserInfoQuery, string twoFactor, bool getRoles, params long[] roles)
+        public static async Task<IResult> makeConnectionStepTwo(SQLExecutor executor, Query readUserInfoQuery, string twoFactor, bool getRoles, bool returnWithName,params long[] roles)
         {
             var userInfo = await executor.SelectSingle<UserInfo>(readUserInfoQuery.setParam("Token", twoFactor));
             if (userInfo is null)
@@ -256,7 +256,7 @@ namespace DynamicStructureObjects
                 rolesUser = roles.Concat(await getRolesArray(userInfo.userID));//Utiliser structure pour role
             else
                 rolesUser = roles;
-            return Results.Ok(CreateToken(userInfo, rolesUser));
+            return Results.Ok(returnWithName ? new { token = CreateToken(userInfo, rolesUser), name = userInfo.username } : CreateToken(userInfo, rolesUser));
         }
         public static async Task<IResult> makeConnectionStepOne(SQLExecutor executor, Query readUserInfoQuery, Query write2Factor, string Email, string password)
         {
