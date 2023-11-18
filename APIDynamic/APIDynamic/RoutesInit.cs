@@ -184,7 +184,7 @@ namespace APIDynamic
 
                     if ((await executorData.ExecuteQueryWithTransaction(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
-                    
+                    /*
                     try
                     {
                         float totalPrice = 20.50f; // Replace with your desired total price
@@ -224,7 +224,7 @@ namespace APIDynamic
                         return Results.Forbid();
                     }
 
-
+                    */
                 }
 
             );

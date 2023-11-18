@@ -69,7 +69,7 @@ namespace APIDynamic
                 .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .Authorize(Roles.Client.ID(), Roles.Admin.ID(), Roles.Anonymous.ID())
+                    //.Authorize(Roles.Client.ID(), Roles.Admin.ID(), Roles.Anonymous.ID())
                     .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID AND a.nom LIKE CONCAT('%', @#Nom, '%')", QueryTypes.SELECT)
                 
                 .addRoute(BaseRoutes.INSERT)
@@ -161,7 +161,7 @@ namespace APIDynamic
 
 
                 .addRoute(BaseRoutes.GETALL)
-                    .Authorize(Roles.Anonymous.ID(), Roles.Admin.ID(), Roles.Client.ID())
+                    //.Authorize(Roles.Anonymous.ID(), Roles.Admin.ID(), Roles.Client.ID())
                     .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS CategorieID, c.nom AS Categorie, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatsProduitNom FROM produits AS p LEFT JOIN categories AS c ON c.id = p.id_categorie LEFT JOIN etats_produit AS ep ON ep.id = p.id_etat_produit LEFT JOIN collaborateurs_produits AS cp ON cp.id_produit = p.id WHERE p.id = @_ID AND p.id_categorie = @_CategorieID AND p.id_etat_produit = @_EtatProduitID AND cp.id_collaborateur = @_CollaborateurID", QueryTypes.SELECT)
                     .addFilter("CollaborateurID", "", ShowTypes.INT, 10, "CollaborateurID")
 
