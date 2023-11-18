@@ -69,7 +69,7 @@ namespace APIDynamic
                 .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    //.Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .Authorize(Roles.Client.ID(), Roles.Admin.ID(), Roles.Anonymous.ID())
                     .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID AND a.nom LIKE CONCAT('%', @#Nom, '%')", QueryTypes.SELECT)
                 
                 .addRoute(BaseRoutes.INSERT)
@@ -80,6 +80,9 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE categories SET nom = @_Nom, descriptions = @_Description, id_categorie_mere = @_CategorieMereID WHERE id = @ID", QueryTypes.UPDATE)
                         
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM categories WHERE id = @ID", QueryTypes.DELETE)
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM categories", QueryTypes.CBO)
                 ;
@@ -98,6 +101,7 @@ namespace APIDynamic
                 .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
+                    .Authorize(Roles.Admin.ID(), Roles.Client.ID(), Roles.Anonymous.ID())
                     .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Descriptions FROM etats_produit WHERE id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
@@ -105,8 +109,10 @@ namespace APIDynamic
                     .addRouteQuery("INSERT INTO etats_produit (nom, descriptions) VALUES (@Nom, @Descriptions)", QueryTypes.INSERT)
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("UPDATE etats_produit SET nom = @_Nom, descriptions = @_Descriptions WHERE id = @ID", QueryTypes.UPDATE)
-
+                    .addRouteQuery("UPDATE etats_produit SET nom = @_Nom, descriptions = @_Descriptions", QueryTypes.UPDATE)
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM etats_produit WHERE id = @ID", QueryTypes.DELETE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM etats_produit", QueryTypes.CBO)
@@ -155,7 +161,8 @@ namespace APIDynamic
 
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS CategorieID, c.nom AS Categorie, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatsProduitNom FROM produits AS p LEFT JOIN categories AS c ON c.id = p.id_categorie LEFT JOIN etats_produit AS ep ON ep.id = p.id_etat_produit WHERE p.id = @_ID AND p.id_categorie = @_CategorieID AND p.id_etat_produit = @_EtatProduitID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS CategorieID, c.nom AS Categorie, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatsProduitNom FROM produits AS p LEFT JOIN categories AS c ON c.id = p.id_categorie LEFT JOIN etats_produit AS ep ON ep.id = p.id_etat_produit LEFT JOIN collaborateurs_produits AS cp ON cp.id_produit = p.id WHERE p.id = @_ID AND p.id_categorie = @_CategorieID AND p.id_etat_produit = @_EtatProduitID AND cp.id_collaborateur = @_CollaborateurID", QueryTypes.SELECT)
+                    .addFilter("CollaborateurID", "", ShowTypes.INT, 10, "CollaborateurID")
 
                 .addRoute(BaseRoutes.INSERT)
                     .Authorize(Roles.Admin.ID())
@@ -164,6 +171,9 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE produits SET nom = @_Nom, descriptions = @_Descriptions, ingrediants = @_Ingrediants, quantite_inventaire = @_QuantiteInventaire, prix = @_Prix, id_categorie = @_CategorieID, id_etat_produit = @_EtatProduitID WHERE id = @ID", QueryTypes.UPDATE)
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM produits WHERE id = @ID", QueryTypes.DELETE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM produits", QueryTypes.CBO)
@@ -181,15 +191,18 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
+                    .Authorize(Roles.Admin.ID(), Roles.Client.ID(), Roles.Anonymous.ID())
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM provinces WHERE id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("INSERT INTO provinces (nom) VALUES (@Nom)", QueryTypes.INSERT)
-
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE provinces SET nom = @_Nom WHERE id = @ID", QueryTypes.UPDATE)
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM provinces WHERE id = @ID", QueryTypes.DELETE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM provinces", QueryTypes.CBO)
@@ -211,6 +224,7 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
+                    .Authorize(Roles.Admin.ID(), Roles.Client.ID())
                     .addRouteQuery("SELECT v.id AS ID, v.nom AS Nom, v.id_province AS ProvinceID FROM villes AS v INNER JOIN provinces AS pro ON pro.id = v.id_province WHERE pro.id = @_ProvinceID AND v.id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
@@ -220,6 +234,10 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE villes SET nom = @_Nom, id_province = @_ProvinceID WHERE id = @ID", QueryTypes.UPDATE)
+
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM villes WHERE id = @ID", QueryTypes.DELETE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM villes", QueryTypes.CBO)
@@ -239,6 +257,7 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
+                    .Authorize(Roles.Admin.ID(), Roles.Client.ID())
                     .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Description FROM types_valeur WHERE id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
@@ -247,6 +266,9 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE types_valeur SET nom = @_Nom, descriptions = @_Description WHERE id = @ID", QueryTypes.UPDATE)
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM types_valeur WHERE id = @ID", QueryTypes.DELETE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM types_valeur", QueryTypes.CBO)
@@ -267,6 +289,7 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
+                    .Authorize(Roles.Admin.ID(), Roles.Client.ID())
                     .addRouteQuery("SELECT id AS ID, nom AS Nom, descriptions AS Description, facteur_affectation AS EstTaxe FROM types_affectation WHERE id = @_ID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
@@ -276,6 +299,10 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE types_affectation SET nom = @_Nom, descriptions = @_Description, facteur_affectation = @_EstTaxe WHERE id = @ID", QueryTypes.UPDATE)
+                
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM types_affectation WHERE id = @ID", QueryTypes.DELETE)
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, nom FROM types_valeur", QueryTypes.CBO)
@@ -300,6 +327,11 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE etats_commandes SET nom = @_Nom, descriptions = @_Descriptions WHERE id = @ID", QueryTypes.UPDATE)
+
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM etats_commandes WHERE id = @ID", QueryTypes.DELETE)
+
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id AS ID, nom AS Nom FROM etats_commandes", QueryTypes.CBO)
@@ -406,6 +438,10 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE formats_produit SET nom = @_Nom, descriptions = @_Description, id_type_format_produit = @_TypeFormatID WHERE id = @ID ", QueryTypes.UPDATE)
 
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM formats_produit WHERE id = @ID", QueryTypes.DELETE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
 
@@ -438,6 +474,11 @@ namespace APIDynamic
                 .addRoute(BaseRoutes.UPDATE)
                     .Authorize(Roles.Admin.ID())
                     .addRouteQuery("UPDATE formats_produit_produits SET id_format_produit = @_FormatIDNew, id_produit = @_ProduitIDNew WHERE id_format_produit = @FormatID AND id_produit = @ProduitID", QueryTypes.UPDATE)
+
+                    /*
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM formats_produit_produits WHERE id = @ID", QueryTypes.DELETE)*/
 
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id_format_choisi, format_choisi FROM format_produit_produits_commande", QueryTypes.CBO)
@@ -655,6 +696,10 @@ namespace APIDynamic
                         .bindParamToUserID("ClientID")
                     .addFilter("ClientID", "", ShowTypes.STRING, 10, "ClientID")
 
+                .addRoute(BaseRoutes.DELETE)
+                    .Authorize(Roles.Admin.ID())
+                    .addRouteQuery("DELETE FROM produits_par_commande WHERE id = @id", QueryTypes.DELETE)
+
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT ppc.id, p.nom FROM produits_par_commande ppc INNER JOIN produits p ON p.id = ppc.id_produit", QueryTypes.CBO)
             ;
@@ -775,7 +820,7 @@ namespace APIDynamic
                         .bindParamToUserID("ID")
 
 
-                .addRoute("ConnexionStepOne", RouteTypes.POST)
+                .addRoute("ConnexionStepOne", RouteTypes.POST, RouteDisplayTypes.MULTIPLE)
                     .addRouteQuery(selectUserInfoStart + "WHERE adresse_courriel = @Email", QueryTypes.ROW, true)
                         .addFilterParam("Password", ShowTypes.STRING)
                     .addRouteQueryNoVar(updateToken, QueryTypes.UPDATE)

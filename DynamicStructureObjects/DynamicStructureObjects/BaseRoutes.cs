@@ -51,13 +51,13 @@
         {
             return GetRouteType(baseRoute);
         }
-        public static BaseRoutes[] requireAuthorizationRoutes = new BaseRoutes[] { BaseRoutes.INSERT, BaseRoutes.UPDATE };
+        public static BaseRoutes[] requireAuthorizationRoutes = new BaseRoutes[] { BaseRoutes.INSERT, BaseRoutes.UPDATE, BaseRoutes.DELETE };
         public static bool requireAuthorization(this BaseRoutes baseRoute)
         {
             return requireAuthorizationRoutes.Contains(baseRoute);
         }
-        public static BaseRoutes[] displaySingle = new BaseRoutes[] { BaseRoutes.UPDATE };
-        public static BaseRoutes[] displayMultiple = new BaseRoutes[] { BaseRoutes.INSERT, BaseRoutes.DELETE };
+        public static BaseRoutes[] displaySingle = new BaseRoutes[] { BaseRoutes.UPDATE, BaseRoutes.DELETE };
+        public static BaseRoutes[] displayMultiple = new BaseRoutes[] { BaseRoutes.INSERT };
         public static RouteDisplayTypes DisplayType(this BaseRoutes baseRoute)
         {
             if (displaySingle.Contains(baseRoute))
