@@ -13,10 +13,11 @@ namespace DynamicStructureObjects
         private int Port { get; set; }
         public const string defaultHost = "smtp.gmail.com";
         public const int defaultPort = 587;
+        private bool IsHtml { get; set; }
         public EmailSender(string fromEmail, string smtpUsername, string smtpPassword, string displayName = null)
             : this (fromEmail, smtpUsername, smtpPassword, defaultHost, defaultPort, displayName)
         { }
-        public EmailSender(string fromEmail, string smtpUsername, string smtpPassword, string host, int port, string displayName = null)
+        public EmailSender(string fromEmail, string smtpUsername, string smtpPassword, string host, int port, string displayName = null, bool isHtml = true)
         {
             from = fromEmail;
             this.smtpUsername = smtpUsername;
@@ -24,6 +25,7 @@ namespace DynamicStructureObjects
             this.Host = host;
             this.Port = port;
             this.displayName = null;
+            this.IsHtml = isHtml;
         }
         public static bool SendEmail(string fromEmail, IEnumerable<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, string host = defaultHost, int port = defaultPort, string displayName = null, List<Attachment> attachments = null, bool isHtml = true)
         {
