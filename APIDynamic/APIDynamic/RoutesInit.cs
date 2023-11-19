@@ -220,6 +220,8 @@ namespace APIDynamic
                     }
                     catch (Exception ex)
                     {
+                        Console.WriteLine($"Exception: {ex.Message}");
+                        Console.WriteLine($"StackTrace: {ex.StackTrace}");
                         return Results.Forbid();
                     }
 

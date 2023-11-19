@@ -36,6 +36,7 @@ namespace DynamicStructureObjects
             mailMessage.Subject = subject;
             if (isHtml)
             {
+                Console.Write("allo, isHTML lol",isHtml);
                 mailMessage.IsBodyHtml = true;
                 mailMessage.Body = body;
             }
