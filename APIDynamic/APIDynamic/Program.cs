@@ -90,21 +90,26 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 /* Set attachments aux courriels*/
+string rootPath = AppDomain.CurrentDomain.BaseDirectory;
 List<Attachment> attachments = new List<Attachment>();
 
-var attachment1 = new Attachment("Emailtemplates\\images\\devanyChai.png");
+string imageDevanyChai = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
+var attachment1 = new Attachment(imageDevanyChai);
 attachment1.Name = "DevanyChai";
 attachment1.ContentId = "DevanyChai";
 
-var attachment2 = new Attachment("Emailtemplates\\images\\facebook.png");
+string imageFacebook = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
+var attachment2 = new Attachment(imageFacebook);
 attachment2.Name = "Facebook";
 attachment2.ContentId = "Facebook";
 
-var attachment3 = new Attachment("Emailtemplates\\images\\instagram.png");
+string imageInstagram = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
+var attachment3 = new Attachment(imageInstagram);
 attachment2.Name = "Instagram";
 attachment2.ContentId = "Instagram";
 
-var attachment4 = new Attachment("Emailtemplates\\images\\logo.png");
+string imageLogo = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
+var attachment4 = new Attachment(imageLogo);
 attachment2.Name = "Logo";
 attachment2.ContentId = "Logo";
 
