@@ -94,22 +94,22 @@ string rootPath = AppDomain.CurrentDomain.BaseDirectory;
 List<Attachment> attachments = new List<Attachment>();
 
 string imageDevanyChai = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
-var attachment1 = new Attachment("..\\Emailtemplates\\images\\devanyChai.png");
+var attachment1 = new Attachment("Emailtemplates\\images\\devanyChai.png");
 attachment1.Name = "DevanyChai";
 attachment1.ContentId = "DevanyChai";
 
 string imageFacebook = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
-var attachment2 = new Attachment("..\\Emailtemplates\\images\\facebook.png");
+var attachment2 = new Attachment("Emailtemplates\\images\\facebook.png");
 attachment2.Name = "Facebook";
 attachment2.ContentId = "Facebook";
 
 string imageInstagram = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
-var attachment3 = new Attachment("..\\Emailtemplates\\images\\instagram.png");
+var attachment3 = new Attachment("Emailtemplates\\images\\instagram.png");
 attachment2.Name = "Instagram";
 attachment2.ContentId = "Instagram";
 
 string imageLogo = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
-var attachment4 = new Attachment("..\\Emailtemplates\\images\\logo.png");
+var attachment4 = new Attachment("Emailtemplates\\images\\logo.png");
 attachment2.Name = "Logo";
 attachment2.ContentId = "Logo";
 
