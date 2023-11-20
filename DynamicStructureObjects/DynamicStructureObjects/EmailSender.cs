@@ -27,7 +27,7 @@ namespace DynamicStructureObjects
             this.displayName = null;
             this.IsHtml = isHtml;
         }
-        public static bool SendEmail(string fromEmail, IEnumerable<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, string host = defaultHost, int port = defaultPort, string displayName = null, List<Attachment> attachments, bool isHtml = true)
+        public static bool SendEmail(string fromEmail, IEnumerable<string> toEmails, string subject, string body, string smtpUsername, string smtpPassword, List<Attachment> attachments, string host = defaultHost, int port = defaultPort, string displayName = null, bool isHtml = true)
         {
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = displayName is null ? new MailAddress(fromEmail) : new MailAddress(fromEmail, displayName);
@@ -74,7 +74,7 @@ namespace DynamicStructureObjects
         }
         public bool SendEmail(IEnumerable<string> toEmails, string subject, string body, List<Attachment> attachments, bool isHtml = true)
         {
-            return SendEmail(from, toEmails, subject, body, smtpUsername, smtpPassword, Host, Port, displayName, attachments, isHtml);
+            return SendEmail(from, toEmails, subject, body, smtpUsername, smtpPassword, attachments, Host, Port, displayName, isHtml);
         }
         public bool SendEmail(string toEmail, string subject, string body, List<Attachment> attachments, bool isHtml = true)
         {
