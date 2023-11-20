@@ -185,8 +185,10 @@ namespace APIDynamic
                     if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
 
-                    return Results.Ok();
-                }
+                    //À mettre des vraies valeurs (soit des queries ou du résultat des store procedure)
+                    var amount = 0;
+                    string CommandeNom = "";
+
                     /*
                     try
                     {
@@ -232,6 +234,73 @@ namespace APIDynamic
 
                     
                 }*/
+                    /*
+                    var stripe = new Stripe.Checkout.SessionService();
+
+                    // Specify the total amount dynamically (replace this with your logic)
+                    var totalAmount = 2000; // For example, $20.00 in cents
+
+                    var session = stripe.Create(new Stripe.Checkout.SessionCreateOptions
+                    {
+                        PaymentMethodTypes = new List<string> { "card" },
+                        LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
+                        {
+                            new Stripe.Checkout.SessionLineItemOptions
+                            {
+                                Price = "Your Product", // replace with your product description
+                                Amount = totalAmount,
+                                Currency = "usd",
+                                Quantity = 1,
+                            },
+                        },
+                        Mode = "payment",
+                        SuccessUrl = "http://localhost:4200/success", // replace with your success URL
+                        CancelUrl = "http://localhost:4200/cancel", // replace with your cancel URL
+                    });
+
+                    await context.Response.WriteAsJsonAsync(new { id = session.Id });
+
+                }
+                */
+                    // Set your secret key. Remember to switch to your live secret key in production.
+                    // See your keys here: https://dashboard.stripe.com/apikeys
+                    StripeConfiguration.ApiKey = stripeApiKey;  //Défini avant l'appel de la route
+
+                    var options = new Stripe.Checkout.SessionCreateOptions
+                    {
+                        LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
+                        {
+                            new Stripe.Checkout.SessionLineItemOptions
+                            {
+                                PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
+                                {
+                                    Currency = "cad",
+                                    ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
+                                    {
+                                        Name = CommandeNom,
+                                    },
+                                    UnitAmount = amount,
+                                    TaxBehavior = "exclusive",  //J'imagine comme il y a des taxes qui sont ajoutées ou enlevées?
+                                },
+                                AdjustableQuantity = new Stripe.Checkout.SessionLineItemAdjustableQuantityOptions   //JSP exactement ce que ^ca fait encore
+                                {
+                                    Enabled = true,
+                                    Minimum = 1,
+                                    Maximum = 10,
+                                },
+                                Quantity = 1,
+                            },
+                        },
+                        AutomaticTax = new Stripe.Checkout.SessionAutomaticTaxOptions { Enabled = true },
+                        Mode = "payment",
+                        SuccessUrl = "http://localhost:4200/success",
+                        CancelUrl = "http://localhost:4200/cancel",
+                    };
+                    var service = new Stripe.Checkout.SessionService();
+                    service.Create(options);
+
+                    return Results.Ok();
+                }
 
             );
 
