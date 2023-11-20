@@ -70,7 +70,7 @@ namespace APIDynamic
                 .Authorize(Roles.Admin.CanModify())
 
                 .addRoute(BaseRoutes.GETALL)
-                    .Authorize(Roles.Client.ID(), Roles.Admin.ID(), Roles.Anonymous.ID())
+                    //.Authorize(Roles.Client.ID(), Roles.Admin.ID(), Roles.Anonymous.ID())
                     .addRouteQuery("SELECT a.id AS ID, a.nom AS Nom, a.descriptions AS Description, b.id AS CategorieMereID, b.nom AS CategorieMere FROM categories a LEFT JOIN categories b ON a.id_categorie_mere = b.id WHERE b.id = @_CategorieMereID AND a.id = @_ID AND a.nom LIKE CONCAT('%', @#Nom, '%')", QueryTypes.SELECT)
                 
                 .addRoute(BaseRoutes.INSERT)
@@ -162,6 +162,7 @@ namespace APIDynamic
 
 
                 .addRoute(BaseRoutes.GETALL)
+                    //.Authorize(Roles.Anonymous.ID(), Roles.Admin.ID(), Roles.Client.ID())
                     .addRouteQuery("SELECT p.id AS ID, p.nom AS Nom, p.descriptions AS Descriptions, p.ingrediants AS Ingrediants, p.prix AS Prix, p.quantite_inventaire AS QuantiteInventaire, p.id_categorie AS CategorieID, c.nom AS Categorie, p.id_etat_produit AS EtatProduitID, ep.nom AS EtatsProduitNom FROM produits AS p LEFT JOIN categories AS c ON c.id = p.id_categorie LEFT JOIN etats_produit AS ep ON ep.id = p.id_etat_produit LEFT JOIN collaborateurs_produits AS cp ON cp.id_produit = p.id WHERE p.id = @_ID AND p.id_categorie = @_CategorieID AND p.id_etat_produit = @_EtatProduitID AND cp.id_collaborateur = @_CollaborateurID", QueryTypes.SELECT)
                     .addFilter("CollaborateurID", "", ShowTypes.INT, 10, "CollaborateurID")
 
@@ -626,7 +627,7 @@ namespace APIDynamic
             #endregion
             #region ProduitsParCommande
             var queryInsertPanierDiffEtat = "INSERT INTO produits_par_commande (id_produit, id_commande, quantite, prix_unitaire) SELECT @id_produit, c.id, @quantite, 0 FROM commandes AS c";
-            var queryInsertFormat = "INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT fp.id, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id @FormatID";
+            var queryInsertFormat = "INSERT INTO format_produit_produits_commande (id_format_choisi, id_produit_commande, format_choisi, type_format) SELECT fp.id, @ProduitCommandeID, fp.nom, tfp.nom FROM formats_produit AS fp INNER JOIN types_format_produit AS tfp ON tfp.id = fp.id_type_format_produit WHERE fp.id = @FormatID";
             await controllers["ProduitsParCommande"]
 
                 .addPropriety("id_commande", true, true, ShowTypes.CBO,
@@ -678,7 +679,7 @@ namespace APIDynamic
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery(queryInsertPanierDiffEtat + " WHERE c.id_client = @id_client AND c.id_etat_commande = 4", QueryTypes.INSERT)
                         .bindParamToUserID("id_client")
-                    .addFilter("ClientID", "", ShowTypes.STRING, 10, "id_client")
+                        .addFilter("ClientID", "", ShowTypes.STRING, 10, "id_client")
                     .addRouteQueryNoVar(queryInsertFormat, QueryTypes.INSERT)
 
                 .addRoute("InsertWishList", RouteTypes.POST)
@@ -900,6 +901,8 @@ namespace APIDynamic
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Nom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
+                .addPropriety("Image", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Prenom", true, true, ShowTypes.STRING).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Telephone", true, true, ShowTypes.INT).Anonymous()
@@ -908,22 +911,21 @@ namespace APIDynamic
                     isEmail
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("CompagnieID", false, true, ShowTypes.CBO).Anonymous()
+                .addPropriety("Description", true, true, ShowTypes.STRING).Anonymous()
+                    .Authorize(Roles.Admin.CanModify())
+                .addPropriety("CompagnieID", true, true, ShowTypes.CBO).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Reseau", false, true, ShowTypes.Ref).Anonymous()
 
 
                 .addRoute(BaseRoutes.GETALL)
-                    .addRouteQuery("SELECT coll.id AS ID, coll.nom AS Nom, coll.prenom AS Prenom, coll.telephone AS Telephone, coll.adresse_courriel AS Email, coll.id_compagnie AS CompagnieID, comp.nom AS Compagnie FROM collaborateurs AS coll LEFT JOIN compagnies AS comp ON comp.id = coll.id_compagnie WHERE coll.id = @_ID AND coll.id_compagnie = @_CompagnieID", QueryTypes.SELECT)
+                    .addRouteQuery("SELECT coll.id AS ID, coll.nom AS Nom, coll.prenom AS Prenom, coll.telephone AS Telephone, coll.adresse_courriel AS Email,coll.descriptions AS Description, coll.images AS Image, coll.id_compagnie AS CompagnieID, comp.nom AS Compagnie FROM collaborateurs AS coll LEFT JOIN compagnies AS comp ON comp.id = coll.id_compagnie WHERE coll.id = @_ID AND coll.id_compagnie = @_CompagnieID", QueryTypes.SELECT)
 
                 .addRoute(BaseRoutes.INSERT)
-                    .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("INSERT INTO collaborateurs (nom, prenom, telephone, adresse_courriel, id_compagnie) VALUES (@Nom, @Prenom, @Telephone, @Email, @CompagnieID)", QueryTypes.INSERT)
+                    .addRouteQuery("INSERT INTO collaborateurs (nom, prenom, telephone, adresse_courriel, images, descriptions, id_compagnie) VALUES (@Nom, @Prenom, @Telephone, @Email, @_Image, @_Description, @CompagnieID)", QueryTypes.INSERT)
 
                 .addRoute(BaseRoutes.UPDATE)
-                    .Authorize(Roles.Admin.ID())
-                    .addRouteQuery("UPDATE collaborateurs SET nom = @_Nom, prenom = @_Prenom, telephone = @_Telephone, adresse_courriel = @_Email, id_compagnie = @_CompagnieID WHERE id = @ID", QueryTypes.UPDATE)
-
+                    .addRouteQuery("UPDATE collaborateurs SET nom = @_Nom, prenom = @_Prenom, telephone = @_Telephone, adresse_courriel = @_Email, images = @_Image,descriptions=@_Description, id_compagnie = @_CompagnieID WHERE id = @ID", QueryTypes.UPDATE)
                 .addRoute(BaseRoutes.CBO)
                     .addRouteQuery("SELECT id, CONCAT(prenom, ' ', nom, ' - ', adresse_courriel) FROM collaborateurs", QueryTypes.CBO)
             ;

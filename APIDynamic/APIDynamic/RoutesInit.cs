@@ -16,12 +16,11 @@ namespace APIDynamic
     {
         public static void InitRoutes(Dictionary<string, DynamicController> controllers, WebApplication app, Dictionary<string, string> connectionStrings)
         {
-            var emailContacter = "LeChai@gmail.com";
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
             controllers["Clients"].mapRoute("ConnexionStepOne",
-                (queries, bodyData) => DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"))
+                (queries, bodyData) =>  DynamicConnection.makeConnectionStepOne(executorData, queries[0], queries[1], bodyData.Get<string>("Email"), bodyData.Get<string>("Password"))
             );
             controllers["Clients"].mapRoute("ConnexionStepTwo",
                 (queries, bodyData) => DynamicConnection.makeConnectionStepTwo(executorData, queries[0], bodyData.Get<string>("Token"), false, false, Roles.Client.ID())
@@ -37,7 +36,7 @@ namespace APIDynamic
                         .setParam("MDP", userInfo.passwordHash)
                         .setParam("Token", "")
                         .setParam("Sel", userInfo.passwordSalt)
-                    //.setParam("Password", bodyData.Get<bool>("Password"))
+                        //.setParam("Password", bodyData.Get<bool>("Password"))
                     );
                     if ((await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ClientID", id))) == 0)
                         return Results.Problem();
@@ -150,12 +149,12 @@ namespace APIDynamic
                 }
                 );
             controllers["ProduitsParCommande"].mapRoute("DeletePanier",
-                async (queries, bodyData) =>
+                async(queries, bodyData) =>
                 {
                     var idProduitParCommande = bodyData.Get<int>("id");
                     queries[0].setParam("id", idProduitParCommande);
                     queries[1].setParam("id", idProduitParCommande);
-                    queries[2].setParam("id", idProduitParCommande);
+                    queries[2].setParam("id", idProduitParCommande);             
 
                     if ((await executorData.ExecuteQueryWithTransaction(queries.toOrderedPairs())) == 0)
                         return Results.Forbid();
@@ -172,19 +171,19 @@ namespace APIDynamic
                 {
 
 
-                    
+                    /*
                     var idClient = bodyData.UserID();
                     var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
 
                     foreach (long idProduitParCommande in ProduitsParCommande) {
 
-                        if ((await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande))) == 0)
+                        if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande))) == 0)
                             return Results.Forbid();
                     }
 
-                    if ((await executorData.ExecuteQueryWithTransaction(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
+                    if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
-                    
+                    */
                     try
                     {
                         float totalPrice = 20.50f; // Replace with your desired total price
@@ -221,10 +220,13 @@ namespace APIDynamic
                     }
                     catch (Exception ex)
                     {
+
+                        Console.WriteLine($"Exception: {ex.Message}");
+                        Console.WriteLine($"StackTrace: {ex.StackTrace}");
                         return Results.Forbid();
                     }
 
-
+                    
                 }
 
             );
@@ -235,14 +237,6 @@ namespace APIDynamic
                     queries[0].setParam("ClientID", bodyData.Get<long>("ClientID")).setParam("id", bodyData.Get<long>("id"));
                     if ((await executorData.ExecuteQueryWithTransaction(queries[0])) == 0)
                         return Results.Forbid();
-                    return Results.Ok();
-                }
-            );
-            controllers["Clients"].mapRoute("Contacter",
-                async (queries, bodyData) =>
-                {
-                if (!DynamicConnection.emailSender.SendEmail(emailContacter, bodyData.Get<string>("Sujet"), string.Format("{0}\r\n{1}", bodyData.Get<string>("Email"), bodyData.Get<string>("Contenu"))))
-                        return Results.Problem();
                     return Results.Ok();
                 }
             );

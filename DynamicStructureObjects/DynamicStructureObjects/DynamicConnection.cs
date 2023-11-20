@@ -170,7 +170,7 @@ namespace DynamicStructureObjects
             var randomToken = GetRandom();
             string subject = SubjectTokenHasPlaceholderRecovery ? string.Format(CourrielTokenSubjectRecovery, randomToken) : CourrielTokenSubjectRecovery;
             string message = string.Format(CourrielTokenBody, randomToken);
-            emailSender.SendEmail(userInfo.Email, subject, message);
+            emailSender.SendEmail(userInfo.Email, subject, message, null);
 
             return Results.Ok();
         }
@@ -268,7 +268,7 @@ namespace DynamicStructureObjects
             string message = string.Format(CourrielTokenBody, randomToken);
             if (await executor.ExecuteQueryWithTransaction(write2Factor.setParam("Token", randomToken).setParam("ID", userInfo.userID)) > 0)
             {
-                emailSender.SendEmail(userInfo.Email, subject, message); //Add bool pour isHtml
+                emailSender.SendEmail(userInfo.Email, subject, message, null); //Add bool pour isHtml
                 return Results.Ok();
             }
             return Results.Forbid();
@@ -283,7 +283,7 @@ namespace DynamicStructureObjects
             string message = string.Format(CourrielTokenBodyRecovery, randomToken);
             if (await executor.ExecuteQueryWithTransaction(write2Factor.setParam("Token", randomToken).setParam("ID", userID)) > 0)
             {
-                emailSender.SendEmail(Email, subject, message); //Add bool pour isHtml
+                emailSender.SendEmail(Email, subject, message, null); //Add bool pour isHtml
                 return Results.Ok();
             }
             return Results.Forbid();
