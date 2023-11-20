@@ -171,11 +171,12 @@ namespace APIDynamic
                 {
 
 
-                    /*
+
                     var idClient = bodyData.UserID();
                     var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
 
-                    foreach (long idProduitParCommande in ProduitsParCommande) {
+                    foreach (long idProduitParCommande in ProduitsParCommande)
+                    {
 
                         if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande))) == 0)
                             return Results.Forbid();
@@ -183,7 +184,10 @@ namespace APIDynamic
 
                     if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
-                    */
+
+                    return Results.Ok();
+                }
+                    /*
                     try
                     {
                         float totalPrice = 20.50f; // Replace with your desired total price
@@ -227,7 +231,7 @@ namespace APIDynamic
                     }
 
                     
-                }
+                }*/
 
             );
 
