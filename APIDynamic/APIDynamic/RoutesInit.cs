@@ -320,7 +320,7 @@ namespace APIDynamic
                     return Results.Ok(await executorData.SelectDictionary(queries[0]));
                 });
 
-            controllers["Client"].mapRoute("Contacter",
+            controllers["Clients"].mapRoute("Contacter",
                 async (queries, bodyData) =>
                 {
 
