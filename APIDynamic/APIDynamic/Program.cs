@@ -141,8 +141,33 @@ app.MapGet("/GetImage/{**imagePath}", (string imagePath) =>
     /*URL+/GetImage/lechai*/
 });
 
+app.MapPost("/upload", async (ImageUploadRequest request) =>
+{
+    if (!string.IsNullOrEmpty(request.Image))
+    {
+        // Convertir la chaîne base64 en tableau d'octets
+        var bytes = Convert.FromBase64String(request.Image);
+
+        // Assurez-vous d'ajuster le chemin de sauvegarde et le nom du fichier selon vos besoins.
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", request.nomImage);
+        await System.IO.File.WriteAllBytesAsync(filePath, bytes);
+
+        return Results.Ok("Image téléchargée avec succès !");
+    }
+
+    return Results.BadRequest("Aucune image n'a été fournie.");
+});
+
+
 
 app.Run();
+
+internal class ImageUploadRequest
+{
+    public string nomImage { get; set; }
+    public string Image { get; set; }
+
+}
 
 
 /*
