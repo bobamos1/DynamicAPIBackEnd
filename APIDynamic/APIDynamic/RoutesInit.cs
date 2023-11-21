@@ -320,6 +320,13 @@ namespace APIDynamic
                     return Results.Ok(await executorData.SelectDictionary(queries[0]));
                 });
 
+            controllers["Client"].mapRoute("Contacter",
+                async (queries, bodyData) =>
+                {
+
+                    return Results.Ok(DynamicConnection.emailSender.SendEmail(bodyData.Get<string>("Email"), bodyData.Get<string>("Sujet"), bodyData.Get<string>("Contenu"), null));
+                }
+                );
 
             /*
             controllers["Clients"].addRouteAPI("CreateUser",
