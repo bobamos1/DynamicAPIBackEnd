@@ -447,9 +447,9 @@ namespace DynamicStructureObjects
                 paramAffecteds = paramAffecteds.Append(new ParamAffectedResume(propriety.MapperGenerator.parametersToLink[SQLExecutor.VALUE_FOR_CBO].ToString(), false)).ToArray();
             return paramAffecteds;
         }
-        public IEnumerable<ParamInfoResume> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties)
+        public IEnumerable<ParamInfoResume> InfoObjectPropreties(IEnumerable<DynamicPropriety> proprieties, IEnumerable<long> roles)
         {
-            return proprieties.Select(prop => new ParamInfoResume(prop.displayName, prop.IsMain, prop.IsUpdatable, prop.description, prop.placeholder, (long)prop.ShowType, prop.MapperGenerator?.toResume(), prop.ind, InfoParamAffectedPropriety(prop)));
+            return proprieties.Select(prop => new ParamInfoResume(prop.displayName, prop.IsMain, prop.IsUpdatable && (roles.Any(role => prop.roles.ContainsKey(role) ? prop.roles[role] : false)), prop.description, prop.placeholder, (long)prop.ShowType, prop.MapperGenerator?.toResume(), prop.ind, InfoParamAffectedPropriety(prop)));
         }
         public IEnumerable<object> InfoObjectRoutes(IEnumerable<DynamicRoute> routes)
         {
@@ -467,7 +467,7 @@ namespace DynamicStructureObjects
                 if (paramInfo.ProprietyID != 1)
                 {
                     var propriety = Proprieties.First(prop => prop.id == paramInfo.ProprietyID);
-                    yield return new ParamInfoResume(propriety.displayName, propriety.IsMain, propriety.IsUpdatable, propriety.description, propriety.placeholder, (long)propriety.ShowType, propriety.MapperGenerator?.toResume(), propriety.ind, paramAffected);
+                    yield return new ParamInfoResume(propriety.displayName, propriety.IsMain, true, propriety.description, propriety.placeholder, (long)propriety.ShowType, propriety.MapperGenerator?.toResume(), propriety.ind, paramAffected);
                 }
                 else if (paramInfo.VarAffected == Query.ORDERBYVARKEY)
                 {
@@ -553,7 +553,7 @@ namespace DynamicStructureObjects
                 var roles = getRolesInfo(JWT);
                 if (!roles.Any())
                     return Results.Forbid();
-                return Results.Ok(InfoObjectPropreties(getAuthorizedProprieties(false, roles)));
+                return Results.Ok(InfoObjectPropreties(getAuthorizedProprieties(false, roles), roles));
             }).WithName($"{Name}InfoProprieties");
 
             var infoRoutesObjectSQLParam = Routes.Select(route => new { route = new RouteResume(route.Name, route.routeDisplayType, route.RouteType, route.requireAuthorization, route.Roles), paramsInfo = InfoObjectSQLParam(route) });

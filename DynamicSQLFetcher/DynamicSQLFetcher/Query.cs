@@ -116,7 +116,7 @@ namespace DynamicSQLFetcher
         }
         private static readonly List<string> delimiters = new List<string>
         {
-           "SELECT", "DISTINCT", "TOP", "FROM", "WHERE", "(", ")", "VALUES", "ORDER BY", "UPDATE", "SET"
+           "SELECT", "DISTINCT", "TOP", "FROM", "WHERE", "(", ")", "VALUES", "ORDER BY", "UPDATE", "SET", "GROUP BY"
         };
         private static readonly List<string> separators = new List<string>
         {
@@ -143,7 +143,9 @@ namespace DynamicSQLFetcher
             new(",WHERE", " WHERE"),
             new(", WHERE", " WHERE"),
             new(",FROM", " FROM"),
-            new(", FROM", " FROM")
+            new(", FROM", " FROM"),
+            new("ANDGROUP", "GROUP"),
+            new("ORGROUP", "GROUP")
         };
         private static readonly List<string> removeEnd = new List<string>()
         {

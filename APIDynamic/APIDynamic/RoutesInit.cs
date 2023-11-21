@@ -172,22 +172,22 @@ namespace APIDynamic
 
 
 
-                    var idClient = bodyData.UserID();
-                    var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
+                    //var idClient = bodyData.UserID();
+                    //var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
 
-                    foreach (long idProduitParCommande in ProduitsParCommande)
-                    {
+                    //foreach (long idProduitParCommande in ProduitsParCommande)
+                    //{
 
-                        if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande))) == 0)
-                            return Results.Forbid();
-                    }
+                    //    if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande))) == 0)
+                    //        return Results.Forbid();
+                    //}
 
-                    if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("NoCiviqueLivraison", bodyData.SafeGet<int>("NoCiviqueLivraison")).setParam("RueLivraison", bodyData.SafeGet<string>("RueLivraison")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
-                        return Results.Forbid();
+                    //if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("no_civique", bodyData.SafeGet<int>("no_civique")).setParam("rue", bodyData.SafeGet<string>("rue")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
+                    //    return Results.Forbid();
 
                     //À mettre des vraies valeurs (soit des queries ou du résultat des store procedure)
-                    var amount = 0;
-                    string CommandeNom = "";
+                    var amount = 3000;
+                    string CommandeNom = "allo_Antoine";
 
                     /*
                     try
@@ -280,7 +280,7 @@ namespace APIDynamic
                                         Name = CommandeNom,
                                     },
                                     UnitAmount = amount,
-                                    TaxBehavior = "exclusive",  //J'imagine comme il y a des taxes qui sont ajoutées ou enlevées?
+                                    TaxBehavior = "unspecified",  //J'imagine comme il y a des taxes qui sont ajoutées ou enlevées?
                                 },
                                 AdjustableQuantity = new Stripe.Checkout.SessionLineItemAdjustableQuantityOptions   //JSP exactement ce que ^ca fait encore
                                 {
@@ -291,15 +291,15 @@ namespace APIDynamic
                                 Quantity = 1,
                             },
                         },
-                        AutomaticTax = new Stripe.Checkout.SessionAutomaticTaxOptions { Enabled = true },
+                        AutomaticTax = new Stripe.Checkout.SessionAutomaticTaxOptions { Enabled = false },
                         Mode = "payment",
                         SuccessUrl = "http://localhost:4200/success",
                         CancelUrl = "http://localhost:4200/cancel",
                     };
                     var service = new Stripe.Checkout.SessionService();
-                    service.Create(options);
+                    
 
-                    return Results.Ok();
+                    return Results.Ok(service.Create(options));
                 }
 
             );

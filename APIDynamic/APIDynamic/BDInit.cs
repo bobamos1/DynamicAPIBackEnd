@@ -47,6 +47,7 @@ namespace APIDynamic
                 .addController("TypeValeurs", false)
                 .addController("TypeAffectations", false)
                 .addController("FormatsProduitsCommandes", false)
+                .addController("Rapport_Produits", false)
                 //.addController("Roles", false)
                 ;
             #endregion
@@ -1128,7 +1129,7 @@ namespace APIDynamic
 
                 .addPropriety("ID", false, false, ShowTypes.ID).Anonymous()
                 .addPropriety("NomVariable", true, true, ShowTypes.STRING).Anonymous()
-                    .Authorize(Roles.Admin.CanModify())
+                    //.Authorize(Roles.Admin.CanModify())
                 .addPropriety("Description", false, true, ShowTypes.DESCRIPTION).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
                 .addPropriety("Value", true, true, ShowTypes.COULEUR).Anonymous()
@@ -1152,6 +1153,25 @@ namespace APIDynamic
                     .addRouteQuery("SELECT nom, code_hex FROM couleurs", QueryTypes.CBO)
             ;
 
+            #endregion
+            #region Rapport
+
+            await controllers["Rapport_Produits"]
+
+                .addPropriety("ID", false, true, ShowTypes.ID).Anonymous()
+                .addPropriety("nombre_vendu", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("total_vente", true, false, ShowTypes.STRING).Anonymous()
+                .addPropriety("nom", true, false, ShowTypes.STRING).Anonymous()
+
+                .addRoute(BaseRoutes.GETALL)
+                        .addRouteQuery("SELECT p.id AS ID, p.nom, COUNT(*) AS nombre_vendu, SUM(c.montant_brut) AS total_vente FROM commandes AS c JOIN produits_par_commande AS pc ON c.id = pc.id_commande JOIN produits AS p ON pc.id_produit = p.id WHERE c.date_heure_transaction >= @_date_debut AND c.date_heure_transaction <= @_date_fin AND p.id = @_ID GROUP BY p.id, p.nom", QueryTypes.SELECT)
+                .addFilter("date_debut", "", ShowTypes.DATE, 1, "date_debut")
+                .addFilter("date_fin", "", ShowTypes.DATE, 2, "date_fin")
+
+                .addRoute(BaseRoutes.CBO)
+                    .addRouteQuery("SELECT 1, 2 FROM couleurs", QueryTypes.CBO)
+
+                    ;
             #endregion
             #region GÉNÉRATION DE CBO ET MAPGENERATORS
             await controllers["Categories"]
