@@ -324,7 +324,10 @@ namespace APIDynamic
                 async (queries, bodyData) =>
                 {
 
-                    return Results.Ok(DynamicConnection.emailSender.SendEmail(bodyData.Get<string>("Email"), bodyData.Get<string>("Sujet"), bodyData.Get<string>("Contenu"), null));
+                    string Message = bodyData.Get<string>("Email") + " : " + bodyData.Get<string>("Contenu");
+
+
+                    return Results.Ok(DynamicConnection.emailSender.SendEmail(app.Configuration["Email:EmailHost"], bodyData.Get<string>("Sujet"), Message, null));
                 }
                 );
 
