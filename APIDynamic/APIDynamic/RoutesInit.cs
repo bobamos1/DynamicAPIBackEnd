@@ -172,98 +172,24 @@ namespace APIDynamic
 
 
 
-                    //var idClient = bodyData.UserID();
-                    //var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
+                    var idClient = bodyData.UserID();
+                    var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
 
-                    //foreach (long idProduitParCommande in ProduitsParCommande)
-                    //{
+                    foreach (long idProduitParCommande in ProduitsParCommande)
+                    {
 
-                    //    if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande))) == 0)
-                    //        return Results.Forbid();
-                    //}
+                        if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande))) == 0)
+                            return Results.Forbid();
+                    }
 
-                    //if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("no_civique", bodyData.SafeGet<int>("no_civique")).setParam("rue", bodyData.SafeGet<string>("rue")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
-                    //    return Results.Forbid();
+                    if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("no_civique", bodyData.SafeGet<int>("no_civique")).setParam("rue", bodyData.SafeGet<string>("rue")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
+                        return Results.Forbid();
 
                     //À mettre des vraies valeurs (soit des queries ou du résultat des store procedure)
                     var amount = 3000;
                     string CommandeNom = "allo_Antoine";
 
-                    /*
-                    try
-                    {
-                        float totalPrice = 20.50f; // Replace with your desired total price
-                        int totalAmount = (int)(totalPrice * 100); // Convert to cents
 
-                        var options = new SessionCreateOptions
-                        {
-                            PaymentMethodTypes = new List<string> { "card" },
-                            LineItems = new List<SessionLineItemOptions>
-                            {
-                                new SessionLineItemOptions
-                                {
-                                    PriceData = new PriceDataOptions
-                                    {
-                                        Currency = "usd",
-                                        ProductData = new PriceDataProductDataOptions
-                                        {
-                                            Name = "Votre commande",
-                                        },
-                                        UnitAmount = totalAmount,
-                                    },
-                                    Quantity = 1,
-                                },
-                            },
-                            Mode = "payment",
-                            SuccessUrl = "http://localhost:4200/",
-                            CancelUrl = "http://localhost:4200/",
-                        };
-
-                        var service = new SessionService();
-                        var session = await service.CreateAsync(options);
-
-                        return Results.Ok(new { sessionId = session.Id });
-                    }
-                    catch (Exception ex)
-                    {
-
-                        Console.WriteLine($"Exception: {ex.Message}");
-                        Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                        return Results.Forbid();
-                    }
-
-                    
-                }*/
-                    /*
-                    var stripe = new Stripe.Checkout.SessionService();
-
-                    // Specify the total amount dynamically (replace this with your logic)
-                    var totalAmount = 2000; // For example, $20.00 in cents
-
-                    var session = stripe.Create(new Stripe.Checkout.SessionCreateOptions
-                    {
-                        PaymentMethodTypes = new List<string> { "card" },
-                        LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
-                        {
-                            new Stripe.Checkout.SessionLineItemOptions
-                            {
-                                Price = "Your Product", // replace with your product description
-                                Amount = totalAmount,
-                                Currency = "usd",
-                                Quantity = 1,
-                            },
-                        },
-                        Mode = "payment",
-                        SuccessUrl = "http://localhost:4200/success", // replace with your success URL
-                        CancelUrl = "http://localhost:4200/cancel", // replace with your cancel URL
-                    });
-
-                    await context.Response.WriteAsJsonAsync(new { id = session.Id });
-
-                }
-                */
-                    // Set your secret key. Remember to switch to your live secret key in production.
-                    // See your keys here: https://dashboard.stripe.com/apikeys
                     StripeConfiguration.ApiKey = stripeApiKey;  //Défini avant l'appel de la route
 
                     var options = new Stripe.Checkout.SessionCreateOptions
