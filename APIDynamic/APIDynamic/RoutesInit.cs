@@ -170,24 +170,29 @@ namespace APIDynamic
                 async (queries, bodyData) =>
                 {
 
-
-
                     var idClient = bodyData.UserID();
                     var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
+
+                    var montantTotal = 0;
+                    var itemMontant = 0;
+
 
                     foreach (long idProduitParCommande in ProduitsParCommande)
                     {
 
-                        if ((await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande))) == 0)
-                            return Results.Forbid();
+                        itemMontant = await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande));
+
+                            if (itemMontant == 0)
+                                return Results.Forbid();
+                            else
+                                montantTotal += itemMontant;
                     }
 
                     if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("no_civique", bodyData.SafeGet<int>("no_civique")).setParam("rue", bodyData.SafeGet<string>("rue")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
 
-                    //À mettre des vraies valeurs (soit des queries ou du résultat des store procedure)
-                    var amount = 3000;
-                    string CommandeNom = "allo_Antoine";
+                    string CommandeNom = "Commande";
+                    montantTotal = montantTotal * 100;      //Mettre la valeur en cenne pour Stripe
 
 
                     StripeConfiguration.ApiKey = stripeApiKey;  //Défini avant l'appel de la route
@@ -205,10 +210,10 @@ namespace APIDynamic
                                     {
                                         Name = CommandeNom,
                                     },
-                                    UnitAmount = amount,
-                                    TaxBehavior = "unspecified",  //J'imagine comme il y a des taxes qui sont ajoutées ou enlevées?
+                                    UnitAmount = montantTotal,
+                                    TaxBehavior = "unspecified",
                                 },
-                                AdjustableQuantity = new Stripe.Checkout.SessionLineItemAdjustableQuantityOptions   //JSP exactement ce que ^ca fait encore
+                                AdjustableQuantity = new Stripe.Checkout.SessionLineItemAdjustableQuantityOptions
                                 {
                                     Enabled = true,
                                     Minimum = 1,
