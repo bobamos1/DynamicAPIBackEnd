@@ -326,7 +326,7 @@ namespace DynamicStructureObjects
 
         public static void ContacterCourrielSend(string fromEmail, string subject, string body, List<Attachment> attachments, bool isHtml)
         {
-            EmailSender.SendEmail()
+            emailSender.SendEmail(fromEmail, subject, body, attachments, isHtml);
         }
 
     }
