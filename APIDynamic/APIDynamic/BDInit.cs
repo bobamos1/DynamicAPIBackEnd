@@ -159,15 +159,15 @@ namespace APIDynamic
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("Images", true, true, ShowTypes.Ref,
+                .addPropriety("Images", false, true, ShowTypes.Ref,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("Formats", true, true, ShowTypes.Ref,
+                .addPropriety("Formats", false, true, ShowTypes.Ref,
                     minOrEqualZeroBundle
                 ).Anonymous()
                     .Authorize(Roles.Admin.CanModify())
-                .addPropriety("Affectations", true ,true, ShowTypes.Ref)
+                .addPropriety("Affectations", false, true, ShowTypes.Ref)
                     .Anonymous()
                     .Authorize(Roles.Admin.CanModify())
 
