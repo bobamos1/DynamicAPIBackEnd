@@ -864,9 +864,10 @@ namespace APIDynamic
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
                     .addRouteQuery("SELECT pc.id AS ProduitParCommande FROM produits_par_commande AS pc INNER JOIN commandes AS c ON c.id = pc.id_commande WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.ARRAY)
                         .bindParamToUserID("ClientID")
-                    .addRouteQueryNoVar("EXEC CheckoutPanier @ClientID, @ProduitParCommandeID", QueryTypes.STOREPROCEDURE)
+                    .addRouteQueryNoVar("EXEC CheckoutPanier @ClientID, @ProduitParCommandeID", QueryTypes.NONE)
+                        //.addSQLParam("ProduitParCommandeID")
                     //.addFilter("ProduitParCommandeID", "", ShowTypes.STRING, 100, "ProduitParCommandeID")
-                    .addRouteQuery("EXEC FinaliseCommande @ClientID, @no_civique, @rue, @VilleID", QueryTypes.STOREPROCEDURE)
+                    .addRouteQuery("EXEC FinaliseCommande @ClientID, @no_civique, @rue, @VilleID", QueryTypes.NONE)
 
             ;
             #endregion
