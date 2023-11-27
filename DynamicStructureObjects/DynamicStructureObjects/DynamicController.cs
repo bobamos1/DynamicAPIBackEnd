@@ -13,6 +13,7 @@ using Microsoft.Extensions.Primitives;
 using System.Linq;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Dapper;
 
 namespace DynamicStructureObjects
 {
@@ -782,6 +783,41 @@ namespace DynamicStructureObjects
                         var mappers = controller.Value.getMappersGenerated(controllers, bodyData.UserRoles(), authorizedProprieties);
                         return Results.Ok(await executorData.DetailedSelectQuerySingle(queries[0].setParams(bodyData), mappers, authorizedProprieties));
                     });//, true, true, false
+                if (controller.Value.hasRoute(BaseRoutes.DELETE.Value()))
+                    controller.Value.mapRoute(BaseRoutes.DELETE, async (queries, bodyData) =>
+                    {
+                        foreach (var query in queries)
+                            query.setParams(bodyData);
+                        int nbAffected = await executorData.ExecuteQueryWithTransaction(queries.ToArray());
+                        if (nbAffected <= 0)
+                            return Results.Problem();
+                        return Results.Ok(nbAffected);
+                    });
+                if (controller.Value.hasRoute(BaseRoutes.DELETEMULTIPLE.Value()))
+                    controller.Value.mapRoute(BaseRoutes.DELETEMULTIPLE, async (queries, bodyData) =>
+                    {
+                        var selectedIds = bodyData.Get<List<object>>("selectedIds"); // as List<Dictionary<string, object>>;
+                        var objectQueries = new KeyValuePair<string, DynamicParameters>[selectedIds.Count * queries.Count];
+                        var curentIndex = 0;
+
+                        foreach (var id in selectedIds)
+                        {
+                            foreach (var query in queries)
+                            {
+                                query.setParams(bodyData);
+                                query.setParams(id as Dictionary<string, object>);
+
+                                objectQueries[curentIndex] = new KeyValuePair<string, DynamicParameters>(query.Parse(), query.getParameters());
+                                curentIndex++;
+                            }
+                            
+                        }
+                        int nbAffected = await executorData.ExecuteQueryWithTransaction(objectQueries);
+
+                        if (nbAffected <= 0)
+                            return Results.Problem();
+                        return Results.Ok(nbAffected);
+                    });
             }
         }
         public IEnumerable<DynamicMapper> getMappersGenerated(Dictionary<string, DynamicController> controllers, IEnumerable<long> roles, params string[] authorizedColumns)

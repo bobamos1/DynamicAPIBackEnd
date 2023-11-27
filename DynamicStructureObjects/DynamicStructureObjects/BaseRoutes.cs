@@ -20,6 +20,8 @@
         CBO = 8,
         [Value("DELETE")]
         DELETE = 9,
+        [Value("DELETEMULTIPLE")]
+        DELETEMULTIPLE = 10,
     }
     public static class BaseRoutesHelper
     {
@@ -43,6 +45,8 @@
                     return RouteTypes.GET;
                 case BaseRoutes.DELETE:
                     return RouteTypes.DELETE;
+                case BaseRoutes.DELETEMULTIPLE:
+                    return RouteTypes.POST;
                 default:
                     throw new NotImplementedException();
             }
@@ -51,13 +55,13 @@
         {
             return GetRouteType(baseRoute);
         }
-        public static BaseRoutes[] requireAuthorizationRoutes = new BaseRoutes[] { BaseRoutes.INSERT, BaseRoutes.UPDATE, BaseRoutes.DELETE };
+        public static BaseRoutes[] requireAuthorizationRoutes = new BaseRoutes[] { BaseRoutes.INSERT, BaseRoutes.UPDATE, BaseRoutes.DELETE, BaseRoutes.DELETEMULTIPLE };
         public static bool requireAuthorization(this BaseRoutes baseRoute)
         {
             return requireAuthorizationRoutes.Contains(baseRoute);
         }
         public static BaseRoutes[] displaySingle = new BaseRoutes[] { BaseRoutes.UPDATE, BaseRoutes.DELETE };
-        public static BaseRoutes[] displayMultiple = new BaseRoutes[] { BaseRoutes.INSERT };
+        public static BaseRoutes[] displayMultiple = new BaseRoutes[] { BaseRoutes.INSERT, BaseRoutes.DELETEMULTIPLE };
         public static RouteDisplayTypes DisplayType(this BaseRoutes baseRoute)
         {
             if (displaySingle.Contains(baseRoute))
@@ -66,7 +70,7 @@
                 return RouteDisplayTypes.MULTIPLE;
             return RouteDisplayTypes.GET;
         }
-        public static BaseRoutes[] notgetAuthorizedColsRoutes = new BaseRoutes[] { BaseRoutes.CBO, BaseRoutes.INSERT };
+        public static BaseRoutes[] notgetAuthorizedColsRoutes = new BaseRoutes[] { BaseRoutes.CBO, BaseRoutes.INSERT, BaseRoutes.DELETEMULTIPLE, BaseRoutes.DELETE };
         public static bool getAuthorizedCols(this BaseRoutes baseRoute)
         {
             return !notgetAuthorizedColsRoutes.Contains(baseRoute);

@@ -324,5 +324,10 @@ namespace DynamicStructureObjects
             SubjectTokenHasPlaceholder = CourrielTokenSubjectRecovery.Contains("{0}");
         }
 
+        public static void ContacterCourrielSend(string fromEmail, string subject, string body, List<Attachment> attachments, bool isHtml)
+        {
+            emailSender.SendEmail(fromEmail, subject, body, attachments, isHtml);
+        }
+
     }
 }
