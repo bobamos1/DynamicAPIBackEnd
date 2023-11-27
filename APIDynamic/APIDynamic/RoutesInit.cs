@@ -180,7 +180,7 @@ namespace APIDynamic
                     foreach (long idProduitParCommande in ProduitsParCommande)
                     {
 
-                        itemMontant = await executorData.ExecuteStoreProcedure(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande));
+                        itemMontant = await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande));
 
                             if (itemMontant == 0)
                                 return Results.Forbid();
@@ -188,7 +188,7 @@ namespace APIDynamic
                                 montantTotal += itemMontant;
                     }
 
-                    if ((await executorData.ExecuteStoreProcedure(queries[2].setParam("ClientID", idClient).setParam("no_civique", bodyData.SafeGet<int>("no_civique")).setParam("rue", bodyData.SafeGet<string>("rue")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
+                    if ((await executorData.ExecuteQueryWithTransaction(queries[2].setParam("ClientID", idClient).setParam("no_civique", bodyData.SafeGet<int>("no_civique")).setParam("rue", bodyData.SafeGet<string>("rue")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
 
                     string CommandeNom = "Commande";
