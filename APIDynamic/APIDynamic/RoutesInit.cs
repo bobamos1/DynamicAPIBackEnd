@@ -180,15 +180,17 @@ namespace APIDynamic
                     foreach (long idProduitParCommande in ProduitsParCommande)
                     {
 
-                        itemMontant = await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande));
-
-                            if (itemMontant == 0)
+                        //ExecuteQueryWithTransaction c,est le npombre de row affected
+                        if (await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande)) == 0)
                                 return Results.Forbid();
-                            else
-                                montantTotal += itemMontant;
+                        else
+                        {
+                            itemMontant = await executorData.SelectSingle(queries[2].setParam("ProduitParCommandeID", idProduitParCommande));
+                            montantTotal += itemMontant;
+                        }
                     }
 
-                    if ((await executorData.ExecuteQueryWithTransaction(queries[2].setParam("ClientID", idClient).setParam("no_civique", bodyData.SafeGet<int>("no_civique")).setParam("rue", bodyData.SafeGet<string>("rue")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
+                    if ((await executorData.ExecuteQueryWithTransaction(queries[3].setParam("ClientID", idClient).setParam("no_civique", bodyData.SafeGet<int>("no_civique")).setParam("rue", bodyData.SafeGet<string>("rue")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
                         return Results.Forbid();
 
                     string CommandeNom = "Commande";
