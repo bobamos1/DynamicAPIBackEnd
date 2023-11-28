@@ -185,7 +185,7 @@ namespace APIDynamic
                                 return Results.Forbid();
                         else
                         {
-                            itemMontant = await executorData.SelectSingle(queries[2].setParam("ProduitParCommandeID", idProduitParCommande));
+                            itemMontant = await executorData.SelectSingle(queries[2].setParam("id", idProduitParCommande));
                             montantTotal += itemMontant;
                         }
                     }
