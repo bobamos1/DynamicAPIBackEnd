@@ -9,6 +9,7 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Net.Mail;
 using Microsoft.Extensions.FileProviders;
 
+
 var builder = WebApplication.CreateBuilder(args);
 Dictionary<string, string> connectionStrings = InitializationFile.LoadConnectionStrings(builder.Configuration);
 DynamicConnection.setEmailSender(builder.Configuration["Email:EmailHost"], builder.Configuration["Email:UsernameHost"], builder.Configuration["Email:PasswordHost"], "smtp.gmail.com", 587);
@@ -89,43 +90,16 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-/* Set attachments aux courriels*/
-string rootPath = AppDomain.CurrentDomain.BaseDirectory;
-List<Attachment> attachments = new List<Attachment>();
 
-//string imageDevanyChai = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
-var attachment1 = new Attachment("Emailtemplates\\images\\devanyChai.png");
-attachment1.Name = "DevanyChai";
-attachment1.ContentId = "DevanyChai";
-
-//string imageFacebook = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
-var attachment2 = new Attachment("Emailtemplates\\images\\facebook.png");
-attachment2.Name = "Facebook";
-attachment2.ContentId = "Facebook";
-
-//string imageInstagram = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
-var attachment3 = new Attachment("Emailtemplates\\images\\instagram.png");
-attachment3.Name = "Instagram";
-attachment3.ContentId = "Instagram";
-
-//string imageLogo = Path.Combine(rootPath, "EmailTemplates", "images", "devanyChai.png");
-var attachment4 = new Attachment("Emailtemplates\\images\\logo.png");
-attachment4.Name = "Logo";
-attachment4.ContentId = "Logo";
-
-attachments.Add(attachment1);
-attachments.Add(attachment2);
-attachments.Add(attachment3);
-attachments.Add(attachment4);
 
 /* Set Courriel body and subject*/
 string courrielBody = File.ReadAllText("./Emailtemplates/emailToken.html");
 string courrielSubject = "Token De Double Authentification";
-DynamicConnection.SetTokenCourriel(courrielSubject, courrielBody, attachments, true);
+DynamicConnection.SetTokenCourriel(courrielSubject, courrielBody, null, true);
 
 string courrielBodyRecover = File.ReadAllText("./Emailtemplates/emailTokenRecovery.html");
 string courrielSubjectRecover = "Token De R�cup�ration";
-DynamicConnection.SetTokenCourrielRecovery(courrielSubjectRecover, courrielBodyRecover, attachments, true);
+DynamicConnection.SetTokenCourrielRecovery(courrielSubjectRecover, courrielBodyRecover, null, true);
 
 
 Dictionary<string, DynamicController> controllers = await DynamicController.initControllers(executorStructure, builder.Configuration["JwtSettings:Key"]); //
