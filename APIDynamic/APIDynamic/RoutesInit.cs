@@ -173,19 +173,20 @@ namespace APIDynamic
                     var idClient = bodyData.UserID();
                     var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
 
-                    var montantTotal = 0;
-                    var itemMontant = 0;
+                    var montantTotal = 0.0;
+                    var itemMontant = 0.0;
 
 
                     foreach (long idProduitParCommande in ProduitsParCommande)
                     {
 
                         //ExecuteQueryWithTransaction c,est le npombre de row affected
-                        if (await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ClientID", idClient).setParam("ProduitParCommandeID", idProduitParCommande)) == 0)
+                        if (await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ProduitParCommandeID", idProduitParCommande)) == 0)
                                 return Results.Forbid();
                         else
                         {
-                            itemMontant = await executorData.SelectSingle(queries[2].setParam("id", idProduitParCommande));
+                            itemMontant = await executorData.SelectValue<float>(queries[2].setParam("id", idProduitParCommande));
+                            //itemMontant = await executorData.SelectValue<float>($"SELECT prix_unitaire FROM produits_par_commande WHERE id = {idProduitParCommande}");
                             montantTotal += itemMontant;
                         }
                     }
@@ -212,7 +213,7 @@ namespace APIDynamic
                                     {
                                         Name = CommandeNom,
                                     },
-                                    UnitAmount = montantTotal,
+                                    UnitAmount = (long)montantTotal,
                                     TaxBehavior = "unspecified",
                                 },
                                 AdjustableQuantity = new Stripe.Checkout.SessionLineItemAdjustableQuantityOptions

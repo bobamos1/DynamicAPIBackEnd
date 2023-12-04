@@ -168,6 +168,12 @@ namespace DynamicSQLFetcher
         {
             return SelectValue<T>(_connectionString, query, valueCol);
         }
+
+        public Task<T> SelectValue<T>(string strQuery)
+        {
+            return SelectValue<T>(_connectionString, strQuery, new DynamicParameters());
+        }
+
         public Task<Dictionary<object, object>> SelectDictionary(Query query, string idCol, string valueCol)
         {
             return SelectDictionary<object, object>(_connectionString, query.Parse(idCol, valueCol), query.getParameters());
