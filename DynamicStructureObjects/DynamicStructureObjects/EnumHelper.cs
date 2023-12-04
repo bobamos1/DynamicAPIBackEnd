@@ -17,7 +17,7 @@ namespace DynamicStructureObjects
         public static string ValueOf<TEnum>(TEnum? enumEntry) where TEnum : struct, Enum
         {
             if (enumEntry == null)
-                throw new Exception();
+                throw new Exception("enum not valid");
             return ValueOf<TEnum>((TEnum)enumEntry);
         }
         public static string ValueOf<TEnum>(TEnum enumEntry) where TEnum : Enum

@@ -114,7 +114,7 @@ namespace DynamicStructureObjects
         public Task<DynamicQueryForRoute> addValidator(string Value, ValidatorTypes ValidatorType)
         {
             if (lastSQLParamAdded is null)
-                throw new Exception();
+                throw new Exception("Last sql paramater is null. Té toutsuite avant une route, entoutcas");
             return addValidator(lastSQLParamAdded, Value, ValidatorType);
         }
         public async Task<DynamicQueryForRoute> setNotRequired(params string[] VarsAffected)

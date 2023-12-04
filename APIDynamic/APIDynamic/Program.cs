@@ -74,6 +74,7 @@ builder.Services.AddCors(options => options.AddPolicy(name: "NgOrigins",
 var app = builder.Build();
 SQLExecutor executorStructure = new SQLExecutor(connectionStrings["structure"]);
 // Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     await InitializationFile.InitDB(executorStructure, true);//keep it commit

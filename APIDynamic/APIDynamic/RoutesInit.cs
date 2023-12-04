@@ -16,6 +16,8 @@ namespace APIDynamic
     {
         public static void InitRoutes(Dictionary<string, DynamicController> controllers, WebApplication app, Dictionary<string, string> connectionStrings)
         {
+            string paymentSuccessURL = "https://clientlechai.azurewebsites.net/success";
+            string paymentFailureURL = "https://clientlechai.azurewebsites.net/cancel";
             SQLExecutor executorData = new SQLExecutor(connectionStrings["data"]);
             DynamicController.initRoutesControllersInfo(app, controllers);
             DynamicController.MakeBaseRoutesDefinition(controllers, executorData);
@@ -169,30 +171,12 @@ namespace APIDynamic
             controllers["Commandes"].mapRoute("CheckoutPanier",
                 async (queries, bodyData) =>
                 {
+                    long clientID = bodyData.Get<long>("ClientID");
+                   
+                    await executorData.ExecuteQueryWithTransaction(queries[0].setParams(bodyData));
+                    var montantTotal = await executorData.SelectValue<float>(queries[1].setParam("ClientID", clientID));
+                   
 
-                    var idClient = bodyData.UserID();
-                    var ProduitsParCommande = await executorData.SelectArray<long>(queries[0].setParam("ClientID", idClient));
-
-                    var montantTotal = 0.0;
-                    var itemMontant = 0.0;
-
-
-                    foreach (long idProduitParCommande in ProduitsParCommande)
-                    {
-
-                        //ExecuteQueryWithTransaction c,est le npombre de row affected
-                        if (await executorData.ExecuteQueryWithTransaction(queries[1].setParam("ProduitParCommandeID", idProduitParCommande)) == 0)
-                                return Results.Forbid();
-                        else
-                        {
-                            itemMontant = await executorData.SelectValue<float>(queries[2].setParam("id", idProduitParCommande));
-                            //itemMontant = await executorData.SelectValue<float>($"SELECT prix_unitaire FROM produits_par_commande WHERE id = {idProduitParCommande}");
-                            montantTotal += itemMontant;
-                        }
-                    }
-
-                    if ((await executorData.ExecuteQueryWithTransaction(queries[3].setParam("ClientID", idClient).setParam("no_civique", bodyData.SafeGet<int>("no_civique")).setParam("rue", bodyData.SafeGet<string>("rue")).setParam("VilleID", bodyData.SafeGet<string>("VilleID"))) == 0))
-                        return Results.Forbid();
 
                     string CommandeNom = "Commande";
                     montantTotal = montantTotal * 100;      //Mettre la valeur en cenne pour Stripe
@@ -227,8 +211,8 @@ namespace APIDynamic
                         },
                         AutomaticTax = new Stripe.Checkout.SessionAutomaticTaxOptions { Enabled = false },
                         Mode = "payment",
-                        SuccessUrl = "http://localhost:4200/success",
-                        CancelUrl = "http://localhost:4200/cancel",
+                        SuccessUrl = paymentSuccessURL,
+                        CancelUrl = paymentFailureURL,
                     };
                     var service = new Stripe.Checkout.SessionService();
                     
@@ -237,7 +221,14 @@ namespace APIDynamic
                 }
 
             );
-
+            controllers["Commandes"].mapRoute("ConfirmPayment",
+                async (queries, bodyData) =>
+                {
+                    if (await executorData.ExecuteQueryWithTransaction(queries[0].setParam("ClientID", bodyData.Get<int>("ClientID"))) == 0)
+                        return Results.Forbid();
+                    return Results.Ok();
+                }
+            );
             controllers["ProduitsParCommande"].mapRoute("MoveToPanier",
                 async (queries, bodyData) =>
                 {

@@ -65,7 +65,7 @@ namespace DynamicStructureObjects
                     .setParam("refController", refController)
             );
             if (!SQLVariables.Any())
-                throw new Exception();
+                throw new Exception("Allo gang");
             await DynamicController.executor.ExecuteQueryWithTransaction(insertFilterBinder.toOrderedPairs("SQLParamInfoID", "FilterID", idFilter, SQLVariables.Select(param => param.id), (query, i) => query.setParam("ind", i)));
             return new DynamicFilter(DisplayName, Description, placeholder, showType, "", ind, SQLVariables);
         }

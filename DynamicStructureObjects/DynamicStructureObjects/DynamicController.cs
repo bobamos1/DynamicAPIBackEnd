@@ -204,7 +204,7 @@ namespace DynamicStructureObjects
         public async Task<DynamicController> bindParamToUserID(string paramName)
         {
             if (!Routes.Any(route => route.Queries.Any(query => query.ParamsInfos.Any(param => param.Key == paramName))))
-                throw new Exception();
+                throw new Exception("Variable to bind was not present in the query");
             Routes.Last().bindParamToUserID(paramName);
             return this;
         }
@@ -592,7 +592,7 @@ namespace DynamicStructureObjects
             DynamicRoute route = getRoute(routeName);
             var idsParams = Proprieties.Where(propriety => propriety.ShowType.IsID()).Select(propriety => propriety.Name).ToArray();
             if (route is null)
-                throw new Exception();
+                throw new Exception($"Route {routeName} was not present in the controller {Name}");
             List<Query> queries = route.Queries.Select(dynamicQuery => dynamicQuery.query).ToList();
             Func<HttpRequest, Task<IResult>> delegateMethod = async (request) =>
             {

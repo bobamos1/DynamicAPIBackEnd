@@ -862,13 +862,19 @@ namespace APIDynamic
 
                 .addRoute("CheckoutPanier", RouteTypes.POST)
                     .Authorize(Roles.Client.ID(), Roles.Admin.ID())
-                    .addRouteQuery("SELECT pc.id AS ProduitParCommande FROM produits_par_commande AS pc INNER JOIN commandes AS c ON c.id = pc.id_commande WHERE c.id_client = @ClientID AND c.id_etat_commande = 4", QueryTypes.ARRAY)
+                    
+                       
+                    .addRouteQuery("EXEC CheckoutPanier @ClientID, @no_civique, @rue, @VilleID, @code_postal", QueryTypes.NONE)
                         .bindParamToUserID("ClientID")
-                    .addRouteQueryNoVar("EXEC CheckoutPanier @ProduitParCommandeID", QueryTypes.NONE)
-                    .addRouteQueryNoVar("SELECT prix_unitaire FROM produits_par_commande WHERE id = @id", QueryTypes.VALUE)
-                        //.addFilterParam("ProduitParCommandeID", ShowTypes.INT)
-                    .addRouteQuery("EXEC FinaliseCommande @ClientID, @no_civique, @rue, @VilleID", QueryTypes.NONE)
+                    .addRouteQuery("SELECT SUM(prix_unitaire) FROM produits_par_commande AS pc INNER JOIN commandes AS c ON c.id = pc.id_commande WHERE c.id_client = 1 AND c.id_etat_commande = 4", QueryTypes.VALUE)
+                       
+                  
 
+                 .addRoute("ConfirmPayment", RouteTypes.PUT)
+                    .Authorize(Roles.Client.ID(), Roles.Admin.ID())
+                    .addRouteQuery("EXEC FinaliseCommande @ClientID", QueryTypes.NONE)
+                        .bindParamToUserID("ClientID")
+                    
             ;
             #endregion
             #region Clients
